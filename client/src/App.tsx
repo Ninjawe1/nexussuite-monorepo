@@ -6,6 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
 import Payroll from "@/pages/payroll";
@@ -17,6 +21,23 @@ import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
 
 function Router() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Landing />;
+  }
+
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
@@ -41,22 +62,45 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <SidebarProvider style={style as React.CSSProperties}>
-          <div className="flex h-screen w-full">
-            <AppSidebar />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <header className="flex items-center justify-between p-4 border-b border-border bg-background">
-                <SidebarTrigger data-testid="button-sidebar-toggle" />
-                <ThemeToggle />
-              </header>
-              <main className="flex-1 overflow-auto">
-                <Router />
-              </main>
-            </div>
-          </div>
-        </SidebarProvider>
+        <AuthenticatedApp style={style as React.CSSProperties} />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
+  );
+}
+
+function AuthenticatedApp({ style }: { style: React.CSSProperties }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading || !isAuthenticated) {
+    return <Router />;
+  }
+
+  return (
+    <SidebarProvider style={style}>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex items-center justify-between p-4 border-b border-border bg-background">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                data-testid="button-logout"
+                onClick={() => window.location.href = "/api/logout"}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+              <ThemeToggle />
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto">
+            <Router />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 }
