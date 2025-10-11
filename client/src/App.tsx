@@ -19,6 +19,7 @@ import Marcom from "@/pages/marcom";
 import Contracts from "@/pages/contracts";
 import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
+import Admin from "@/pages/admin";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -40,7 +41,9 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={user?.isSuperAdmin ? Admin : Dashboard} />
+      <Route path="/admin" component={Admin} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/staff" component={Staff} />
       <Route path="/payroll" component={Payroll} />
       <Route path="/analytics" component={Analytics} />

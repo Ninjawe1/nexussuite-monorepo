@@ -1,4 +1,4 @@
-import { Home, Users, DollarSign, BarChart3, Calendar, Megaphone, FileText, Shield, Settings } from "lucide-react";
+import { Home, Users, DollarSign, BarChart3, Calendar, Megaphone, FileText, Shield, Settings, Crown } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -13,9 +13,10 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
 
-const menuItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+const clubMenuItems = [
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Staff", url: "/staff", icon: Users },
   { title: "Payroll", url: "/payroll", icon: DollarSign },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
@@ -26,8 +27,14 @@ const menuItems = [
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
+const adminMenuItems = [
+  { title: "Admin Dashboard", url: "/admin", icon: Crown },
+];
+
 export function AppSidebar() {
   const [location] = useLocation();
+  const { user } = useAuth();
+  const menuItems = user?.isSuperAdmin ? adminMenuItems : clubMenuItems;
 
   return (
     <Sidebar>
@@ -67,11 +74,18 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <div className="flex items-center gap-3 p-2 rounded-lg hover-elevate active-elevate-2">
           <Avatar className="w-8 h-8">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">JD</AvatarFallback>
+            <AvatarImage src={user?.profileImageUrl || undefined} />
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+              {user?.firstName?.[0]}{user?.lastName?.[0] || user?.email?.[0].toUpperCase()}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">John Doe</p>
-            <p className="text-xs text-muted-foreground truncate">Club Owner</p>
+            <p className="text-sm font-medium truncate">
+              {user?.firstName} {user?.lastName || user?.email}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.isSuperAdmin ? "Super Admin" : user?.role}
+            </p>
           </div>
         </div>
       </SidebarFooter>

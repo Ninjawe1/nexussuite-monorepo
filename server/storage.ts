@@ -75,6 +75,13 @@ export interface IStorage {
   // Audit log operations
   getAuditLogsByTenant(tenantId: string, limit?: number): Promise<AuditLog[]>;
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+
+  // Super Admin operations
+  getAllTenants(): Promise<Tenant[]>;
+  updateTenantAdmin(id: string, tenant: Partial<InsertTenant>): Promise<Tenant>;
+  deleteTenant(id: string): Promise<void>;
+  getAllUsers(): Promise<User[]>;
+  updateUserAdmin(id: string, user: Partial<UpsertUser>): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -317,6 +324,37 @@ export class DatabaseStorage implements IStorage {
   async createAuditLog(logData: InsertAuditLog): Promise<AuditLog> {
     const [log] = await db.insert(auditLogs).values(logData).returning();
     return log;
+  }
+
+  // Super Admin operations
+  async getAllTenants(): Promise<Tenant[]> {
+    return db.select().from(tenants).orderBy(desc(tenants.createdAt));
+  }
+
+  async updateTenantAdmin(id: string, tenantData: Partial<InsertTenant>): Promise<Tenant> {
+    const [tenant] = await db
+      .update(tenants)
+      .set({ ...tenantData, updatedAt: new Date() })
+      .where(eq(tenants.id, id))
+      .returning();
+    return tenant;
+  }
+
+  async deleteTenant(id: string): Promise<void> {
+    await db.delete(tenants).where(eq(tenants.id, id));
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserAdmin(id: string, userData: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
   }
 }
 

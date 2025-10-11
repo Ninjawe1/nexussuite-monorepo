@@ -31,8 +31,9 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  tenantId: varchar("tenant_id").notNull(), // Multi-tenant support
+  tenantId: varchar("tenant_id"), // Multi-tenant support (nullable for super admins)
   role: varchar("role").notNull().default("owner"), // owner, admin, manager, staff, player, marcom, analyst, finance
+  isSuperAdmin: boolean("is_super_admin").notNull().default(false), // System-level admin
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -49,6 +50,13 @@ export const tenants = pgTable("tenants", {
   primaryColor: varchar("primary_color").default("#a855f7"),
   website: varchar("website"),
   region: varchar("region"),
+  // Subscription fields
+  subscriptionPlan: varchar("subscription_plan").default("starter"), // starter, growth, enterprise
+  subscriptionStatus: varchar("subscription_status").default("active"), // active, suspended, canceled, trial
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  trialEndsAt: timestamp("trial_ends_at"),
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

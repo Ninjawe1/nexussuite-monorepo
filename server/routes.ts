@@ -21,6 +21,26 @@ async function getTenantId(req: any): Promise<string> {
   return user.tenantId;
 }
 
+// Helper to check if user is super admin
+async function isSuperAdmin(req: any): Promise<boolean> {
+  const userId = req.user.claims.sub;
+  const user = await storage.getUser(userId);
+  return user?.isSuperAdmin || false;
+}
+
+// Middleware to require super admin
+async function requireSuperAdmin(req: any, res: any, next: any) {
+  try {
+    const superAdmin = await isSuperAdmin(req);
+    if (!superAdmin) {
+      return res.status(403).json({ message: "Super admin access required" });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Authorization check failed" });
+  }
+}
+
 // Helper to create audit log
 async function createAuditLog(
   tenantId: string,
@@ -638,6 +658,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Super Admin routes
+  app.get("/api/admin/clubs", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const clubs = await storage.getAllTenants();
+      res.json(clubs);
+    } catch (error) {
+      console.error("Error fetching clubs:", error);
+      res.status(500).json({ message: "Failed to fetch clubs" });
+    }
+  });
+
+  app.post("/api/admin/clubs", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const validatedData = insertTenantSchema.parse(req.body);
+      const newClub = await storage.createTenant(validatedData);
+      res.json(newClub);
+    } catch (error) {
+      console.error("Error creating club:", error);
+      res.status(500).json({ message: "Failed to create club" });
+    }
+  });
+
+  app.patch("/api/admin/clubs/:id", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const validatedData = insertTenantSchema.partial().parse(req.body);
+      const updatedClub = await storage.updateTenantAdmin(req.params.id, validatedData);
+      res.json(updatedClub);
+    } catch (error) {
+      console.error("Error updating club:", error);
+      res.status(500).json({ message: "Failed to update club" });
+    }
+  });
+
+  app.delete("/api/admin/clubs/:id", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteTenant(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting club:", error);
+      res.status(500).json({ message: "Failed to delete club" });
+    }
+  });
+
+  app.get("/api/admin/users", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.patch("/api/admin/users/:id", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const { isSuperAdmin, tenantId } = req.body;
+      const updatedUser = await storage.updateUserAdmin(req.params.id, { isSuperAdmin, tenantId });
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
     }
   });
 
