@@ -1,0 +1,70 @@
+import { FileText, Download, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { format, differenceInDays } from "date-fns";
+
+interface ContractRowProps {
+  id: string;
+  fileName: string;
+  type: "Player" | "Staff" | "Sponsor";
+  linkedPerson: string;
+  expirationDate: Date;
+  status: "active" | "expiring" | "expired";
+}
+
+export function ContractRow({ id, fileName, type, linkedPerson, expirationDate, status }: ContractRowProps) {
+  const daysUntilExpiration = differenceInDays(expirationDate, new Date());
+  
+  const statusColors = {
+    active: 'bg-chart-2 text-primary-foreground',
+    expiring: 'bg-chart-4 text-primary-foreground',
+    expired: 'bg-chart-5 text-primary-foreground',
+  };
+
+  const typeColors: Record<string, string> = {
+    'Player': 'bg-primary text-primary-foreground',
+    'Staff': 'bg-chart-3 text-primary-foreground',
+    'Sponsor': 'bg-accent text-accent-foreground',
+  };
+
+  return (
+    <div 
+      className="flex items-center justify-between p-4 rounded-lg border border-border hover-elevate active-elevate-2"
+      data-testid={`row-contract-${id}`}
+    >
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="w-10 h-10 rounded-lg bg-card flex items-center justify-center shrink-0">
+          <FileText className="w-5 h-5 text-muted-foreground" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="font-semibold text-sm truncate" data-testid={`text-filename-${id}`}>{fileName}</h4>
+            <Badge className={`${typeColors[type]} text-xs shrink-0`}>{type}</Badge>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="truncate">{linkedPerson}</span>
+            <span>•</span>
+            <span className="shrink-0">Expires: {format(expirationDate, 'MMM dd, yyyy')}</span>
+            {daysUntilExpiration > 0 && daysUntilExpiration <= 30 && (
+              <>
+                <span>•</span>
+                <span className="text-chart-4 shrink-0">{daysUntilExpiration} days left</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge className={`${statusColors[status]} text-xs`}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+        <Button variant="ghost" size="icon" data-testid={`button-preview-${id}`}>
+          <Eye className="w-4 h-4" />
+        </Button>
+        <Button variant="ghost" size="icon" data-testid={`button-download-${id}`}>
+          <Download className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
