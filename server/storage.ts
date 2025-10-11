@@ -85,6 +85,9 @@ export interface IStorage {
   deleteTenant(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   updateUserAdmin(id: string, user: Partial<UpsertUser>): Promise<User>;
+  
+  // Stripe operations
+  updateTenantStripe(id: string, stripeData: Partial<Pick<Tenant, 'stripeCustomerId' | 'stripeSubscriptionId' | 'subscriptionPlan' | 'subscriptionStatus'>>): Promise<Tenant>;
 
   // Invite operations
   getInvitesByTenant(tenantId: string): Promise<Invite[]>;
@@ -365,6 +368,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+  
+  // Stripe operations
+  async updateTenantStripe(id: string, stripeData: Partial<Pick<Tenant, 'stripeCustomerId' | 'stripeSubscriptionId' | 'subscriptionPlan' | 'subscriptionStatus'>>): Promise<Tenant> {
+    const [tenant] = await db
+      .update(tenants)
+      .set({ ...stripeData, updatedAt: new Date() })
+      .where(eq(tenants.id, id))
+      .returning();
+    return tenant;
   }
 
   // Invite operations

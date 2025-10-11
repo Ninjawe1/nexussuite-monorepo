@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, UserPlus, Copy, Trash2, Check } from "lucide-react";
+import { Upload, UserPlus, Copy, Trash2, Check, Crown, Zap, Rocket } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -183,6 +183,167 @@ function InviteManagement() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SubscriptionManagement() {
+  const { toast } = useToast();
+  const { data: tenant, isLoading } = useQuery<Tenant>({
+    queryKey: ["/api/tenant"],
+  });
+
+  const upgradeMutation = useMutation({
+    mutationFn: async (plan: string) => {
+      const response = await apiRequest("/api/subscriptions/create-checkout", "POST", { plan });
+      return response;
+    },
+    onSuccess: (data: { url: string }) => {
+      window.location.href = data.url;
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to start checkout", variant: "destructive" });
+    },
+  });
+
+  const portalMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("/api/subscriptions/create-portal", "POST", {});
+      return response;
+    },
+    onSuccess: (data: { url: string }) => {
+      window.location.href = data.url;
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to open billing portal", variant: "destructive" });
+    },
+  });
+
+  const plans = [
+    {
+      name: "Starter",
+      value: "starter",
+      price: "$29",
+      icon: Zap,
+      features: [
+        "Up to 10 staff members",
+        "Basic analytics",
+        "Email support",
+        "1 GB file storage",
+      ],
+    },
+    {
+      name: "Growth",
+      value: "growth",
+      price: "$99",
+      icon: Rocket,
+      features: [
+        "Up to 50 staff members",
+        "Advanced analytics",
+        "Priority support",
+        "10 GB file storage",
+        "Social media integration",
+      ],
+    },
+    {
+      name: "Enterprise",
+      value: "enterprise",
+      price: "$299",
+      icon: Crown,
+      features: [
+        "Unlimited staff members",
+        "Custom analytics",
+        "Dedicated support",
+        "Unlimited storage",
+        "Full social media suite",
+        "API access",
+      ],
+    },
+  ];
+
+  const currentPlan = tenant?.subscriptionPlan || "starter";
+  const subscriptionStatus = tenant?.subscriptionStatus || "active";
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-heading">Subscription Plan</CardTitle>
+            <CardDescription>Manage your subscription and billing</CardDescription>
+          </div>
+          {tenant?.stripeCustomerId && (
+            <Button
+              variant="outline"
+              onClick={() => portalMutation.mutate()}
+              disabled={portalMutation.isPending}
+              data-testid="button-billing-portal"
+            >
+              {portalMutation.isPending ? "Loading..." : "Manage Billing"}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <Badge variant={subscriptionStatus === "active" ? "default" : "destructive"}>
+                {subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                Current plan: <span className="font-semibold text-foreground">{currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {plans.map((plan) => {
+                const Icon = plan.icon;
+                const isCurrentPlan = currentPlan === plan.value;
+                
+                return (
+                  <div
+                    key={plan.value}
+                    className={`p-4 rounded-lg border-2 ${
+                      isCurrentPlan ? "border-primary bg-primary/5" : "border-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Icon className="w-5 h-5 text-primary" />
+                      <h3 className="font-heading font-semibold">{plan.name}</h3>
+                    </div>
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-muted-foreground">/mo</span>
+                    </div>
+                    <ul className="space-y-2 mb-4">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button
+                      className="w-full"
+                      variant={isCurrentPlan ? "outline" : "default"}
+                      disabled={isCurrentPlan || upgradeMutation.isPending}
+                      onClick={() => upgradeMutation.mutate(plan.value)}
+                      data-testid={`button-upgrade-${plan.value}`}
+                    >
+                      {isCurrentPlan ? "Current Plan" : upgradeMutation.isPending ? "Loading..." : "Upgrade"}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </CardContent>
@@ -418,6 +579,8 @@ export default function Settings() {
         </Card>
       </div>
 
+      <SubscriptionManagement />
+      
       <InviteManagement />
 
       <Card>

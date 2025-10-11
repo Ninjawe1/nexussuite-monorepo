@@ -12,6 +12,16 @@ import {
   insertInviteSchema,
 } from "@shared/schema";
 import { randomBytes } from "crypto";
+import Stripe from "stripe";
+
+// Initialize Stripe with testing keys (production keys can be added later)
+const stripeKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
+if (!stripeKey) {
+  throw new Error("Missing Stripe secret key (TESTING_STRIPE_SECRET_KEY or STRIPE_SECRET_KEY)");
+}
+const stripe = new Stripe(stripeKey, {
+  apiVersion: "2025-09-30.clover",
+});
 
 // Helper to get tenant ID from authenticated user
 async function getTenantId(req: any): Promise<string> {
@@ -876,6 +886,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting invite:", error);
       res.status(500).json({ message: "Failed to delete invite" });
+    }
+  });
+
+  // ==================== Stripe Subscription Routes ====================
+  
+  // Create Stripe checkout session for subscription
+  app.post("/api/subscriptions/create-checkout", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const tenant = await storage.getTenant(tenantId);
+      const { plan } = req.body; // starter, growth, enterprise
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      
+      if (!user || !user.email) {
+        return res.status(400).json({ message: "User email not found" });
+      }
+      
+      // Price mapping (in cents) - these should be configured in Stripe dashboard
+      const prices: Record<string, number> = {
+        starter: 2900,  // $29/month
+        growth: 9900,   // $99/month
+        enterprise: 29900, // $299/month
+      };
+      
+      if (!prices[plan]) {
+        return res.status(400).json({ message: "Invalid plan selected" });
+      }
+      
+      // Create or retrieve Stripe customer
+      let customerId = tenant.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email, // Use authenticated user's email
+          name: tenant.name,
+          metadata: {
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            userId: user.id,
+          },
+        });
+        customerId = customer.id;
+        await storage.updateTenantStripe(tenantId, { stripeCustomerId: customerId });
+      }
+      
+      // Create checkout session for subscription
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan`,
+                description: `Nexus Esports Suite - ${plan} subscription`,
+              },
+              unit_amount: prices[plan],
+              recurring: {
+                interval: "month",
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings`,
+        metadata: {
+          tenantId: tenant.id,
+          plan,
+        },
+      });
+      
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).json({ message: "Failed to create checkout session", error: error.message });
+    }
+  });
+  
+  // Create Stripe billing portal session
+  app.post("/api/subscriptions/create-portal", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const tenant = await storage.getTenant(tenantId);
+      
+      if (!tenant || !tenant.stripeCustomerId) {
+        return res.status(400).json({ message: "No subscription found" });
+      }
+      
+      const session = await stripe.billingPortal.sessions.create({
+        customer: tenant.stripeCustomerId,
+        return_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings`,
+      });
+      
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("Error creating portal session:", error);
+      res.status(500).json({ message: "Failed to create portal session", error: error.message });
+    }
+  });
+  
+  // Webhook endpoint for Stripe events
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig as string,
+        process.env.STRIPE_WEBHOOK_SECRET || ""
+      );
+      
+      // Handle subscription events
+      switch (event.type) {
+        case 'checkout.session.completed': {
+          const session = event.data.object as any;
+          const tenantId = session.metadata.tenantId;
+          const plan = session.metadata.plan;
+          
+          if (tenantId && session.subscription) {
+            await storage.updateTenantStripe(tenantId, {
+              stripeSubscriptionId: session.subscription as string,
+              subscriptionPlan: plan,
+              subscriptionStatus: 'active',
+            });
+          }
+          break;
+        }
+        
+        case 'customer.subscription.updated': {
+          const subscription = event.data.object as any;
+          const customer = await stripe.customers.retrieve(subscription.customer);
+          const tenantId = (customer as any).metadata?.tenantId;
+          
+          if (tenantId) {
+            await storage.updateTenantStripe(tenantId, {
+              subscriptionStatus: subscription.status,
+            });
+          }
+          break;
+        }
+        
+        case 'customer.subscription.deleted': {
+          const subscription = event.data.object as any;
+          const customer = await stripe.customers.retrieve(subscription.customer);
+          const tenantId = (customer as any).metadata?.tenantId;
+          
+          if (tenantId) {
+            await storage.updateTenantStripe(tenantId, {
+              subscriptionStatus: 'canceled',
+            });
+          }
+          break;
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("Webhook error:", error.message);
+      res.status(400).json({ message: `Webhook Error: ${error.message}` });
     }
   });
 
