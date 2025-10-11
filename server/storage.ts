@@ -334,6 +334,14 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
+  async getAllAuditLogs(limit: number = 10000): Promise<AuditLog[]> {
+    return db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(limit);
+  }
+
   async createAuditLog(logData: InsertAuditLog): Promise<AuditLog> {
     const [log] = await db.insert(auditLogs).values(logData).returning();
     return log;
@@ -409,6 +417,31 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInvite(id: string, tenantId: string): Promise<void> {
     await db.delete(invites).where(and(eq(invites.id, id), eq(invites.tenantId, tenantId)));
+  }
+
+  async getAllInvites(): Promise<Invite[]> {
+    return db.select().from(invites).orderBy(desc(invites.createdAt));
+  }
+
+  // Super Admin export operations
+  async getAllStaff(): Promise<Staff[]> {
+    return db.select().from(staff).orderBy(desc(staff.createdAt));
+  }
+
+  async getAllPayroll(): Promise<Payroll[]> {
+    return db.select().from(payroll).orderBy(desc(payroll.date));
+  }
+
+  async getAllMatches(): Promise<Match[]> {
+    return db.select().from(matches).orderBy(desc(matches.date));
+  }
+
+  async getAllCampaigns(): Promise<Campaign[]> {
+    return db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
+  }
+
+  async getAllContracts(): Promise<Contract[]> {
+    return db.select().from(contracts).orderBy(desc(contracts.createdAt));
   }
 }
 

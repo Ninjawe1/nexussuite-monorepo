@@ -764,6 +764,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database export route (Super Admin only)
+  app.get("/api/admin/export-database", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      // Export all database tables
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        version: "1.0",
+        data: {
+          tenants: await storage.getAllTenants(),
+          users: await storage.getAllUsers(),
+          staff: await storage.getAllStaff(),
+          payroll: await storage.getAllPayroll(),
+          matches: await storage.getAllMatches(),
+          campaigns: await storage.getAllCampaigns(),
+          contracts: await storage.getAllContracts(),
+          auditLogs: await storage.getAllAuditLogs(10000),
+          invites: await storage.getAllInvites(),
+        }
+      };
+
+      // Set headers for file download
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="nexus-database-export-${new Date().toISOString().split('T')[0]}.json"`);
+      
+      res.json(exportData);
+    } catch (error) {
+      console.error("Error exporting database:", error);
+      res.status(500).json({ message: "Failed to export database" });
+    }
+  });
+
   // Invite routes
   app.get("/api/invites", isAuthenticated, async (req: any, res) => {
     try {

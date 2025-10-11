@@ -3,7 +3,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Building2, Users, Trash2, Ban, CheckCircle } from "lucide-react";
+import { Plus, Building2, Users, Trash2, Ban, CheckCircle, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -111,6 +111,33 @@ export default function AdminPage() {
     });
   };
 
+  const downloadDatabase = async () => {
+    try {
+      const response = await fetch("/api/admin/export-database", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to export database");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `nexus-database-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({ title: "Success", description: "Database exported successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to export database", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -118,6 +145,10 @@ export default function AdminPage() {
           <h1 className="text-3xl font-bold">Super Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage all clubs and users</p>
         </div>
+        <Button onClick={downloadDatabase} variant="outline" data-testid="button-export-database">
+          <Download className="h-4 w-4 mr-2" />
+          Export Database
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
