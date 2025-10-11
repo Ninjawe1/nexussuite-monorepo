@@ -149,8 +149,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      const validatedData = insertStaffSchema.partial().parse(req.body);
       const oldStaff = await storage.getStaff(req.params.id, tenantId);
+      if (!oldStaff) {
+        return res.status(404).json({ message: "Staff member not found" });
+      }
+      
+      const validatedData = insertStaffSchema.partial().parse(req.body);
       const updatedStaff = await storage.updateStaff(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -179,6 +183,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       const staff = await storage.getStaff(req.params.id, tenantId);
+      if (!staff) {
+        return res.status(404).json({ message: "Staff member not found" });
+      }
+      
       await storage.deleteStaff(req.params.id, tenantId);
       
       await createAuditLog(
@@ -246,8 +254,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      const validatedData = insertPayrollSchema.partial().parse(req.body);
       const oldPayroll = await storage.getPayroll(req.params.id, tenantId);
+      if (!oldPayroll) {
+        return res.status(404).json({ message: "Payroll entry not found" });
+      }
+      
+      const validatedData = insertPayrollSchema.partial().parse(req.body);
       const updatedPayroll = await storage.updatePayroll(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -276,13 +288,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       const payroll = await storage.getPayroll(req.params.id, tenantId);
+      if (!payroll) {
+        return res.status(404).json({ message: "Payroll entry not found" });
+      }
+      
       await storage.deletePayroll(req.params.id, tenantId);
       
       await createAuditLog(
         tenantId,
         userId,
         `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
-        `Deleted payroll for ${payroll?.name || 'Unknown'}`,
+        `Deleted payroll for ${payroll.name}`,
         "payroll",
         req.params.id,
         payroll,
@@ -343,8 +359,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      const validatedData = insertMatchSchema.partial().parse(req.body);
       const oldMatch = await storage.getMatch(req.params.id, tenantId);
+      if (!oldMatch) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      
+      const validatedData = insertMatchSchema.partial().parse(req.body);
       const updatedMatch = await storage.updateMatch(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -373,6 +393,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       const match = await storage.getMatch(req.params.id, tenantId);
+      if (!match) {
+        return res.status(404).json({ message: "Match not found" });
+      }
+      
       await storage.deleteMatch(req.params.id, tenantId);
       
       await createAuditLog(
@@ -440,8 +464,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      const validatedData = insertCampaignSchema.partial().parse(req.body);
       const oldCampaign = await storage.getCampaign(req.params.id, tenantId);
+      if (!oldCampaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      const validatedData = insertCampaignSchema.partial().parse(req.body);
       const updatedCampaign = await storage.updateCampaign(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -470,6 +498,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       const campaign = await storage.getCampaign(req.params.id, tenantId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
       await storage.deleteCampaign(req.params.id, tenantId);
       
       await createAuditLog(
@@ -537,8 +569,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
-      const validatedData = insertContractSchema.partial().parse(req.body);
       const oldContract = await storage.getContract(req.params.id, tenantId);
+      if (!oldContract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
+      const validatedData = insertContractSchema.partial().parse(req.body);
       const updatedContract = await storage.updateContract(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -567,6 +603,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       
       const contract = await storage.getContract(req.params.id, tenantId);
+      if (!contract) {
+        return res.status(404).json({ message: "Contract not found" });
+      }
+      
       await storage.deleteContract(req.params.id, tenantId);
       
       await createAuditLog(

@@ -1,7 +1,8 @@
+import { PayrollDialog } from "@/components/payroll-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Download, DollarSign, TrendingUp, TrendingDown, Edit, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -10,21 +11,81 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import type { Payroll as PayrollType } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 export default function Payroll() {
-  const payrollEntries = [
-    { id: "1", name: "Sarah Johnson", role: "Manager", amount: 8500, type: "Monthly", status: "paid", date: "Oct 1, 2024" },
-    { id: "2", name: "Mike Chen", role: "Analyst", amount: 6500, type: "Monthly", status: "paid", date: "Oct 1, 2024" },
-    { id: "3", name: "Alex Rivera", role: "Player", amount: 12000, type: "Monthly", status: "pending", date: "Oct 15, 2024" },
-    { id: "4", name: "Emma Wilson", role: "Staff", amount: 5500, type: "Monthly", status: "paid", date: "Oct 1, 2024" },
-    { id: "5", name: "James Park", role: "Player", amount: 10000, type: "Monthly", status: "paid", date: "Oct 1, 2024" },
-    { id: "6", name: "Lisa Martinez", role: "Admin", amount: 9500, type: "Monthly", status: "paid", date: "Oct 1, 2024" },
-    { id: "7", name: "Tournament Bonus", role: "Team", amount: 50000, type: "One-time", status: "pending", date: "Oct 20, 2024" },
-  ];
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPayroll, setSelectedPayroll] = useState<PayrollType | undefined>();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const totalSalaries = payrollEntries.reduce((sum, entry) => sum + entry.amount, 0);
-  const paidAmount = payrollEntries.filter(e => e.status === 'paid').reduce((sum, e) => sum + e.amount, 0);
-  const pendingAmount = payrollEntries.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.amount, 0);
+  const { data: payrollEntries = [], isLoading } = useQuery<PayrollType[]>({
+    queryKey: ["/api/payroll"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/payroll/${id}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/payroll"] });
+      toast({
+        title: "Success",
+        description: "Payroll entry deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete payroll entry",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const totalSalaries = payrollEntries.reduce((sum, entry) => sum + Number(entry.amount), 0);
+  const paidAmount = payrollEntries.filter(e => e.status === 'paid').reduce((sum, e) => sum + Number(e.amount), 0);
+  const pendingAmount = payrollEntries.filter(e => e.status === 'pending').reduce((sum, e) => sum + Number(e.amount), 0);
+
+  const handleEdit = (payroll: PayrollType) => {
+    setSelectedPayroll(payroll);
+    setDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedPayroll(undefined);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this payroll entry?")) {
+      await deleteMutation.mutateAsync(id);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -40,7 +101,7 @@ export default function Payroll() {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button data-testid="button-add-payroll">
+          <Button onClick={handleAdd} data-testid="button-add-payroll">
             <Plus className="w-4 h-4 mr-2" />
             Add Payment
           </Button>
@@ -54,10 +115,16 @@ export default function Payroll() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono" data-testid="stat-total-payroll">
-              ${totalSalaries.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">October 2024</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-32" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono" data-testid="stat-total-payroll">
+                  ${totalSalaries.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Total payroll</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -67,10 +134,16 @@ export default function Payroll() {
             <TrendingUp className="h-4 w-4 text-chart-2" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono text-chart-2">
-              ${paidAmount.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">{payrollEntries.filter(e => e.status === 'paid').length} transactions</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-32" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono text-chart-2">
+                  ${paidAmount.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{payrollEntries.filter(e => e.status === 'paid').length} transactions</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -80,10 +153,16 @@ export default function Payroll() {
             <TrendingDown className="h-4 w-4 text-chart-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono text-chart-4">
-              ${pendingAmount.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">{payrollEntries.filter(e => e.status === 'pending').length} transactions</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-32" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono text-chart-4">
+                  ${pendingAmount.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{payrollEntries.filter(e => e.status === 'pending').length} transactions</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -93,42 +172,86 @@ export default function Payroll() {
           <CardTitle className="text-lg font-heading">Payment History</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payrollEntries.map((entry) => (
-                <TableRow key={entry.id} className="hover-elevate" data-testid={`row-payroll-${entry.id}`}>
-                  <TableCell className="font-medium">{entry.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{entry.role}</TableCell>
-                  <TableCell>
-                    <Badge variant={entry.type === 'Monthly' ? 'secondary' : 'outline'} className="text-xs">
-                      {entry.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="font-mono font-semibold">
-                    ${entry.amount.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{entry.date}</TableCell>
-                  <TableCell>
-                    <Badge className={entry.status === 'paid' ? 'bg-chart-2 text-primary-foreground' : 'bg-chart-4 text-primary-foreground'}>
-                      {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          ) : payrollEntries.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No payroll entries yet. Add your first payment to get started.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payrollEntries.map((entry) => (
+                  <TableRow key={entry.id} className="hover-elevate" data-testid={`row-payroll-${entry.id}`}>
+                    <TableCell className="font-medium">{entry.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{entry.role}</TableCell>
+                    <TableCell>
+                      <Badge variant={entry.type === 'monthly' ? 'secondary' : 'outline'} className="text-xs">
+                        {entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono font-semibold">
+                      ${Number(entry.amount).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(entry.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={entry.status === 'paid' ? 'bg-chart-2 text-primary-foreground' : 'bg-chart-4 text-primary-foreground'}>
+                        {entry.status.charAt(0).toUpperCase() + entry.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" data-testid={`button-menu-payroll-${entry.id}`}>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(entry)} data-testid={`button-edit-payroll-${entry.id}`}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(entry.id)}
+                            className="text-destructive"
+                            data-testid={`button-delete-payroll-${entry.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+
+      <PayrollDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        payroll={selectedPayroll}
+      />
     </div>
   );
 }

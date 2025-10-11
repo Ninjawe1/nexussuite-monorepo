@@ -1,63 +1,82 @@
 import { ContractRow } from "@/components/contract-row";
+import { ContractDialog } from "@/components/contract-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, FileText, AlertTriangle, CheckCircle } from "lucide-react";
+import { Upload, FileText, AlertTriangle, CheckCircle, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import type { Contract as ContractType } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Contracts() {
-  const contracts = [
-    {
-      id: "1",
-      fileName: "player_contract_alex_rivera.pdf",
-      type: "Player" as const,
-      linkedPerson: "Alex Rivera",
-      expirationDate: new Date('2025-12-31'),
-      status: "active" as const,
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<ContractType | undefined>();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: contracts = [], isLoading } = useQuery<ContractType[]>({
+    queryKey: ["/api/contracts"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/contracts/${id}`, "DELETE");
     },
-    {
-      id: "2",
-      fileName: "staff_agreement_sarah_johnson.pdf",
-      type: "Staff" as const,
-      linkedPerson: "Sarah Johnson",
-      expirationDate: new Date('2024-11-15'),
-      status: "expiring" as const,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
+      toast({
+        title: "Success",
+        description: "Contract deleted successfully",
+      });
     },
-    {
-      id: "3",
-      fileName: "sponsor_contract_techgear_inc.pdf",
-      type: "Sponsor" as const,
-      linkedPerson: "TechGear Inc.",
-      expirationDate: new Date('2024-09-30'),
-      status: "expired" as const,
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete contract",
+        variant: "destructive",
+      });
     },
-    {
-      id: "4",
-      fileName: "player_contract_james_park.pdf",
-      type: "Player" as const,
-      linkedPerson: "James Park",
-      expirationDate: new Date('2026-06-30'),
-      status: "active" as const,
-    },
-    {
-      id: "5",
-      fileName: "staff_agreement_mike_chen.pdf",
-      type: "Staff" as const,
-      linkedPerson: "Mike Chen",
-      expirationDate: new Date('2025-03-20'),
-      status: "active" as const,
-    },
-    {
-      id: "6",
-      fileName: "sponsor_contract_energydrink_co.pdf",
-      type: "Sponsor" as const,
-      linkedPerson: "EnergyDrink Co.",
-      expirationDate: new Date('2025-12-31'),
-      status: "active" as const,
-    },
-  ];
+  });
 
   const activeContracts = contracts.filter(c => c.status === 'active').length;
   const expiringContracts = contracts.filter(c => c.status === 'expiring').length;
   const expiredContracts = contracts.filter(c => c.status === 'expired').length;
+
+  const handleEdit = (contract: ContractType) => {
+    setSelectedContract(contract);
+    setDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedContract(undefined);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this contract?")) {
+      await deleteMutation.mutateAsync(id);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -68,7 +87,7 @@ export default function Contracts() {
           </h1>
           <p className="text-muted-foreground">Manage player, staff, and sponsor contracts</p>
         </div>
-        <Button data-testid="button-upload-contract">
+        <Button onClick={handleAdd} data-testid="button-upload-contract">
           <Upload className="w-4 h-4 mr-2" />
           Upload Contract
         </Button>
@@ -81,10 +100,16 @@ export default function Contracts() {
             <CheckCircle className="h-4 w-4 text-chart-2" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono text-chart-2" data-testid="stat-active-contracts">
-              {activeContracts}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Currently valid</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-16" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono text-chart-2" data-testid="stat-active-contracts">
+                  {activeContracts}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Currently valid</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -94,10 +119,16 @@ export default function Contracts() {
             <AlertTriangle className="h-4 w-4 text-chart-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono text-chart-4">
-              {expiringContracts}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Within 30 days</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-16" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono text-chart-4">
+                  {expiringContracts}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Within 30 days</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -107,10 +138,16 @@ export default function Contracts() {
             <FileText className="h-4 w-4 text-chart-5" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-mono text-chart-5">
-              {expiredContracts}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Needs renewal</p>
+            {isLoading ? (
+              <Skeleton className="h-10 w-16" />
+            ) : (
+              <>
+                <div className="text-3xl font-bold font-mono text-chart-5">
+                  {expiredContracts}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Needs renewal</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -120,11 +157,57 @@ export default function Contracts() {
           <CardTitle className="text-lg font-heading">All Contracts</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {contracts.map((contract) => (
-            <ContractRow key={contract.id} {...contract} />
-          ))}
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : contracts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No contracts yet. Upload your first contract to get started.
+            </div>
+          ) : (
+            contracts.map((contract) => (
+              <div key={contract.id} className="flex items-center gap-3 group">
+                <div className="flex-1">
+                  <ContractRow
+                    {...contract}
+                    expirationDate={new Date(contract.expirationDate)}
+                  />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" data-testid={`button-menu-contract-${contract.id}`}>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleEdit(contract)} data-testid={`button-edit-contract-${contract.id}`}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(contract.id)}
+                      className="text-destructive"
+                      data-testid={`button-delete-contract-${contract.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
+
+      <ContractDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        contract={selectedContract}
+      />
     </div>
   );
 }

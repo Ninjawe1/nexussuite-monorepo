@@ -19,9 +19,12 @@ interface StaffCardProps {
   avatar?: string;
   permissions: string[];
   status: "active" | "suspended";
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onToggleStatus?: () => void;
 }
 
-export function StaffCard({ id, name, role, email, phone, avatar, permissions, status }: StaffCardProps) {
+export function StaffCard({ id, name, role, email, phone, avatar, permissions, status, onEdit, onDelete, onToggleStatus }: StaffCardProps) {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
   const roleColors: Record<string, string> = {
     'Owner': 'bg-primary text-primary-foreground',
@@ -66,12 +69,11 @@ export function StaffCard({ id, name, role, email, phone, avatar, permissions, s
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem data-testid={`button-edit-${id}`}>Edit Details</DropdownMenuItem>
-              <DropdownMenuItem>Edit Permissions</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem onClick={onEdit} data-testid={`button-edit-${id}`}>Edit Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={onToggleStatus}>
                 {status === 'active' ? 'Suspend Account' : 'Activate Account'}
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

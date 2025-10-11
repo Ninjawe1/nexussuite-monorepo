@@ -4,51 +4,76 @@ import { CampaignCard } from "@/components/campaign-card";
 import { DollarSign, Users, Trophy, Megaphone, TrendingUp, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import type { Match, Campaign, AuditLog, Staff, Payroll } from "@shared/schema";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Dashboard() {
-  const upcomingMatches = [
-    {
-      id: "1",
-      teamA: "Nexus Valorant",
-      teamB: "Team Phoenix",
-      date: new Date('2024-10-12T18:00:00'),
-      tournament: "VCT Champions",
-      game: "Valorant",
-      venue: "Online",
-      status: "upcoming" as const,
-    },
-    {
-      id: "2",
-      teamA: "Nexus League",
-      teamB: "Storm Esports",
-      date: new Date('2024-10-13T20:00:00'),
-      tournament: "LCS Summer",
-      game: "League of Legends",
-      status: "upcoming" as const,
-    },
-  ];
+  const { data: matches = [] } = useQuery<Match[]>({
+    queryKey: ["/api/matches"],
+  });
 
-  const activeCampaigns = [
-    {
-      id: "1",
-      title: "VCT Championship Hype",
-      description: "Building excitement for championship run",
-      startDate: new Date('2024-10-01'),
-      endDate: new Date('2024-10-15'),
-      platforms: ['twitter' as const, 'instagram' as const],
-      reach: 125000,
-      engagement: 8.5,
-      status: "active" as const,
-    },
-  ];
+  const { data: campaigns = [] } = useQuery<Campaign[]>({
+    queryKey: ["/api/campaigns"],
+  });
 
-  const recentActivity = [
-    { id: 1, action: "Sarah Johnson updated payroll for October", time: "2 hours ago", type: "payroll" },
-    { id: 2, action: "New contract uploaded for Alex Rivera", time: "5 hours ago", type: "contract" },
-    { id: 3, action: "VCT match result: Win 2-1", time: "1 day ago", type: "match" },
-    { id: 4, action: "New staff member added: Mike Chen", time: "2 days ago", type: "staff" },
-  ];
+  const { data: auditLogs = [] } = useQuery<AuditLog[]>({
+    queryKey: ["/api/audit-logs"],
+  });
+
+  const { data: staff = [] } = useQuery<Staff[]>({
+    queryKey: ["/api/staff"],
+  });
+
+  const { data: payroll = [] } = useQuery<Payroll[]>({
+    queryKey: ["/api/payroll"],
+  });
+
+  const upcomingMatches = matches
+    .filter(m => m.status === "upcoming")
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 2)
+    .map(m => ({
+      ...m,
+      scoreA: m.scoreA ?? undefined,
+      scoreB: m.scoreB ?? undefined,
+      venue: m.venue ?? undefined,
+      status: m.status as "upcoming" | "live" | "completed",
+    }));
+
+  const activeCampaigns = campaigns
+    .filter(c => c.status === "active")
+    .slice(0, 3)
+    .map(c => ({
+      ...c,
+      platforms: c.platforms as Array<'twitter' | 'instagram' | 'youtube' | 'tiktok' | 'twitch'>,
+      reach: c.reach ?? undefined,
+      engagement: c.engagement ? parseFloat(c.engagement) : undefined,
+      status: c.status as "active" | "completed" | "scheduled",
+    }));
+
+  const recentActivity = auditLogs.slice(0, 4);
+
+  const totalRevenue = payroll
+    .filter(p => p.status === "paid")
+    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+  const activeStaffCount = staff.filter(s => s.status === "active").length;
+
+  const completedMatches = matches.filter(m => m.status === "completed");
+  const wonMatches = completedMatches.filter(m => 
+    (m.scoreA && m.scoreB && m.scoreA > m.scoreB)
+  ).length;
+  const winRate = completedMatches.length > 0 
+    ? Math.round((wonMatches / completedMatches.length) * 100) 
+    : 0;
+
+  const thisWeekMatches = matches.filter(m => {
+    const matchDate = new Date(m.date);
+    const now = new Date();
+    const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return matchDate >= now && matchDate <= weekFromNow;
+  }).length;
 
   return (
     <div className="p-6 space-y-6">
@@ -62,30 +87,27 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Revenue"
-          value="$142,500"
+          value={`$${totalRevenue.toLocaleString()}`}
           icon={DollarSign}
-          trend={12.5}
-          trendLabel="vs last month"
+          subtitle="Paid this month"
         />
         <StatCard
-          title="Active Rosters"
-          value="6"
+          title="Active Staff"
+          value={activeStaffCount.toString()}
           icon={Users}
-          subtitle="Across 4 game titles"
+          subtitle="Team members"
         />
         <StatCard
           title="Win Rate"
-          value="68%"
+          value={`${winRate}%`}
           icon={Trophy}
-          trend={5.2}
-          trendLabel="this season"
+          subtitle={`${wonMatches}/${completedMatches.length} matches`}
         />
         <StatCard
           title="Active Campaigns"
-          value="12"
+          value={activeCampaigns.length.toString()}
           icon={Megaphone}
-          trend={-2.1}
-          trendLabel="vs last month"
+          subtitle="Marketing campaigns"
         />
       </div>
 
@@ -98,9 +120,13 @@ export default function Dashboard() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
-            {upcomingMatches.map((match) => (
-              <MatchCard key={match.id} {...match} />
-            ))}
+            {upcomingMatches.length > 0 ? (
+              upcomingMatches.map((match) => (
+                <MatchCard key={match.id} {...match} />
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">No upcoming matches</p>
+            )}
           </CardContent>
         </Card>
 
@@ -113,15 +139,21 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover-elevate">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover-elevate">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm">{activity.action}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formatDistanceToNow(new Date(activity.timestamp!), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -136,9 +168,13 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeCampaigns.map((campaign) => (
-              <CampaignCard key={campaign.id} {...campaign} />
-            ))}
+            {activeCampaigns.length > 0 ? (
+              activeCampaigns.map((campaign) => (
+                <CampaignCard key={campaign.id} {...campaign} />
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4 col-span-full">No active campaigns</p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -151,8 +187,8 @@ export default function Dashboard() {
                 <TrendingUp className="w-6 h-6 text-chart-2" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-mono">+24%</p>
-                <p className="text-sm text-muted-foreground">Revenue Growth</p>
+                <p className="text-2xl font-bold font-mono">{wonMatches}</p>
+                <p className="text-sm text-muted-foreground">Total Wins</p>
               </div>
             </div>
           </CardContent>
@@ -165,7 +201,7 @@ export default function Dashboard() {
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-mono">8</p>
+                <p className="text-2xl font-bold font-mono">{thisWeekMatches}</p>
                 <p className="text-sm text-muted-foreground">Matches This Week</p>
               </div>
             </div>
@@ -179,7 +215,7 @@ export default function Dashboard() {
                 <Users className="w-6 h-6 text-chart-4" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-mono">42</p>
+                <p className="text-2xl font-bold font-mono">{activeStaffCount}</p>
                 <p className="text-sm text-muted-foreground">Total Staff Members</p>
               </div>
             </div>

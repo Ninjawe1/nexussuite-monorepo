@@ -1,4 +1,5 @@
 import { StaffCard } from "@/components/staff-card";
+import { StaffDialog } from "@/components/staff-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
@@ -10,73 +11,111 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import type { Staff as StaffType } from "@shared/schema";
 
 export default function Staff() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<StaffType | undefined>();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const staffMembers = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      role: "Manager",
-      email: "sarah.j@nexus.gg",
-      phone: "+1 555-0123",
-      permissions: ['Staff', 'Payroll', 'Matches', 'Analytics'],
-      status: "active" as const,
+  const { data: staffMembers = [], isLoading } = useQuery<StaffType[]>({
+    queryKey: ["/api/staff"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/staff/${id}`, "DELETE");
     },
-    {
-      id: "2",
-      name: "Mike Chen",
-      role: "Analyst",
-      email: "mike.c@nexus.gg",
-      phone: "+1 555-0234",
-      permissions: ['Analytics', 'Matches'],
-      status: "active" as const,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      toast({
+        title: "Success",
+        description: "Staff member deleted successfully",
+      });
     },
-    {
-      id: "3",
-      name: "Alex Rivera",
-      role: "Player",
-      email: "alex.r@nexus.gg",
-      phone: "+1 555-0456",
-      permissions: ['Matches'],
-      status: "active" as const,
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete staff member",
+        variant: "destructive",
+      });
     },
-    {
-      id: "4",
-      name: "Emma Wilson",
-      role: "Staff",
-      email: "emma.w@nexus.gg",
-      permissions: ['Marcom', 'Contracts'],
-      status: "active" as const,
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      return await apiRequest(`/api/staff/${id}`, "PATCH", {
+        status: status === "active" ? "suspended" : "active",
+      });
     },
-    {
-      id: "5",
-      name: "James Park",
-      role: "Player",
-      email: "james.p@nexus.gg",
-      phone: "+1 555-0789",
-      permissions: ['Matches'],
-      status: "suspended" as const,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      toast({
+        title: "Success",
+        description: "Staff status updated successfully",
+      });
     },
-    {
-      id: "6",
-      name: "Lisa Martinez",
-      role: "Admin",
-      email: "lisa.m@nexus.gg",
-      phone: "+1 555-0321",
-      permissions: ['Staff', 'Payroll', 'Matches', 'Analytics', 'Marcom', 'Contracts', 'Settings'],
-      status: "active" as const,
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update staff status",
+        variant: "destructive",
+      });
     },
-  ];
+  });
 
   const filteredStaff = staffMembers.filter(staff => {
     const matchesSearch = staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          staff.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === "all" || staff.role === roleFilter;
+    const matchesRole = roleFilter === "all" || staff.role.toLowerCase() === roleFilter.toLowerCase();
     return matchesSearch && matchesRole;
   });
+
+  const handleEdit = (staff: StaffType) => {
+    setSelectedStaff(staff);
+    setDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedStaff(undefined);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setSelectedStaff(undefined);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -87,7 +126,7 @@ export default function Staff() {
           </h1>
           <p className="text-muted-foreground">Manage your club's staff members and their permissions</p>
         </div>
-        <Button data-testid="button-add-staff">
+        <Button onClick={handleAdd} data-testid="button-add-staff">
           <Plus className="w-4 h-4 mr-2" />
           Add Staff
         </Button>
@@ -110,27 +149,54 @@ export default function Staff() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="Owner">Owner</SelectItem>
-            <SelectItem value="Admin">Admin</SelectItem>
-            <SelectItem value="Manager">Manager</SelectItem>
-            <SelectItem value="Staff">Staff</SelectItem>
-            <SelectItem value="Player">Player</SelectItem>
-            <SelectItem value="Analyst">Analyst</SelectItem>
+            <SelectItem value="owner">Owner</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="manager">Manager</SelectItem>
+            <SelectItem value="staff">Staff</SelectItem>
+            <SelectItem value="player">Player</SelectItem>
+            <SelectItem value="marcom">Marketing</SelectItem>
+            <SelectItem value="analyst">Analyst</SelectItem>
+            <SelectItem value="finance">Finance</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStaff.map((staff) => (
-          <StaffCard key={staff.id} {...staff} />
-        ))}
-      </div>
-
-      {filteredStaff.length === 0 && (
+      {isLoading ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No staff members found matching your criteria</p>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Loading staff...</p>
+        </div>
+      ) : filteredStaff.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredStaff.map((staff) => (
+            <StaffCard
+              key={staff.id}
+              {...staff}
+              onEdit={() => handleEdit(staff)}
+              onDelete={() => deleteMutation.mutate(staff.id)}
+              onToggleStatus={() => toggleStatusMutation.mutate({ id: staff.id, status: staff.status })}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            {searchQuery || roleFilter !== "all" ? "No staff members found matching your filters" : "No staff members yet"}
+          </p>
+          {!searchQuery && roleFilter === "all" && (
+            <Button onClick={handleAdd} className="mt-4" data-testid="button-add-first-staff">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Your First Staff Member
+            </Button>
+          )}
         </div>
       )}
+
+      <StaffDialog
+        open={dialogOpen}
+        onOpenChange={handleDialogClose}
+        staff={selectedStaff}
+      />
     </div>
   );
 }

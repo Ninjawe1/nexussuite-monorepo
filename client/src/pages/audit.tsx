@@ -4,68 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { AuditLog } from "@shared/schema";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Audit() {
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const auditLogs = [
-    {
-      id: "1",
-      user: "John Doe",
-      action: "Updated staff member role",
-      entity: "Staff #SA-4521",
-      timestamp: new Date(Date.now() - 1000 * 60 * 15),
-      oldValue: "Player",
-      newValue: "Manager",
-      actionType: "update" as const,
-    },
-    {
-      id: "2",
-      user: "Sarah Johnson",
-      action: "Created new payroll entry",
-      entity: "Payroll #PR-8833",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      actionType: "create" as const,
-    },
-    {
-      id: "3",
-      user: "Mike Chen",
-      action: "Deleted expired contract",
-      entity: "Contract #CT-2291",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5),
-      actionType: "delete" as const,
-    },
-    {
-      id: "4",
-      user: "John Doe",
-      action: "Updated campaign end date",
-      entity: "Campaign #CM-5512",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      oldValue: "Oct 10, 2024",
-      newValue: "Oct 15, 2024",
-      actionType: "update" as const,
-    },
-    {
-      id: "5",
-      user: "Lisa Martinez",
-      action: "Created new match entry",
-      entity: "Match #MT-9921",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-      actionType: "create" as const,
-    },
-    {
-      id: "6",
-      user: "Sarah Johnson",
-      action: "Updated match result",
-      entity: "Match #MT-8811",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-      oldValue: "Pending",
-      newValue: "Win 2-1",
-      actionType: "update" as const,
-    },
-  ];
+  const { data: auditLogs = [], isLoading } = useQuery<AuditLog[]>({
+    queryKey: ["/api/audit-logs"],
+  });
 
-  const filteredLogs = filter === "all" ? auditLogs : auditLogs.filter(log => log.actionType === filter);
+  const filteredLogs = auditLogs.filter(log => {
+    const matchesFilter = filter === "all" || log.actionType === filter;
+    const matchesSearch = !searchQuery || 
+      log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.entity.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div className="p-6 space-y-6">
@@ -82,6 +40,8 @@ export default function Audit() {
           <Input
             placeholder="Search audit logs..."
             className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             data-testid="input-search-audit"
           />
         </div>
@@ -103,9 +63,32 @@ export default function Audit() {
           <CardTitle className="text-lg font-heading">Activity History</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {filteredLogs.map((log) => (
-            <AuditLogEntry key={log.id} {...log} />
-          ))}
+          {isLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : filteredLogs.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {searchQuery || filter !== "all" 
+                ? "No audit logs match your filters." 
+                : "No audit logs yet. Actions will be tracked here."}
+            </div>
+          ) : (
+            filteredLogs.map((log) => (
+              <AuditLogEntry
+                key={log.id}
+                user={log.userName}
+                action={log.action}
+                entity={log.entity}
+                timestamp={new Date(log.timestamp)}
+                oldValue={log.oldValue || undefined}
+                newValue={log.newValue || undefined}
+                actionType={log.actionType as "create" | "update" | "delete"}
+              />
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
