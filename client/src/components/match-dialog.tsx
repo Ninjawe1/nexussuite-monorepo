@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { insertMatchSchema, type InsertMatch, type Match } from "@shared/schema";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -43,8 +44,12 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<InsertMatch>({
-    resolver: zodResolver(insertMatchSchema.omit({ tenantId: true })),
+  const formSchema = insertMatchSchema.omit({ tenantId: true }).extend({
+    date: insertMatchSchema.shape.date.or(z.string().transform(val => new Date(val))),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       teamA: match?.teamA || "",
       teamB: match?.teamB || "",

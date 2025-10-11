@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { insertPayrollSchema, type InsertPayroll, type Payroll } from "@shared/schema";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +43,12 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<InsertPayroll>({
-    resolver: zodResolver(insertPayrollSchema.omit({ tenantId: true })),
+  const formSchema = insertPayrollSchema.omit({ tenantId: true }).extend({
+    date: insertPayrollSchema.shape.date.or(z.string().transform(val => new Date(val))),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       staffId: payroll?.staffId || "",
       name: payroll?.name || "",

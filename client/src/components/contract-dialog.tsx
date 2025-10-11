@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { insertContractSchema, type InsertContract, type Contract } from "@shared/schema";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +43,12 @@ export function ContractDialog({ open, onOpenChange, contract }: ContractDialogP
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<InsertContract>({
-    resolver: zodResolver(insertContractSchema.omit({ tenantId: true })),
+  const formSchema = insertContractSchema.omit({ tenantId: true }).extend({
+    expirationDate: insertContractSchema.shape.expirationDate.or(z.string().transform(val => new Date(val))),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       fileName: contract?.fileName || "",
       fileUrl: contract?.fileUrl || "",

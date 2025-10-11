@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { insertCampaignSchema, type InsertCampaign, type Campaign } from "@shared/schema";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -53,8 +54,13 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<InsertCampaign>({
-    resolver: zodResolver(insertCampaignSchema.omit({ tenantId: true })),
+  const formSchema = insertCampaignSchema.omit({ tenantId: true }).extend({
+    startDate: insertCampaignSchema.shape.startDate.or(z.string().transform(val => new Date(val))),
+    endDate: insertCampaignSchema.shape.endDate.or(z.string().transform(val => new Date(val))),
+  });
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: campaign?.title || "",
       description: campaign?.description || "",
