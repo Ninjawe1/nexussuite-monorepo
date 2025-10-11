@@ -15,7 +15,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Staff as StaffType } from "@shared/schema";
+import type { Staff as StaffType, Tenant } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
 
 export default function Staff() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +29,20 @@ export default function Staff() {
   const { data: staffMembers = [], isLoading } = useQuery<StaffType[]>({
     queryKey: ["/api/staff"],
   });
+
+  const { data: tenant } = useQuery<Tenant>({
+    queryKey: ["/api/tenant"],
+  });
+
+  // Calculate staff limit based on subscription plan
+  const planLimits: Record<string, number> = {
+    starter: 10,
+    growth: 50,
+    enterprise: Infinity,
+  };
+  const currentPlan = tenant?.subscriptionPlan || 'starter';
+  const staffLimit = planLimits[currentPlan] ?? 10;
+  const staffCount = staffMembers.length;
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -121,9 +136,14 @@ export default function Staff() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold mb-1" data-testid="text-staff-title">
-            Staff Management
-          </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-heading font-bold" data-testid="text-staff-title">
+              Staff Management
+            </h1>
+            <Badge variant="outline" data-testid="badge-staff-limit">
+              {staffCount} / {staffLimit === Infinity ? '∞' : staffLimit} staff
+            </Badge>
+          </div>
           <p className="text-muted-foreground">Manage your club's staff members and their permissions</p>
         </div>
         <Button onClick={handleAdd} data-testid="button-add-staff">

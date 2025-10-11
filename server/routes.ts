@@ -153,6 +153,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
+      // Check subscription plan limits
+      const tenant = await storage.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      
+      const currentStaffCount = await storage.getStaffByTenant(tenantId);
+      const staffCount = currentStaffCount.length;
+      
+      // Define plan limits
+      const planLimits = {
+        starter: 10,
+        growth: 50,
+        enterprise: Infinity, // Unlimited
+      };
+      
+      const currentPlan = tenant.subscriptionPlan || 'starter';
+      const limit = planLimits[currentPlan];
+      
+      if (staffCount >= limit) {
+        return res.status(403).json({ 
+          message: `Staff limit reached for ${currentPlan} plan. Upgrade to add more staff members.`,
+          limit,
+          current: staffCount
+        });
+      }
+      
       const validatedData = insertStaffSchema.parse({ ...req.body, tenantId });
       const newStaff = await storage.createStaff(validatedData);
       

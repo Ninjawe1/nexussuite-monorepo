@@ -92,6 +92,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
         }, 500);
         return;
       }
+      
       toast({
         title: "Error",
         description: error.message || "Failed to add staff member",
