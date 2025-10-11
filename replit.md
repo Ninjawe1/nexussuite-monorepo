@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ Stripe subscription billing integrated with checkout, billing portal, and session sync
 - ✅ Subscription-based feature gating implemented (staff limits per plan)
 - ✅ Super Admin dashboard with subscription management capabilities
+- ✅ Database export feature for complete data backup (Super Admin only)
 
 **Security Architecture:**
 - All update/delete routes validate record ownership before mutation
