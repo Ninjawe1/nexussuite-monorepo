@@ -2,14 +2,193 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
+import { Upload, UserPlus, Copy, Trash2, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Tenant } from "@shared/schema";
+import type { Tenant, Invite } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+
+function InviteManagement() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("staff");
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [copiedToken, setCopiedToken] = useState("");
+
+  const { data: invites = [] } = useQuery<Invite[]>({
+    queryKey: ["/api/invites"],
+  });
+
+  const createInviteMutation = useMutation({
+    mutationFn: async (data: { email: string; role: string; permissions: string[] }) => {
+      return await apiRequest("/api/invites", "POST", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/invites"] });
+      setIsDialogOpen(false);
+      setEmail("");
+      setRole("staff");
+      setPermissions([]);
+      toast({ title: "Success", description: "Invite created successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create invite", variant: "destructive" });
+    },
+  });
+
+  const deleteInviteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/invites/${id}`, "DELETE", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/invites"] });
+      toast({ title: "Success", description: "Invite deleted" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete invite", variant: "destructive" });
+    },
+  });
+
+  const copyInviteLink = (token: string) => {
+    const link = `${window.location.origin}/invite/${token}`;
+    navigator.clipboard.writeText(link);
+    setCopiedToken(token);
+    toast({ title: "Copied!", description: "Invite link copied to clipboard" });
+    setTimeout(() => setCopiedToken(""), 2000);
+  };
+
+  const handleCreateInvite = () => {
+    if (!email) {
+      toast({ title: "Error", description: "Email is required", variant: "destructive" });
+      return;
+    }
+    createInviteMutation.mutate({ email, role, permissions });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-heading">Staff Invites</CardTitle>
+            <CardDescription>Invite team members to join your club</CardDescription>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-create-invite">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Staff
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite New Staff Member</DialogTitle>
+                <DialogDescription>
+                  Send an invitation link to add a new member to your club
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="staff@example.com"
+                    type="email"
+                    data-testid="input-invite-email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role</Label>
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger data-testid="select-invite-role">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="player">Player</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="analyst">Analyst</SelectItem>
+                      <SelectItem value="marcom">Marketing</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  onClick={handleCreateInvite}
+                  disabled={createInviteMutation.isPending}
+                  data-testid="button-submit-invite"
+                >
+                  {createInviteMutation.isPending ? "Creating..." : "Create Invite"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {invites.length === 0 ? (
+          <p className="text-muted-foreground text-center py-4">No pending invites</p>
+        ) : (
+          <div className="space-y-3">
+            {invites.map((invite) => (
+              <div
+                key={invite.id}
+                className="flex items-center justify-between p-4 rounded-lg border"
+                data-testid={`invite-item-${invite.id}`}
+              >
+                <div className="flex-1">
+                  <p className="font-medium">{invite.email}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="outline">{invite.role}</Badge>
+                    <Badge variant={invite.status === "pending" ? "default" : "secondary"}>
+                      {invite.status}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      Expires: {new Date(invite.expiresAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyInviteLink(invite.token)}
+                    data-testid={`button-copy-invite-${invite.id}`}
+                  >
+                    {copiedToken === invite.token ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteInviteMutation.mutate(invite.id)}
+                    data-testid={`button-delete-invite-${invite.id}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Settings() {
   const { toast } = useToast();
@@ -238,6 +417,8 @@ export default function Settings() {
           </CardContent>
         </Card>
       </div>
+
+      <InviteManagement />
 
       <Card>
         <CardHeader>

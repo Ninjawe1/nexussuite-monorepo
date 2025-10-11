@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { useEffect } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
@@ -20,6 +21,7 @@ import Contracts from "@/pages/contracts";
 import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
+import InviteAccept from "@/pages/invite-accept";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -32,6 +34,15 @@ function Router() {
           <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  // Allow access to invite page without auth
+  if (window.location.pathname.startsWith('/invite/')) {
+    return (
+      <Switch>
+        <Route path="/invite/:token" component={InviteAccept} />
+      </Switch>
     );
   }
 
@@ -74,6 +85,17 @@ export default function App() {
 
 function AuthenticatedApp({ style }: { style: React.CSSProperties }) {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Check for pending invite token after login - runs once when auth completes
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      const pendingToken = sessionStorage.getItem("pendingInviteToken");
+      if (pendingToken) {
+        // Redirect to invite page with token
+        window.location.href = `/invite/${pendingToken}`;
+      }
+    }
+  }, [isAuthenticated, isLoading]);
 
   if (isLoading || !isAuthenticated) {
     return <Router />;

@@ -9,7 +9,9 @@ import {
   insertCampaignSchema,
   insertContractSchema,
   insertTenantSchema,
+  insertInviteSchema,
 } from "@shared/schema";
+import { randomBytes } from "crypto";
 
 // Helper to get tenant ID from authenticated user
 async function getTenantId(req: any): Promise<string> {
@@ -722,6 +724,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Invite routes
+  app.get("/api/invites", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const invitesList = await storage.getInvitesByTenant(tenantId);
+      res.json(invitesList);
+    } catch (error) {
+      console.error("Error fetching invites:", error);
+      res.status(500).json({ message: "Failed to fetch invites" });
+    }
+  });
+
+  app.post("/api/invites", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
+      
+      const validatedData = insertInviteSchema.parse({
+        ...req.body,
+        tenantId,
+        token,
+        invitedBy: userId,
+        inviterName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        expiresAt,
+      });
+      
+      const newInvite = await storage.createInvite(validatedData);
+      res.json(newInvite);
+    } catch (error) {
+      console.error("Error creating invite:", error);
+      res.status(500).json({ message: "Failed to create invite" });
+    }
+  });
+
+  app.get("/api/invites/verify/:token", async (req: any, res) => {
+    try {
+      const invite = await storage.getInviteByToken(req.params.token);
+      
+      if (!invite) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      if (invite.status !== "pending") {
+        return res.status(400).json({ message: "Invite already used or expired" });
+      }
+      
+      if (new Date() > new Date(invite.expiresAt)) {
+        await storage.updateInviteStatus(req.params.token, "expired");
+        return res.status(400).json({ message: "Invite has expired" });
+      }
+      
+      res.json(invite);
+    } catch (error) {
+      console.error("Error verifying invite:", error);
+      res.status(500).json({ message: "Failed to verify invite" });
+    }
+  });
+
+  app.post("/api/invites/accept/:token", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userEmail = req.user.claims.email;
+      const invite = await storage.getInviteByToken(req.params.token);
+      
+      if (!invite) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      // SECURITY: Verify the logged-in user's email matches the invite
+      if (invite.email.toLowerCase() !== userEmail?.toLowerCase()) {
+        return res.status(403).json({ message: "This invite was sent to a different email address" });
+      }
+      
+      if (invite.status !== "pending") {
+        return res.status(400).json({ message: "Invite already used or expired" });
+      }
+      
+      if (new Date() > new Date(invite.expiresAt)) {
+        await storage.updateInviteStatus(req.params.token, "expired");
+        return res.status(400).json({ message: "Invite has expired" });
+      }
+      
+      // Add user to tenant and create staff entry
+      await storage.updateUserAdmin(userId, { tenantId: invite.tenantId });
+      await storage.createStaff({
+        tenantId: invite.tenantId,
+        name: req.body.name || userEmail,
+        email: userEmail,
+        role: invite.role,
+        permissions: invite.permissions,
+      });
+      
+      await storage.updateInviteStatus(req.params.token, "accepted");
+      
+      await createAuditLog(
+        invite.tenantId,
+        userId,
+        userEmail || 'Unknown',
+        `Accepted invite and joined club`,
+        "invite",
+        invite.id,
+        undefined,
+        undefined,
+        "create"
+      );
+      
+      res.json({ success: true, tenantId: invite.tenantId });
+    } catch (error) {
+      console.error("Error accepting invite:", error);
+      res.status(500).json({ message: "Failed to accept invite" });
+    }
+  });
+
+  app.delete("/api/invites/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Verify invite exists and belongs to tenant before deleting
+      const invites = await storage.getInvitesByTenant(tenantId);
+      const invite = invites.find(inv => inv.id === req.params.id);
+      
+      if (!invite) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      await storage.deleteInvite(req.params.id, tenantId);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Deleted invite for ${invite.email}`,
+        "invite",
+        req.params.id,
+        invite,
+        undefined,
+        "delete"
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting invite:", error);
+      res.status(500).json({ message: "Failed to delete invite" });
     }
   });
 

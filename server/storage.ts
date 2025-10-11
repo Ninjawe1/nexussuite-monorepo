@@ -7,6 +7,7 @@ import {
   campaigns,
   contracts,
   auditLogs,
+  invites,
   type User,
   type UpsertUser,
   type Tenant,
@@ -23,6 +24,8 @@ import {
   type InsertContract,
   type AuditLog,
   type InsertAuditLog,
+  type Invite,
+  type InsertInvite,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -82,6 +85,13 @@ export interface IStorage {
   deleteTenant(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   updateUserAdmin(id: string, user: Partial<UpsertUser>): Promise<User>;
+
+  // Invite operations
+  getInvitesByTenant(tenantId: string): Promise<Invite[]>;
+  getInviteByToken(token: string): Promise<Invite | undefined>;
+  createInvite(invite: InsertInvite): Promise<Invite>;
+  updateInviteStatus(token: string, status: "pending" | "accepted" | "expired"): Promise<Invite>;
+  deleteInvite(id: string, tenantId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -355,6 +365,37 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  // Invite operations
+  async getInvitesByTenant(tenantId: string): Promise<Invite[]> {
+    return db.select().from(invites).where(eq(invites.tenantId, tenantId)).orderBy(desc(invites.createdAt));
+  }
+
+  async getInviteByToken(token: string): Promise<Invite | undefined> {
+    const [invite] = await db.select().from(invites).where(eq(invites.token, token));
+    return invite;
+  }
+
+  async createInvite(inviteData: InsertInvite): Promise<Invite> {
+    const [invite] = await db.insert(invites).values({
+      ...inviteData,
+      permissions: inviteData.permissions as any,
+    }).returning();
+    return invite;
+  }
+
+  async updateInviteStatus(token: string, status: "pending" | "accepted" | "expired"): Promise<Invite> {
+    const [invite] = await db
+      .update(invites)
+      .set({ status })
+      .where(eq(invites.token, token))
+      .returning();
+    return invite;
+  }
+
+  async deleteInvite(id: string, tenantId: string): Promise<void> {
+    await db.delete(invites).where(and(eq(invites.id, id), eq(invites.tenantId, tenantId)));
   }
 }
 

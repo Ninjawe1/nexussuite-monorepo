@@ -217,3 +217,25 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 });
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// Staff Invites
+export const invites = pgTable("invites", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  email: varchar("email").notNull(),
+  role: varchar("role").notNull(),
+  permissions: jsonb("permissions").notNull().$type<string[]>(),
+  token: varchar("token").notNull().unique(),
+  invitedBy: varchar("invited_by").notNull(),
+  inviterName: varchar("inviter_name").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, accepted, expired
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertInviteSchema = createInsertSchema(invites).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertInvite = z.infer<typeof insertInviteSchema>;
+export type Invite = typeof invites.$inferSelect;
