@@ -377,6 +377,37 @@ export default function Settings() {
     }
   }, [tenant]);
 
+  // Sync subscription from Stripe checkout session
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    
+    if (sessionId) {
+      // Clear the session_id from URL
+      window.history.replaceState({}, '', '/settings');
+      
+      // Sync the subscription - apiRequest throws on non-2xx
+      apiRequest('/api/subscriptions/sync-session', 'POST', { sessionId })
+        .then(() => {
+          // Success - apiRequest only resolves on 2xx responses
+          queryClient.invalidateQueries({ queryKey: ['/api/tenant'] });
+          toast({
+            title: 'Success',
+            description: 'Your subscription has been updated!',
+          });
+        })
+        .catch((error: Error) => {
+          // Error - apiRequest threw due to non-2xx or network error
+          console.error('Error syncing subscription:', error);
+          toast({
+            title: 'Error',
+            description: error.message || 'Failed to sync subscription. Please contact support.',
+            variant: 'destructive',
+          });
+        });
+    }
+  }, [queryClient, toast]);
+
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<Tenant>) => {
       return await apiRequest("/api/tenant", "PATCH", data);

@@ -19,6 +19,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Date field handling: Backend schemas accept both Date objects and date strings with automatic transformation
 - ✅ End-to-end testing passed for all modules: Staff, Payroll, Matches, Campaigns, Contracts, Settings, Audit
 - ✅ Multi-tenant isolation properly enforced with 404 responses for cross-tenant access attempts
+- ✅ Stripe subscription billing integrated with checkout, billing portal, and session sync
+- ✅ Subscription-based feature gating implemented (staff limits per plan)
+- ✅ Super Admin dashboard with subscription management capabilities
 
 **Security Architecture:**
 - All update/delete routes validate record ownership before mutation
@@ -31,6 +34,16 @@ Preferred communication style: Simple, everyday language.
 - Server-side validation using shared Zod schemas from `@shared/schema`
 - Date fields accept both Date objects and ISO date strings via z.union transformation
 - Proper error handling with toast notifications and automatic login redirects for unauthorized access
+
+**Stripe Subscription System:**
+- Three-tier pricing: Starter ($29/mo - 10 staff), Growth ($99/mo - 50 staff), Enterprise ($299/mo - unlimited)
+- Checkout flow: Creates Stripe customer, generates checkout session, redirects to Stripe hosted page
+- Session sync: POST /api/subscriptions/sync-session validates payment and updates tenant subscription
+- Security validations: Customer ID verification, payment status check, price verification
+- Feature gating: Staff creation blocked when plan limits reached with upgrade prompts
+- Billing portal: Integrated Stripe customer portal for subscription management
+- Super Admin: Can manually set subscription plans and statuses for all tenants
+- URL scheme handling: Proper https:// prefix for checkout/portal redirect URLs
 
 ## System Architecture
 

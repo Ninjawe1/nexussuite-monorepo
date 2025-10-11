@@ -962,6 +962,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateTenantStripe(tenantId, { stripeCustomerId: customerId });
       }
       
+      // Build base URL with proper scheme
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? (process.env.REPLIT_DEV_DOMAIN.startsWith('http') 
+            ? process.env.REPLIT_DEV_DOMAIN 
+            : `https://${process.env.REPLIT_DEV_DOMAIN}`)
+        : 'http://localhost:5000';
+      
       // Create checkout session for subscription
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -983,8 +990,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             quantity: 1,
           },
         ],
-        success_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings`,
+        success_url: `${baseUrl}/settings?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/settings`,
         metadata: {
           tenantId: tenant.id,
           plan,
@@ -998,6 +1005,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Sync subscription from Stripe session (for environments where webhooks don't work)
+  app.post("/api/subscriptions/sync-session", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      // Retrieve session from Stripe
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      
+      // SECURITY: Validate session belongs to this tenant via customer ID
+      const tenant = await storage.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+      
+      // Verify customer ID matches
+      if (session.customer !== tenant.stripeCustomerId) {
+        return res.status(403).json({ message: "Session customer does not match tenant" });
+      }
+      
+      if (session.payment_status !== 'paid') {
+        return res.status(400).json({ message: "Payment not completed" });
+      }
+      
+      // Get subscription from session
+      const subscriptionId = session.subscription as string;
+      if (!subscriptionId) {
+        return res.status(400).json({ message: "No subscription found" });
+      }
+      
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const plan = session.metadata?.plan || 'starter';
+      
+      // SECURITY: Verify the price matches the plan
+      const prices: Record<string, number> = {
+        starter: 2900,
+        growth: 9900,
+        enterprise: 29900,
+      };
+      
+      const expectedPrice = prices[plan];
+      const actualPrice = subscription.items.data[0]?.price.unit_amount || 0;
+      
+      if (actualPrice !== expectedPrice) {
+        return res.status(400).json({ message: "Price mismatch - subscription verification failed" });
+      }
+      
+      // Update tenant subscription
+      await storage.updateTenant(tenantId, {
+        subscriptionPlan: plan,
+        subscriptionStatus: 'active',
+        stripeSubscriptionId: subscriptionId,
+      });
+      
+      res.json({ success: true, plan });
+    } catch (error: any) {
+      console.error("Error syncing session:", error);
+      res.status(500).json({ message: "Failed to sync session", error: error.message });
+    }
+  });
+  
   // Create Stripe billing portal session
   app.post("/api/subscriptions/create-portal", isAuthenticated, async (req: any, res) => {
     try {
@@ -1008,9 +1080,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No subscription found" });
       }
       
+      // Build base URL with proper scheme
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? (process.env.REPLIT_DEV_DOMAIN.startsWith('http') 
+            ? process.env.REPLIT_DEV_DOMAIN 
+            : `https://${process.env.REPLIT_DEV_DOMAIN}`)
+        : 'http://localhost:5000';
+      
       const session = await stripe.billingPortal.sessions.create({
         customer: tenant.stripeCustomerId,
-        return_url: `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/settings`,
+        return_url: `${baseUrl}/settings`,
       });
       
       res.json({ url: session.url });
