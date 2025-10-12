@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useEffect } from "react";
-import Landing from "@/pages/landing";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
 import Payroll from "@/pages/payroll";
@@ -49,7 +50,12 @@ function Router() {
   }
 
   if (!isAuthenticated) {
-    return <Landing />;
+    return (
+      <Switch>
+        <Route path="/register" component={Register} />
+        <Route path="/" component={Login} />
+      </Switch>
+    );
   }
 
   return (
@@ -117,7 +123,10 @@ function AuthenticatedApp({ style }: { style: React.CSSProperties }) {
                 variant="ghost"
                 size="sm"
                 data-testid="button-logout"
-                onClick={() => window.location.href = "/api/logout"}
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  window.location.href = "/login";
+                }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
