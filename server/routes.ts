@@ -14,6 +14,7 @@ import {
 } from "@shared/schema";
 import { randomBytes } from "crypto";
 import Stripe from "stripe";
+import bcrypt from "bcrypt";
 
 // Initialize Stripe with testing keys (production keys can be added later)
 const stripeKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
@@ -82,6 +83,203 @@ async function createAuditLog(
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Custom Authentication Routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user || !user.password) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Regenerate session to prevent fixation attacks
+      await new Promise((resolve, reject) => {
+        (req as any).session.regenerate((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+
+      // Set session data compatible with existing middleware (req.user.claims.sub)
+      (req as any).session.passport = { 
+        user: { 
+          claims: { sub: user.id }
+        }
+      };
+      
+      await new Promise((resolve, reject) => {
+        (req as any).session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+
+      res.json({ 
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          tenantId: user.tenantId,
+          role: user.role,
+          isSuperAdmin: user.isSuperAdmin,
+          isTemporaryPassword: user.isTemporaryPassword,
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { email, password, firstName, lastName, tenantName } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      let tenant;
+      let user;
+
+      try {
+        // Create tenant for new user
+        tenant = await storage.createTenant({
+          name: tenantName || `${firstName || email}'s Club`,
+          subscriptionPlan: "starter",
+          subscriptionStatus: "trial",
+          trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days trial
+        });
+
+        // Create user
+        user = await storage.createUser({
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          tenantId: tenant.id,
+          role: "owner",
+          isTemporaryPassword: false,
+          lastPasswordChange: new Date(),
+        });
+      } catch (error) {
+        // Cleanup tenant if user creation failed
+        if (tenant) {
+          try {
+            await storage.deleteTenant(tenant.id);
+          } catch (cleanupError) {
+            console.error("Failed to cleanup tenant after registration error:", cleanupError);
+          }
+        }
+        throw error;
+      }
+
+      // Regenerate session to prevent fixation attacks
+      await new Promise((resolve, reject) => {
+        (req as any).session.regenerate((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+
+      // Set session data compatible with existing middleware
+      (req as any).session.passport = { 
+        user: { 
+          claims: { sub: user.id }
+        }
+      };
+      
+      await new Promise((resolve, reject) => {
+        (req as any).session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(true);
+        });
+      });
+
+      res.json({ 
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          tenantId: user.tenantId,
+          role: user.role,
+          isSuperAdmin: user.isSuperAdmin,
+        }
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie("connect.sid");
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.post("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current and new passwords are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.password) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await storage.updateUser(userId, {
+        password: hashedPassword,
+        isTemporaryPassword: false,
+        lastPasswordChange: new Date(),
+      });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
 
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
