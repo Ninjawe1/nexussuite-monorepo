@@ -1764,7 +1764,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate state token for CSRF protection
       const state = randomBytes(32).toString("hex");
       
-      // Store state in session for verification on callback
+      // Generate PKCE parameters (required for Twitter OAuth 2.0)
+      const codeVerifier = randomBytes(32).toString("base64url");
+      const codeChallenge = randomBytes(32)
+        .toString("base64url")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=/g, "");
+      
+      // Use crypto to generate proper code challenge for Twitter
+      const crypto = await import("crypto");
+      const hash = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
+      const properCodeChallenge = hash.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+      
+      // Store state and code verifier in session for verification on callback
       if (!req.session.oauthStates) {
         req.session.oauthStates = {};
       }
@@ -1773,15 +1786,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tenantId,
         userId,
         timestamp: Date.now(),
+        codeVerifier, // Store for token exchange
       };
       
-      // Build authorization URL
+      // Build authorization URL with PKCE
       const params = new URLSearchParams({
         client_id: config.clientId,
         redirect_uri: config.redirectUri,
         response_type: "code",
         scope: config.scope.join(" "),
         state,
+        code_challenge: properCodeChallenge,
+        code_challenge_method: "s256",
       });
       
       const authUrl = `${config.authorizationUrl}?${params.toString()}`;
@@ -1827,20 +1843,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect("/marcom?oauth_error=platform_not_configured");
       }
       
-      // Exchange code for access token
+      // Exchange code for access token (with PKCE code_verifier)
       let tokenResponse;
       try {
+        const tokenParams: Record<string, string> = {
+          grant_type: "authorization_code",
+          code: code as string,
+          redirect_uri: config.redirectUri,
+        };
+        
+        // Add code_verifier for PKCE (Twitter requires this)
+        if (stateData.codeVerifier) {
+          tokenParams.code_verifier = stateData.codeVerifier;
+        }
+        
         tokenResponse = await fetch(config.tokenUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             Authorization: `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString("base64")}`,
           },
-          body: new URLSearchParams({
-            grant_type: "authorization_code",
-            code: code as string,
-            redirect_uri: config.redirectUri,
-          }).toString(),
+          body: new URLSearchParams(tokenParams).toString(),
         });
       } catch (fetchError) {
         console.error("Token exchange network error:", fetchError);
