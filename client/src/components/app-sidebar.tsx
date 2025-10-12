@@ -1,4 +1,4 @@
-import { Home, Users, DollarSign, BarChart3, Calendar, Megaphone, FileText, Shield, Settings, Crown } from "lucide-react";
+import { Home, Users, DollarSign, BarChart3, Calendar, Megaphone, Wallet, FileText, Shield, Settings, Crown } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -22,6 +22,7 @@ const clubMenuItems = [
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Matches", url: "/matches", icon: Calendar },
   { title: "Marcom", url: "/marcom", icon: Megaphone },
+  { title: "Finance", url: "/finance", icon: Wallet },
   { title: "Contracts", url: "/contracts", icon: FileText },
   { title: "Audit Log", url: "/audit", icon: Shield },
   { title: "Settings", url: "/settings", icon: Settings },

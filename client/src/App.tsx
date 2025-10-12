@@ -17,6 +17,7 @@ import Payroll from "@/pages/payroll";
 import Analytics from "@/pages/analytics";
 import Matches from "@/pages/matches";
 import Marcom from "@/pages/marcom";
+import Finance from "@/pages/finance";
 import Contracts from "@/pages/contracts";
 import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/analytics" component={Analytics} />
       <Route path="/matches" component={Matches} />
       <Route path="/marcom" component={Marcom} />
+      <Route path="/finance" component={Finance} />
       <Route path="/contracts" component={Contracts} />
       <Route path="/audit" component={Audit} />
       <Route path="/settings" component={Settings} />

@@ -2,234 +2,56 @@
 
 ## Overview
 
-Nexus Esports Suite is a comprehensive multi-tenant SaaS platform designed for esports club management. The system enables esports organizations to manage their complete operations including staff roster management, payroll processing, match scheduling, marketing campaigns, contract administration, and analytics tracking. Built as a subscription-based product intended for sale to multiple clubs, the platform emphasizes stability, performance, and clean data visualization with a dark-mode-first design approach.
-
-The application combines a modern React frontend with a Node.js/Express backend, utilizing PostgreSQL for data persistence and implementing role-based access control to ensure secure multi-tenant operations.
+Nexus Esports Suite is a comprehensive multi-tenant SaaS platform designed for esports club management. It provides tools for staff roster management, payroll, match scheduling, marketing campaigns, contract administration, and analytics. The platform is subscription-based, targets multiple esports organizations, and features a dark-mode-first design with an emphasis on stability, performance, and clear data visualization. It uses a React frontend, Node.js/Express backend, PostgreSQL database, and implements role-based access control.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Updates (October 2025)
-
-**Complete Implementation Status:**
-- ✅ All backend API routes connected to frontend with full CRUD operations
-- ✅ Security fixes: Tenant validation before all updates/deletes to prevent cross-tenant data access
-- ✅ Comprehensive audit logging across all modules (staff, payroll, matches, campaigns, contracts, tenant settings)
-- ✅ Date field handling: Backend schemas accept both Date objects and date strings with automatic transformation
-- ✅ End-to-end testing passed for all modules: Staff, Payroll, Matches, Campaigns, Contracts, Settings, Audit
-- ✅ Multi-tenant isolation properly enforced with 404 responses for cross-tenant access attempts
-- ✅ Stripe subscription billing integrated with checkout, billing portal, and session sync
-- ✅ Subscription-based feature gating implemented (staff limits per plan)
-- ✅ Super Admin dashboard with subscription management capabilities
-- ✅ Database export feature for complete data backup (Super Admin only)
-- ✅ **Social Media Analytics Integration** - Connect and track Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch accounts with analytics dashboard
-
-**Security Architecture:**
-- All update/delete routes validate record ownership before mutation
-- Returns 404 (not 403) for cross-tenant access to prevent information disclosure
-- Complete audit trail captures all CRUD operations with before/after snapshots
-- All data operations scoped by tenantId with proper validation
-
-**Form & Data Handling:**
-- React Hook Form with Zod schema validation on frontend
-- Server-side validation using shared Zod schemas from `@shared/schema`
-- Date fields accept both Date objects and ISO date strings via z.union transformation
-- Proper error handling with toast notifications and automatic login redirects for unauthorized access
-
-**Stripe Subscription System:**
-- Three-tier pricing: Starter ($29/mo - 10 staff), Growth ($99/mo - 50 staff), Enterprise ($299/mo - unlimited)
-- Checkout flow: Creates Stripe customer, generates checkout session, redirects to Stripe hosted page
-- Session sync: POST /api/subscriptions/sync-session validates payment and updates tenant subscription
-- Security validations: Customer ID verification, payment status check, price verification
-- Feature gating: Staff creation blocked when plan limits reached with upgrade prompts
-- Billing portal: Integrated Stripe customer portal for subscription management
-- Super Admin: Can manually set subscription plans and statuses for all tenants
-- URL scheme handling: Proper https:// prefix for checkout/portal redirect URLs
-
 ## System Architecture
 
 ### Frontend Architecture
 
-**Technology Stack:**
-- **React** with TypeScript for type safety and developer experience
-- **Vite** as the build tool for fast development and optimized production builds
-- **Wouter** for lightweight client-side routing
-- **TanStack Query (React Query)** for server state management, caching, and data synchronization
-- **Tailwind CSS** for utility-first styling with custom design system
-
-**UI Component System:**
-- **shadcn/ui** component library built on Radix UI primitives for accessible, customizable components
-- **New York** style variant selected for a clean, modern aesthetic
-- Custom design system combining Material Design principles with esports-specific energy through strategic color usage
-- Dark mode as primary interface with exceptional readability (light mode available as secondary)
-
-**State Management Strategy:**
-- Server state managed entirely through TanStack Query with aggressive caching (staleTime: Infinity)
-- Local UI state handled with React hooks
-- Authentication state derived from `/api/auth/user` endpoint query
-- Form state managed via react-hook-form with Zod schema validation
-
-**Design Principles:**
-- Data clarity prioritized over decoration for information-dense interfaces
-- Hybrid elevation system using subtle background overlays (`--elevate-1`, `--elevate-2`) for hover/active states
-- Consistent scannable layouts for quick information parsing
-- Purposeful color usage for status indicators (success/green, danger/red, warning/yellow, info/blue)
+The frontend is built with **React** and **TypeScript**, using **Vite** for fast development and optimized builds, **Wouter** for routing, and **TanStack Query** for server state management. Styling is handled by **Tailwind CSS** with a custom design system. **shadcn/ui** components, based on Radix UI, are used for accessible and customizable UI, following a "New York" style variant and a dark-mode-first approach. Server state is managed via TanStack Query, local UI state with React hooks, and form state with React Hook Form and Zod validation.
 
 ### Backend Architecture
 
-**Technology Stack:**
-- **Node.js** with **Express** framework
-- **TypeScript** for end-to-end type safety
-- **Drizzle ORM** for type-safe database operations
-- **Neon PostgreSQL** with serverless connection pooling via `@neondatabase/serverless`
-
-**Authentication & Authorization:**
-- **Replit Auth** integration using OpenID Connect (OIDC) protocol
-- **Passport.js** strategy implementation for authentication flow
-- Session management using `express-session` with PostgreSQL-backed session store (`connect-pg-simple`)
-- Session persistence configured for 7-day TTL with secure, httpOnly cookies
-
-**Multi-Tenant Architecture:**
-- Each club operates as an isolated tenant with automatic tenant context injection
-- User-tenant relationship established during authentication and stored in users table
-- All data operations automatically scoped to authenticated user's tenant via `getTenantId()` helper
-- Tenant isolation enforced at the database query level using Drizzle's filtering capabilities
-
-**API Design:**
-- RESTful endpoints under `/api` prefix
-- Middleware-based authentication check using `isAuthenticated` guard
-- Consistent error handling with proper HTTP status codes
-- Automatic audit logging for create/update/delete operations
-- JSON request/response format with structured error messages
-
-**Role-Based Access Control:**
-- Granular permission system with roles: Owner, Admin, Manager, Staff, Player, Marcom, Analyst, Finance
-- Module-level permissions: Staff Management, Payroll, Matches, Analytics, Marcom, Contracts, Settings, Audit
-- Permission arrays stored per staff member for flexible access control
-- Frontend route protection based on user role and permissions
+The backend uses **Node.js** with **Express** and **TypeScript**. **Drizzle ORM** is employed for type-safe database interactions with **Neon PostgreSQL**. Authentication is handled via **Replit Auth** (OpenID Connect) and **Passport.js**, with session management using `express-session` and a PostgreSQL store. The system supports multi-tenancy, isolating each club's data through automatic tenant context injection and database-level filtering. RESTful APIs are designed with middleware-based authentication, consistent error handling, and automatic audit logging. Role-Based Access Control (RBAC) allows granular permissions for various roles across different modules.
 
 ### Data Storage Solutions
 
-**Database Schema Design:**
-- **PostgreSQL** as primary data store with the following core entities:
-  - `sessions` - Session management for authentication
-  - `users` - User accounts with tenant association and role assignment
-  - `tenants` - Club/organization master data (name, branding, settings)
-  - `staff` - Team members with roles and module permissions
-  - `payroll` - Payment records with recurring/one-time support
-  - `matches` - Match scheduling with scores and tournament information
-  - `campaigns` - Marketing campaigns with platform and performance tracking
-  - `contracts` - Document management with expiration tracking
-  - `socialAccounts` - Connected social media accounts (Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch)
-  - `socialMetrics` - Social media analytics data (followers, reach, engagement, impressions)
-  - `auditLogs` - Complete audit trail with before/after state tracking
-
-**ORM Strategy:**
-- **Drizzle ORM** chosen for:
-  - Type-safe query building with full TypeScript inference
-  - Zero-runtime overhead with compile-time query generation
-  - Direct SQL-like syntax for complex queries
-  - Automatic schema migration support via `drizzle-kit`
-
-**Data Validation:**
-- **Zod schemas** derived from Drizzle schema definitions using `drizzle-zod`
-- Shared validation schemas between frontend and backend via `@shared/schema`
-- Form validation on client side with server-side re-validation
-- Type-safe insert/update operations with automatic validation
-
-**Storage Patterns:**
-- Repository-like storage layer abstracted in `server/storage.ts`
-- CRUD operations scoped by tenant for data isolation
-- Optimistic UI updates on frontend with background synchronization
-- Query invalidation strategy for real-time data consistency
+**PostgreSQL** serves as the primary data store, managed by **Drizzle ORM** for type-safe queries and schema migrations. Core entities include `sessions`, `users`, `tenants`, `staff`, `payroll`, `matches`, `campaigns`, `contracts`, `socialAccounts`, `socialMetrics`, and `auditLogs`. **Zod schemas**, shared between frontend and backend, ensure data validation. Data operations are tenant-scoped, and a repository-like storage layer abstracts CRUD operations.
 
 ### Social Media Analytics System
 
-**Architecture:**
-- **Multi-platform support**: Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch
-- **Account management**: Connect multiple social accounts per tenant with credential storage
-- **Analytics aggregation**: Unified dashboard showing total followers, reach, engagement across all platforms
-- **Platform breakdown**: Individual analytics cards for each connected platform
+This system supports multi-platform social media integration (Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch) for analytics. It allows connecting multiple accounts per tenant, aggregating metrics like followers, reach, and engagement into a unified dashboard. Data is stored in `socialAccounts` (for credentials and status) and `socialMetrics` (for time-series analytics). CRUD APIs manage accounts, and an analytics endpoint provides aggregated data.
 
-**Database Tables:**
-- `socialAccounts` - Stores connected social media accounts
-  - Platform type, account name/handle, account ID
-  - API credentials (encrypted at rest - future OAuth support planned)
-  - Active status and last sync timestamp
-  - Tenant-scoped for multi-tenant isolation
-- `socialMetrics` - Stores analytics data per account
-  - Followers, reach, engagement, impressions
-  - Clicks, shares, comments, saves, profile views
-  - Engagement rate calculations
-  - Time-series data for trend analysis
+### Finance & Transaction Management System
 
-**API Endpoints:**
-- `GET /api/social/accounts` - List connected accounts for tenant
-- `POST /api/social/accounts` - Connect new social account
-- `PATCH /api/social/accounts/:id` - Update account (preserves credentials if not provided)
-- `DELETE /api/social/accounts/:id` - Disconnect account
-- `GET /api/social/analytics` - Get aggregated analytics summary
-- `POST /api/social/sync/:accountId` - Sync account data (currently demo data, real API integration planned)
+This system provides comprehensive tracking of income and expenses with categorization, real-time profit/loss reporting, and summary dashboards. Transactions are stored in a `transactions` table with details like type, category, amount, date, description, and payment method. CRUD APIs are available for managing transactions, with a frontend UI offering filtering, sorting, and real-time financial summaries.
 
-**Frontend Features:**
-- **MarCom page** with tabbed interface (Social Analytics / Campaigns)
-- **Account connection dialog** with platform selection and credential input
-- **Analytics dashboard** with summary cards and platform-specific breakdowns
-- **Manual sync buttons** to refresh data from social platforms
-- **Credential preservation** when editing accounts (bug fixed - no longer overwrites stored credentials)
+## External Dependencies
 
-**Security & Data Handling:**
-- All operations tenant-scoped for multi-tenant isolation
-- Credentials encrypted at rest in database
-- Empty credential fields filtered before updates to preserve existing values
-- Comprehensive audit logging for all social account operations
+### Third-Party Services
 
-**Current Implementation Status:**
-- ✅ Complete database schema with socialAccounts and socialMetrics tables
-- ✅ Full CRUD operations for account management
-- ✅ Analytics aggregation and summary endpoints
-- ✅ Frontend UI with account management and analytics display
-- ✅ Manual sync functionality (demo data)
-- ✅ End-to-end testing passed
-- 🔄 Real API integrations pending (Instagram Graph API, Twitter API v2, etc.)
-- 🔄 OAuth flows for secure authentication (hybrid approach: API keys now, OAuth later)
+-   **Replit Authentication**: OAuth/OIDC provider for user authentication.
+-   **Neon PostgreSQL**: Serverless PostgreSQL database.
 
-### External Dependencies
+### UI Component Dependencies
 
-**Third-Party Services:**
-- **Replit Authentication** - OAuth/OIDC provider for user authentication
-  - Discovery URL: `https://replit.com/oidc` (or custom via `ISSUER_URL`)
-  - Requires `REPL_ID`, `SESSION_SECRET`, and `REPLIT_DOMAINS` environment variables
+-   **Radix UI**: Primitives for accessible UI components.
+-   **Lucide React**: Icon system.
+-   **React Icons**: For specific social media platform icons.
+-   **date-fns**: Date formatting and manipulation.
+-   **class-variance-authority**: For component variant management.
 
-**Database:**
-- **Neon PostgreSQL** - Serverless PostgreSQL database
-  - Connection via `DATABASE_URL` environment variable
-  - WebSocket support for serverless environments using `ws` package
-  - Connection pooling through `@neondatabase/serverless` Pool
+### Build & Development Tools
 
-**UI Component Dependencies:**
-- **Radix UI** primitives for accessible component foundation (dialogs, dropdowns, popovers, etc.)
-- **Lucide React** for consistent icon system
-- **React Icons** specifically for social media platform icons
-- **date-fns** for date formatting and manipulation
-- **class-variance-authority** for component variant management
+-   **Vite**: Frontend build tool.
+-   **ESBuild**: Server-side bundling.
+-   **tsx**: TypeScript execution in development.
+-   **Drizzle-kit**: Database migration tool.
 
-**Development Tools:**
-- **Vite plugins** for Replit integration:
-  - Runtime error overlay
-  - Cartographer for code navigation
-  - Dev banner for development environment indication
-- **ESBuild** for server-side bundling in production
-- **tsx** for TypeScript execution in development
+### Font System
 
-**Build & Deployment:**
-- Development: `npm run dev` - Runs server with tsx, Vite handles client HMR
-- Production: `npm run build` - Vite builds client, esbuild bundles server to `dist/`
-- Database migrations: `npm run db:push` - Applies Drizzle schema changes to PostgreSQL
-
-**Font System:**
-- **Google Fonts** integration:
-  - Inter (400, 500, 600, 700) - Primary UI font
-  - Space Grotesk (500, 600, 700) - Heading font
-  - JetBrains Mono (400, 500, 600) - Monospace/code font
+-   **Google Fonts**: Inter (primary UI), Space Grotesk (headings), JetBrains Mono (monospace).
