@@ -18,6 +18,7 @@ import {
 import { randomBytes } from "crypto";
 import Stripe from "stripe";
 import bcrypt from "bcrypt";
+import { getOAuthConfig, isOAuthConfigured, OAUTH_PLATFORMS } from "./oauth-config";
 
 // Initialize Stripe with testing keys (production keys can be added later)
 const stripeKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
@@ -1690,6 +1691,222 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing social account:", error);
       res.status(500).json({ message: "Failed to sync social account" });
+    }
+  });
+
+  // ==================== OAuth Routes ====================
+  
+  // Check which OAuth platforms are configured
+  app.get("/api/oauth/status", isAuthenticated, (req: any, res) => {
+    const status: Record<string, { configured: boolean; name: string; note?: string }> = {};
+    
+    Object.keys(OAUTH_PLATFORMS).forEach((platform) => {
+      const platformInfo = OAUTH_PLATFORMS[platform as keyof typeof OAUTH_PLATFORMS];
+      status[platform] = {
+        configured: isOAuthConfigured(platform),
+        name: platformInfo.name,
+        note: platformInfo.note,
+      };
+    });
+    
+    res.json(status);
+  });
+
+  // Initiate OAuth flow for a platform
+  app.get("/api/oauth/init/:platform", isAuthenticated, async (req: any, res) => {
+    try {
+      const { platform } = req.params;
+      const config = getOAuthConfig(platform);
+      
+      if (!config) {
+        return res.status(400).json({ 
+          message: `OAuth not configured for ${platform}. Please set ${platform.toUpperCase()}_CLIENT_ID and ${platform.toUpperCase()}_CLIENT_SECRET environment variables.` 
+        });
+      }
+
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      
+      // Generate state token for CSRF protection
+      const state = randomBytes(32).toString("hex");
+      
+      // Store state in session for verification on callback
+      if (!req.session.oauthStates) {
+        req.session.oauthStates = {};
+      }
+      req.session.oauthStates[state] = {
+        platform,
+        tenantId,
+        userId,
+        timestamp: Date.now(),
+      };
+      
+      // Build authorization URL
+      const params = new URLSearchParams({
+        client_id: config.clientId,
+        redirect_uri: config.redirectUri,
+        response_type: "code",
+        scope: config.scope.join(" "),
+        state,
+      });
+      
+      const authUrl = `${config.authorizationUrl}?${params.toString()}`;
+      
+      res.json({ authUrl });
+    } catch (error) {
+      console.error("Error initiating OAuth:", error);
+      res.status(500).json({ message: "Failed to initiate OAuth flow" });
+    }
+  });
+
+  // Handle OAuth callback from platform
+  app.get("/api/oauth/callback/:platform", async (req: any, res) => {
+    try {
+      const { platform } = req.params;
+      const { code, state, error: oauthError } = req.query;
+      
+      // Check for OAuth errors from the platform
+      if (oauthError) {
+        return res.redirect(`/marcom?oauth_error=${encodeURIComponent(oauthError as string)}`);
+      }
+      
+      if (!code || !state) {
+        return res.redirect("/marcom?oauth_error=missing_parameters");
+      }
+      
+      // Verify state token
+      const stateData = req.session?.oauthStates?.[state as string];
+      if (!stateData || stateData.platform !== platform) {
+        return res.redirect("/marcom?oauth_error=invalid_state");
+      }
+      
+      // Check state is not expired (10 minutes)
+      if (Date.now() - stateData.timestamp > 10 * 60 * 1000) {
+        // Clean up expired state
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=state_expired");
+      }
+      
+      const config = getOAuthConfig(platform);
+      if (!config) {
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=platform_not_configured");
+      }
+      
+      // Exchange code for access token
+      let tokenResponse;
+      try {
+        tokenResponse = await fetch(config.tokenUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString("base64")}`,
+          },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            code: code as string,
+            redirect_uri: config.redirectUri,
+          }).toString(),
+        });
+      } catch (fetchError) {
+        console.error("Token exchange network error:", fetchError);
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=network_error");
+      }
+      
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text();
+        console.error("Token exchange failed:", errorText);
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=token_exchange_failed");
+      }
+      
+      let tokenData;
+      try {
+        tokenData = await tokenResponse.json();
+      } catch (parseError) {
+        console.error("Token response parse error:", parseError);
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=invalid_token_response");
+      }
+      
+      const { access_token, refresh_token, expires_in } = tokenData;
+      
+      if (!access_token) {
+        console.error("No access token in response:", tokenData);
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=no_access_token");
+      }
+      
+      // Fetch account info from the platform to get account details
+      let accountName = `${platform}_account`;
+      let accountId = "";
+      
+      // Platform-specific API calls to get account info
+      // (This would need to be implemented for each platform)
+      // For now, we'll use placeholder values
+      
+      // Create or update social account
+      const expiresAt = expires_in 
+        ? new Date(Date.now() + expires_in * 1000)
+        : undefined;
+      
+      try {
+        const accountData = {
+          tenantId: stateData.tenantId,
+          platform,
+          accountName,
+          accountId: accountId || undefined,
+          apiKey: access_token,
+          refreshToken: refresh_token || undefined,
+          expiresAt,
+          isActive: true,
+        };
+        
+        await storage.createSocialAccount(accountData);
+        
+        // Create audit log
+        const userId = stateData.userId;
+        const user = await storage.getUser(userId);
+        await createAuditLog(
+          stateData.tenantId,
+          userId,
+          `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+          `Connected ${platform} account via OAuth`,
+          "socialAccount",
+          undefined,
+          undefined,
+          accountData,
+          "create"
+        );
+        
+        // Clear used state
+        delete req.session.oauthStates[state as string];
+        
+        // Clean up other expired states
+        const now = Date.now();
+        if (req.session.oauthStates) {
+          Object.keys(req.session.oauthStates).forEach((key) => {
+            if (now - req.session.oauthStates[key].timestamp > 10 * 60 * 1000) {
+              delete req.session.oauthStates[key];
+            }
+          });
+        }
+        
+        // Redirect to marcom page with success message
+        res.redirect("/marcom?oauth_success=true");
+      } catch (storageError) {
+        console.error("Error saving social account:", storageError);
+        delete req.session.oauthStates[state as string];
+        return res.redirect("/marcom?oauth_error=save_failed");
+      }
+    } catch (error) {
+      console.error("Error handling OAuth callback:", error);
+      // Clean up state if it exists
+      if (req.query.state && req.session?.oauthStates?.[req.query.state as string]) {
+        delete req.session.oauthStates[req.query.state as string];
+      }
+      res.redirect("/marcom?oauth_error=callback_failed");
     }
   });
 

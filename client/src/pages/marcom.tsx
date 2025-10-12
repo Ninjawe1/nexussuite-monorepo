@@ -1,11 +1,11 @@
 import { CampaignCard } from "@/components/campaign-card";
 import { CampaignDialog } from "@/components/campaign-dialog";
-import { SocialAccountDialog } from "@/components/social-account-dialog";
+import { SocialAccountOAuthDialog } from "@/components/social-account-dialog-oauth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Eye, Heart, TrendingUp, Users, BarChart3, RefreshCw, Trash2, Link as LinkIcon } from "lucide-react";
+import { Plus, Eye, Heart, TrendingUp, Users, BarChart3, RefreshCw, Trash2, Link as LinkIcon, CheckCircle2, XCircle } from "lucide-react";
 import { SiInstagram, SiX, SiFacebook, SiTiktok, SiYoutube, SiTwitch } from "react-icons/si";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ import type { Campaign as CampaignType, SocialAccount } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
 
 const platformIcons: Record<string, any> = {
   instagram: SiInstagram,
@@ -28,9 +29,43 @@ export default function Marcom() {
   const [campaignDialogOpen, setCampaignDialogOpen] = useState(false);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignType | undefined>();
-  const [selectedAccount, setSelectedAccount] = useState<SocialAccount | undefined>();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
+
+  // Handle OAuth callback messages
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthSuccess = params.get("oauth_success");
+    const oauthError = params.get("oauth_error");
+
+    if (oauthSuccess === "true") {
+      toast({
+        title: "Success",
+        description: "Social account connected successfully",
+      });
+      // Clear the OAuth params but preserve other query params
+      params.delete("oauth_success");
+      const newSearch = params.toString();
+      const newUrl = newSearch ? `/marcom?${newSearch}` : "/marcom";
+      window.history.replaceState({}, "", newUrl);
+      
+      // Invalidate queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics"] });
+    } else if (oauthError) {
+      toast({
+        title: "Connection failed",
+        description: `OAuth error: ${oauthError}`,
+        variant: "destructive",
+      });
+      // Clear the OAuth params but preserve other query params
+      params.delete("oauth_error");
+      const newSearch = params.toString();
+      const newUrl = newSearch ? `/marcom?${newSearch}` : "/marcom";
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [toast, queryClient]);
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<CampaignType[]>({
     queryKey: ["/api/campaigns"],
@@ -149,7 +184,6 @@ export default function Marcom() {
   };
 
   const handleConnectAccount = () => {
-    setSelectedAccount(undefined);
     setSocialDialogOpen(true);
   };
 
@@ -491,10 +525,9 @@ export default function Marcom() {
         campaign={selectedCampaign}
       />
 
-      <SocialAccountDialog
+      <SocialAccountOAuthDialog
         open={socialDialogOpen}
         onOpenChange={setSocialDialogOpen}
-        account={selectedAccount}
       />
     </div>
   );
