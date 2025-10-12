@@ -1115,7 +1115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         posts: Math.floor(Math.random() * 500) + 50,
         reach: Math.floor(Math.random() * 100000) + 20000,
         impressions: Math.floor(Math.random() * 200000) + 50000,
-        engagement: (Math.random() * 5000).toFixed(0),
+        engagement: Math.floor(Math.random() * 5000) + 1000,
         engagementRate: (Math.random() * 5).toFixed(2),
         profileViews: Math.floor(Math.random() * 10000),
         websiteClicks: Math.floor(Math.random() * 2000),

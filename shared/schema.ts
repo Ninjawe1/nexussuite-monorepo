@@ -254,7 +254,7 @@ export const socialMetrics = pgTable("social_metrics", {
   posts: integer("posts").default(0),
   reach: integer("reach").default(0),
   impressions: integer("impressions").default(0),
-  engagement: decimal("engagement", { precision: 5, scale: 2 }).default("0"),
+  engagement: integer("engagement").default(0),
   engagementRate: decimal("engagement_rate", { precision: 5, scale: 2 }).default("0"),
   profileViews: integer("profile_views").default(0),
   websiteClicks: integer("website_clicks").default(0),
