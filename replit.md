@@ -26,9 +26,62 @@ The backend uses **Node.js** with **Express** and **TypeScript**. **Drizzle ORM*
 
 This system supports multi-platform social media integration (Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch) for analytics. It allows connecting multiple accounts per tenant, aggregating metrics like followers, reach, and engagement into a unified dashboard. Data is stored in `socialAccounts` (for credentials and status) and `socialMetrics` (for time-series analytics). CRUD APIs manage accounts, and an analytics endpoint provides aggregated data.
 
+**OAuth 2.0 Integration (October 2025):**
+
+The platform now uses OAuth 2.0 authorization code flow for connecting social media accounts:
+
+**Backend Infrastructure:**
+- `server/oauth-config.ts` - Centralized OAuth configuration for all platforms
+- `getBaseUrl()` - Environment-aware redirect URI handling (production, dev, localhost)
+- `getOAuthConfig()` - Platform-specific OAuth configuration retrieval
+- State token management in session with 10-minute expiry
+- Automatic cleanup of consumed and expired state tokens
+
+**OAuth Endpoints:**
+- `GET /api/oauth/status` - Returns configuration status for all platforms
+- `POST /api/oauth/initiate/:platform` - Generates state token and authorization URL
+- `GET /api/oauth/callback/:platform` - Handles OAuth callback, exchanges code for token
+
+**Required Environment Variables per Platform:**
+- Instagram: `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET`
+- Twitter/X: `TWITTER_CLIENT_ID`, `TWITTER_CLIENT_SECRET`
+- Facebook: `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET`
+- TikTok: `TIKTOK_CLIENT_ID`, `TIKTOK_CLIENT_SECRET`
+- YouTube: `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`
+- Twitch: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`
+
+**Security Features:**
+- Cryptographically secure state tokens using Node.js crypto
+- State tokens stored in session, not exposed to client
+- 10-minute state token expiry with automatic cleanup
+- All error paths clean up state tokens
+- Audit logging for all OAuth connections
+
+**Frontend Components:**
+- `SocialAccountOAuthDialog` - OAuth connection interface
+- Loading and error states for OAuth status fetch
+- Platform cards with configuration status badges
+- Required environment variable display for unconfigured platforms
+- Disabled connect buttons for unconfigured platforms
+- Query invalidation after successful OAuth
+
+**Flow:**
+1. User clicks "Connect Account" → OAuth dialog opens
+2. User selects platform → Redirects to platform authorization page
+3. User authorizes → Platform redirects back with authorization code
+4. Server exchanges code for access token → Saves to database
+5. User redirected to /marcom with success/error message
+6. Data automatically refreshes to show connected account
+
 ### Finance & Transaction Management System
 
 This system provides comprehensive tracking of income and expenses with categorization, real-time profit/loss reporting, and summary dashboards. Transactions are stored in a `transactions` table with details like type, category, amount, date, description, and payment method. CRUD APIs are available for managing transactions, with a frontend UI offering filtering, sorting, and real-time financial summaries.
+
+**Data Handling (October 2025):**
+- Amount field uses `decimal(10, 2)` type in PostgreSQL for precise monetary values
+- Frontend converts amount to string before submission to preserve decimal precision
+- Date field properly converted from date picker string to Date object
+- All CRUD operations support tenant isolation and audit logging
 
 ### Tournament Management System
 
