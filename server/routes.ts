@@ -1665,21 +1665,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Social account not found" });
       }
       
-      // TODO: Implement actual API calls to social platforms
-      // For now, create demo metrics
-      const demoMetric = await storage.createSocialMetric({
+      if (!account.apiKey) {
+        return res.status(400).json({ message: "Account not connected. Please connect via OAuth first." });
+      }
+      
+      // Fetch real analytics from the platform
+      const { fetchPlatformAnalytics } = await import("./analytics-fetcher");
+      const platformMetrics = await fetchPlatformAnalytics(
+        account.platform,
+        account.apiKey,
+        account.accountId || account.id
+      );
+      
+      // Calculate engagement rate if we have the data
+      let engagementRate = "0";
+      if (platformMetrics.followers && platformMetrics.engagement) {
+        engagementRate = ((platformMetrics.engagement / platformMetrics.followers) * 100).toFixed(2);
+      }
+      
+      const newMetric = await storage.createSocialMetric({
         accountId: account.id,
         tenantId,
         platform: account.platform,
-        followers: Math.floor(Math.random() * 50000) + 10000,
-        following: Math.floor(Math.random() * 1000),
-        posts: Math.floor(Math.random() * 500) + 50,
-        reach: Math.floor(Math.random() * 100000) + 20000,
-        impressions: Math.floor(Math.random() * 200000) + 50000,
-        engagement: Math.floor(Math.random() * 5000) + 1000,
-        engagementRate: (Math.random() * 5).toFixed(2),
-        profileViews: Math.floor(Math.random() * 10000),
-        websiteClicks: Math.floor(Math.random() * 2000),
+        followers: platformMetrics.followers || 0,
+        following: platformMetrics.following || 0,
+        posts: platformMetrics.posts || 0,
+        reach: platformMetrics.reach || 0,
+        impressions: platformMetrics.impressions || 0,
+        engagement: platformMetrics.engagement || 0,
+        engagementRate: platformMetrics.engagementRate || engagementRate,
+        profileViews: platformMetrics.profileViews || 0,
+        websiteClicks: platformMetrics.websiteClicks || 0,
         date: new Date(),
       });
       
@@ -1687,10 +1703,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastSyncedAt: new Date(),
       });
       
-      res.json({ success: true, metric: demoMetric });
+      // Create audit log
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Synced analytics for ${account.platform} account`,
+        "socialMetric",
+        newMetric.id,
+        undefined,
+        newMetric,
+        "create"
+      );
+      
+      res.json({ success: true, metric: newMetric });
     } catch (error) {
       console.error("Error syncing social account:", error);
-      res.status(500).json({ message: "Failed to sync social account" });
+      res.status(500).json({ 
+        message: "Failed to sync social account", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
@@ -1863,9 +1897,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true,
         };
         
-        await storage.createSocialAccount(accountData);
+        const newAccount = await storage.createSocialAccount(accountData);
         
-        // Create audit log
+        // Create audit log for connection
         const userId = stateData.userId;
         const user = await storage.getUser(userId);
         await createAuditLog(
@@ -1879,6 +1913,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           accountData,
           "create"
         );
+        
+        // Automatically fetch initial analytics after connection
+        try {
+          const { fetchPlatformAnalytics } = await import("./analytics-fetcher");
+          const platformMetrics = await fetchPlatformAnalytics(
+            platform,
+            access_token,
+            accountId || newAccount.id
+          );
+          
+          let engagementRate = "0";
+          if (platformMetrics.followers && platformMetrics.engagement) {
+            engagementRate = ((platformMetrics.engagement / platformMetrics.followers) * 100).toFixed(2);
+          }
+          
+          const initialMetric = await storage.createSocialMetric({
+            accountId: newAccount.id,
+            tenantId: stateData.tenantId,
+            platform,
+            followers: platformMetrics.followers || 0,
+            following: platformMetrics.following || 0,
+            posts: platformMetrics.posts || 0,
+            reach: platformMetrics.reach || 0,
+            impressions: platformMetrics.impressions || 0,
+            engagement: platformMetrics.engagement || 0,
+            engagementRate: platformMetrics.engagementRate || engagementRate,
+            profileViews: platformMetrics.profileViews || 0,
+            websiteClicks: platformMetrics.websiteClicks || 0,
+            date: new Date(),
+          });
+          
+          await storage.updateSocialAccount(newAccount.id, stateData.tenantId, {
+            lastSyncedAt: new Date(),
+          });
+          
+          // Create audit log for initial sync
+          await createAuditLog(
+            stateData.tenantId,
+            userId,
+            `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+            `Auto-synced initial analytics for ${platform} account`,
+            "socialMetric",
+            initialMetric.id,
+            undefined,
+            initialMetric,
+            "create"
+          );
+        } catch (syncError) {
+          console.error("Error fetching initial analytics:", syncError);
+          // Don't fail the OAuth flow if analytics fetch fails
+        }
         
         // Clear used state
         delete req.session.oauthStates[state as string];
