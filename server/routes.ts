@@ -1446,6 +1446,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get monthly aggregated transaction data
+  app.get("/api/finance/monthly", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const transactions = await storage.getTransactionsByTenant(tenantId);
+      
+      // Group transactions by month
+      const monthlyData: Record<string, { income: number; expenses: number }> = {};
+      
+      transactions.forEach(transaction => {
+        const date = new Date(transaction.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { income: 0, expenses: 0 };
+        }
+        
+        const amount = parseFloat(transaction.amount);
+        if (transaction.type === 'income') {
+          monthlyData[monthKey].income += amount;
+        } else {
+          monthlyData[monthKey].expenses += amount;
+        }
+      });
+      
+      // Convert to array and sort by date
+      const result = Object.entries(monthlyData)
+        .map(([month, data]) => ({
+          month,
+          income: data.income,
+          expenses: data.expenses,
+          profit: data.income - data.expenses
+        }))
+        .sort((a, b) => a.month.localeCompare(b.month));
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching monthly data:", error);
+      res.status(500).json({ message: "Failed to fetch monthly data" });
+    }
+  });
+
+  // Export transactions as CSV
+  app.get("/api/finance/export", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const transactions = await storage.getTransactionsByTenant(tenantId);
+      
+      // Create CSV header
+      const header = 'Date,Type,Category,Amount,Description,Payment Method,Reference\n';
+      
+      // Create CSV rows
+      const rows = transactions
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .map(t => {
+          const date = new Date(t.date).toISOString().split('T')[0];
+          const description = (t.description || '').replace(/"/g, '""');
+          const paymentMethod = t.paymentMethod || '';
+          const reference = t.reference || '';
+          
+          return `${date},${t.type},${t.category},${t.amount},"${description}",${paymentMethod},${reference}`;
+        })
+        .join('\n');
+      
+      const csv = header + rows;
+      
+      // Set headers for CSV download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="transactions.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting transactions:", error);
+      res.status(500).json({ message: "Failed to export transactions" });
+    }
+  });
+
   // ==================== Stripe Subscription Routes ====================
   
   // Create Stripe checkout session for subscription
