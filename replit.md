@@ -47,6 +47,33 @@ The tournament management system provides hierarchical organization of competiti
 - Full audit logging for all create, update, and delete operations
 - Modal dialogs for creating and editing tournaments and rounds with form validation
 
+### Tenant Suspension System
+
+The tenant suspension system enables Super Admins to suspend and reactivate club accounts. When a tenant is suspended, all users of that tenant are immediately blocked from accessing the platform, except for Super Admins who can still manage the system.
+
+**Data Model:**
+- `tenants` table includes suspension tracking fields:
+  - `subscriptionStatus`: Can be "active", "suspended", "canceled", or "trial"
+  - `suspendedAt`: Timestamp when suspension occurred
+  - `suspensionReason`: Text description of why the tenant was suspended
+  - `suspendedBy`: User ID of the Super Admin who performed the suspension
+
+**Backend Implementation:**
+- `checkTenantSuspension` middleware runs on all protected routes after authentication
+- Checks if the user's tenant has `subscriptionStatus = "suspended"`
+- Returns 403 error with suspension details if tenant is suspended
+- Super Admins bypass the suspension check to maintain system access
+- Dedicated API endpoints for suspension management (Super Admin only):
+  - `POST /api/admin/clubs/:id/suspend` - Suspend a tenant with reason
+  - `POST /api/admin/clubs/:id/reactivate` - Reactivate a suspended tenant
+
+**Admin UI:**
+- Super Admin dashboard displays all tenants with their current status
+- Suspension dialog captures the reason before suspending
+- Visual indicators show suspended status with reason and timestamp
+- One-click reactivation for suspended tenants
+- Full audit logging of all suspension and reactivation actions
+
 ## External Dependencies
 
 ### Third-Party Services
