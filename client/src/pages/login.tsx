@@ -128,9 +128,9 @@ export default function Login() {
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
               <Link href="/register">
-                <a className="text-primary hover:underline" data-testid="link-register">
+                <span className="text-primary hover:underline cursor-pointer" data-testid="link-register">
                   Sign up
-                </a>
+                </span>
               </Link>
             </div>
           </CardContent>

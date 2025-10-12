@@ -215,9 +215,9 @@ export default function Register() {
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">Already have an account? </span>
               <Link href="/login">
-                <a className="text-primary hover:underline" data-testid="link-login">
+                <span className="text-primary hover:underline cursor-pointer" data-testid="link-login">
                   Sign in
-                </a>
+                </span>
               </Link>
             </div>
           </CardContent>
