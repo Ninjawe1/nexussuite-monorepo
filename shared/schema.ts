@@ -295,3 +295,29 @@ export const insertInviteSchema = createInsertSchema(invites).omit({
 });
 export type InsertInvite = z.infer<typeof insertInviteSchema>;
 export type Invite = typeof invites.$inferSelect;
+
+// Finance Transactions
+export const transactions = pgTable("transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  type: varchar("type").notNull(), // income, expense
+  category: varchar("category").notNull(), // sponsorship, merchandise, tournament_prize, salaries, equipment, facility, travel, etc
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  date: timestamp("date").notNull(),
+  paymentMethod: varchar("payment_method"), // cash, bank_transfer, credit_card, paypal, etc
+  reference: varchar("reference"), // invoice number, receipt number, etc
+  createdBy: varchar("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+});
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type Transaction = typeof transactions.$inferSelect;

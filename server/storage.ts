@@ -32,6 +32,9 @@ import {
   type InsertSocialAccount,
   type SocialMetric,
   type InsertSocialMetric,
+  transactions,
+  type Transaction,
+  type InsertTransaction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -116,6 +119,13 @@ export interface IStorage {
   getSocialMetricsByAccount(accountId: string, limit?: number): Promise<SocialMetric[]>;
   createSocialMetric(metric: InsertSocialMetric): Promise<SocialMetric>;
   getLatestMetricsByTenant(tenantId: string): Promise<SocialMetric[]>;
+
+  // Finance operations
+  getTransactionsByTenant(tenantId: string): Promise<Transaction[]>;
+  getTransaction(id: string, tenantId: string): Promise<Transaction | undefined>;
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  updateTransaction(id: string, tenantId: string, transaction: Partial<InsertTransaction>): Promise<Transaction>;
+  deleteTransaction(id: string, tenantId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -554,6 +564,37 @@ export class DatabaseStorage implements IStorage {
 
   async getAllContracts(): Promise<Contract[]> {
     return db.select().from(contracts).orderBy(desc(contracts.createdAt));
+  }
+
+  // Finance operations
+  async getTransactionsByTenant(tenantId: string): Promise<Transaction[]> {
+    return db.select().from(transactions)
+      .where(eq(transactions.tenantId, tenantId))
+      .orderBy(desc(transactions.date));
+  }
+
+  async getTransaction(id: string, tenantId: string): Promise<Transaction | undefined> {
+    const [transaction] = await db.select().from(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)));
+    return transaction;
+  }
+
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const [newTransaction] = await db.insert(transactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async updateTransaction(id: string, tenantId: string, transactionData: Partial<InsertTransaction>): Promise<Transaction> {
+    const [transaction] = await db
+      .update(transactions)
+      .set({ ...transactionData, updatedAt: new Date() })
+      .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)))
+      .returning();
+    return transaction;
+  }
+
+  async deleteTransaction(id: string, tenantId: string): Promise<void> {
+    await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)));
   }
 }
 
