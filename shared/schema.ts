@@ -60,6 +60,10 @@ export const tenants = pgTable("tenants", {
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   trialEndsAt: timestamp("trial_ends_at"),
   subscriptionEndsAt: timestamp("subscription_ends_at"),
+  // Suspension tracking
+  suspendedAt: timestamp("suspended_at"),
+  suspensionReason: text("suspension_reason"),
+  suspendedBy: varchar("suspended_by"), // User ID who suspended the tenant
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
