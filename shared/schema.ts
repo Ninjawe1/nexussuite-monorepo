@@ -27,8 +27,8 @@ export const sessions = pgTable(
 // Users table - Custom authentication with tenant support
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
-  password: text("password"), // Hashed password (nullable for migration from Replit auth)
+  email: varchar("email").notNull().unique(),
+  password: text("password").notNull(), // Hashed password
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
