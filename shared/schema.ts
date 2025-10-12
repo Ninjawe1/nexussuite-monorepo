@@ -24,16 +24,19 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table - Required for Replit Auth with tenant support
+// Users table - Custom authentication with tenant support
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  password: text("password"), // Hashed password (nullable for migration from Replit auth)
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   tenantId: varchar("tenant_id"), // Multi-tenant support (nullable for super admins)
   role: varchar("role").notNull().default("owner"), // owner, admin, manager, staff, player, marcom, analyst, finance
   isSuperAdmin: boolean("is_super_admin").notNull().default(false), // System-level admin
+  isTemporaryPassword: boolean("is_temporary_password").notNull().default(false), // Must change on first login
+  lastPasswordChange: timestamp("last_password_change"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
