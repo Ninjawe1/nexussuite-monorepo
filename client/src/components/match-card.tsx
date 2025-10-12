@@ -10,9 +10,9 @@ interface MatchCardProps {
   scoreA?: number;
   scoreB?: number;
   date: Date;
-  tournament: string;
+  tournament: string | null;
   game: string;
-  venue?: string;
+  venue?: string | null;
   status: "upcoming" | "live" | "completed";
 }
 
@@ -30,7 +30,7 @@ export function MatchCard({ id, teamA, teamB, scoreA, scoreB, date, tournament, 
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-sm">{tournament}</h3>
+            <h3 className="font-semibold text-sm">{tournament || "Standalone Match"}</h3>
             <p className="text-xs text-muted-foreground">{game}</p>
           </div>
           <Badge className={`${statusColors[status]} text-xs`}>

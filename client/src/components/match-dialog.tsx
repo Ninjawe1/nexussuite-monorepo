@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { insertMatchSchema, type InsertMatch, type Match } from "@shared/schema";
+import { insertMatchSchema, type InsertMatch, type Match, type Tournament, type TournamentRound } from "@shared/schema";
 import { z } from "zod";
 import {
   Dialog,
@@ -43,6 +43,17 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string | undefined>(match?.tournamentId || undefined);
+
+  const { data: tournaments = [] } = useQuery<Tournament[]>({
+    queryKey: ["/api/tournaments"],
+    enabled: open,
+  });
+
+  const { data: rounds = [] } = useQuery<TournamentRound[]>({
+    queryKey: ["/api/tournaments", selectedTournamentId, "rounds"],
+    enabled: open && !!selectedTournamentId,
+  });
 
   const formSchema = insertMatchSchema.omit({ tenantId: true }).extend({
     date: insertMatchSchema.shape.date.or(z.string().transform(val => new Date(val))),
@@ -51,6 +62,8 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      tournamentId: match?.tournamentId || undefined,
+      roundId: match?.roundId || undefined,
       teamA: match?.teamA || "",
       teamB: match?.teamB || "",
       scoreA: match?.scoreA || undefined,
@@ -64,8 +77,46 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      if (match) {
+        setSelectedTournamentId(match.tournamentId || undefined);
+        form.reset({
+          tournamentId: match.tournamentId || undefined,
+          roundId: match.roundId || undefined,
+          teamA: match.teamA || "",
+          teamB: match.teamB || "",
+          scoreA: match.scoreA || undefined,
+          scoreB: match.scoreB || undefined,
+          date: match.date ? new Date(match.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+          tournament: match.tournament || "",
+          game: match.game || "",
+          venue: match.venue || "",
+          status: match.status || "upcoming",
+          notes: match.notes || "",
+        });
+      } else {
+        setSelectedTournamentId(undefined);
+        form.reset({
+          tournamentId: undefined,
+          roundId: undefined,
+          teamA: "",
+          teamB: "",
+          scoreA: undefined,
+          scoreB: undefined,
+          date: new Date().toISOString().slice(0, 16),
+          tournament: "",
+          game: "",
+          venue: "",
+          status: "upcoming",
+          notes: "",
+        });
+      }
+    }
+  }, [match, open, form]);
+
   const createMutation = useMutation({
-    mutationFn: async (data: InsertMatch) => {
+    mutationFn: async (data: Omit<InsertMatch, "tenantId">) => {
       return await apiRequest("/api/matches", "POST", data);
     },
     onSuccess: () => {
@@ -98,7 +149,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: InsertMatch) => {
+    mutationFn: async (data: Omit<InsertMatch, "tenantId">) => {
       return await apiRequest(`/api/matches/${match?.id}`, "PATCH", data);
     },
     onSuccess: () => {
@@ -130,13 +181,17 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     },
   });
 
-  const onSubmit = async (data: InsertMatch) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
+      const submitData = {
+        ...data,
+        date: new Date(data.date),
+      };
       if (match) {
-        await updateMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(submitData);
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(submitData);
       }
     } finally {
       setIsSubmitting(false);
@@ -155,6 +210,71 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="tournamentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tournament (Optional)</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value === "none" ? undefined : value);
+                        setSelectedTournamentId(value === "none" ? undefined : value);
+                        form.setValue("roundId", undefined);
+                      }} 
+                      value={field.value || "none"}
+                    >
+                      <FormControl>
+                        <SelectTrigger data-testid="select-match-tournament">
+                          <SelectValue placeholder="Select tournament" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None (Standalone Match)</SelectItem>
+                        {tournaments.map((tournament) => (
+                          <SelectItem key={tournament.id} value={tournament.id}>
+                            {tournament.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="roundId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Round (Optional)</FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value === "none" ? undefined : value)}
+                      value={field.value || "none"}
+                      disabled={!selectedTournamentId}
+                    >
+                      <FormControl>
+                        <SelectTrigger data-testid="select-match-round">
+                          <SelectValue placeholder={selectedTournamentId ? "Select round" : "Select tournament first"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {rounds.map((round) => (
+                          <SelectItem key={round.id} value={round.id}>
+                            {round.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}

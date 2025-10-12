@@ -122,6 +122,7 @@ export default function Matches() {
                     date={new Date(match.date)}
                     scoreA={match.scoreA ?? undefined}
                     scoreB={match.scoreB ?? undefined}
+                    status={match.status as "upcoming" | "live" | "completed"}
                   />
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
