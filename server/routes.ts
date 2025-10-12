@@ -363,14 +363,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const staffCount = currentStaffCount.length;
       
       // Define plan limits
-      const planLimits = {
+      const planLimits: Record<string, number> = {
         starter: 10,
         growth: 50,
         enterprise: Infinity, // Unlimited
       };
       
       const currentPlan = tenant.subscriptionPlan || 'starter';
-      const limit = planLimits[currentPlan];
+      const limit = planLimits[currentPlan] || 10;
       
       if (staffCount >= limit) {
         return res.status(403).json({ 
