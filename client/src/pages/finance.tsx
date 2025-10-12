@@ -218,7 +218,7 @@ export default function Finance() {
   const onSubmit = (data: any) => {
     const submitData = {
       ...data,
-      amount: parseFloat(data.amount),
+      amount: data.amount.toString(),
       date: new Date(data.date),
     };
     if (editingTransaction) {
