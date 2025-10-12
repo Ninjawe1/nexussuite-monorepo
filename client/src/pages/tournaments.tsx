@@ -76,7 +76,7 @@ function TournamentCard({ tournament, onEdit, onAddRound, onEditRound }: {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }
@@ -242,7 +242,7 @@ function RoundItem({ round, tournamentId, onEdit }: {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }

@@ -85,7 +85,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }
@@ -118,7 +118,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }

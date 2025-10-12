@@ -73,7 +73,7 @@ export default function InviteAccept() {
   const handleLogin = () => {
     // Store token in sessionStorage so we can auto-accept after login
     sessionStorage.setItem("pendingInviteToken", token || "");
-    window.location.href = "/api/login";
+    window.location.href = "/login";
   };
 
   if (loading) {

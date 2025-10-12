@@ -88,7 +88,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }
@@ -121,7 +121,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }

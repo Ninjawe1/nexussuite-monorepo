@@ -93,7 +93,7 @@ export function RoundDialog({ open, onOpenChange, tournamentId, round }: RoundDi
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }

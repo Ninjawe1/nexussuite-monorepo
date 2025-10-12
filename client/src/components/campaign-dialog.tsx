@@ -94,7 +94,7 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }
@@ -127,7 +127,7 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }

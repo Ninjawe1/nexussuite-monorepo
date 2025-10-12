@@ -82,7 +82,7 @@ export function SocialAccountDialog({ open, onOpenChange, account }: SocialAccou
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/login";
         }, 500);
         return;
       }
