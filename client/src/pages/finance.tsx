@@ -144,11 +144,11 @@ export default function Finance() {
   };
 
   const form = useForm<any>({
-    resolver: zodResolver(insertTransactionSchema),
+    resolver: zodResolver(insertTransactionSchema.omit({ tenantId: true, createdBy: true })),
     defaultValues: {
       type: "income",
       category: "",
-      amount: "0",
+      amount: undefined,
       description: "",
       date: new Date().toISOString().split("T")[0],
       paymentMethod: "",
@@ -215,11 +215,16 @@ export default function Finance() {
     },
   });
 
-  const onSubmit = (data: InsertTransaction) => {
+  const onSubmit = (data: any) => {
+    const submitData = {
+      ...data,
+      amount: parseFloat(data.amount),
+      date: new Date(data.date),
+    };
     if (editingTransaction) {
-      updateMutation.mutate({ id: editingTransaction.id, data });
+      updateMutation.mutate({ id: editingTransaction.id, data: submitData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(submitData);
     }
   };
 
