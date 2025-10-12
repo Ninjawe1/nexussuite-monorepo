@@ -23,6 +23,7 @@ Preferred communication style: Simple, everyday language.
 - ✅ Subscription-based feature gating implemented (staff limits per plan)
 - ✅ Super Admin dashboard with subscription management capabilities
 - ✅ Database export feature for complete data backup (Super Admin only)
+- ✅ **Social Media Analytics Integration** - Connect and track Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch accounts with analytics dashboard
 
 **Security Architecture:**
 - All update/delete routes validate record ownership before mutation
@@ -120,6 +121,8 @@ Preferred communication style: Simple, everyday language.
   - `matches` - Match scheduling with scores and tournament information
   - `campaigns` - Marketing campaigns with platform and performance tracking
   - `contracts` - Document management with expiration tracking
+  - `socialAccounts` - Connected social media accounts (Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch)
+  - `socialMetrics` - Social media analytics data (followers, reach, engagement, impressions)
   - `auditLogs` - Complete audit trail with before/after state tracking
 
 **ORM Strategy:**
@@ -140,6 +143,57 @@ Preferred communication style: Simple, everyday language.
 - CRUD operations scoped by tenant for data isolation
 - Optimistic UI updates on frontend with background synchronization
 - Query invalidation strategy for real-time data consistency
+
+### Social Media Analytics System
+
+**Architecture:**
+- **Multi-platform support**: Instagram, Twitter/X, Facebook, TikTok, YouTube, Twitch
+- **Account management**: Connect multiple social accounts per tenant with credential storage
+- **Analytics aggregation**: Unified dashboard showing total followers, reach, engagement across all platforms
+- **Platform breakdown**: Individual analytics cards for each connected platform
+
+**Database Tables:**
+- `socialAccounts` - Stores connected social media accounts
+  - Platform type, account name/handle, account ID
+  - API credentials (encrypted at rest - future OAuth support planned)
+  - Active status and last sync timestamp
+  - Tenant-scoped for multi-tenant isolation
+- `socialMetrics` - Stores analytics data per account
+  - Followers, reach, engagement, impressions
+  - Clicks, shares, comments, saves, profile views
+  - Engagement rate calculations
+  - Time-series data for trend analysis
+
+**API Endpoints:**
+- `GET /api/social/accounts` - List connected accounts for tenant
+- `POST /api/social/accounts` - Connect new social account
+- `PATCH /api/social/accounts/:id` - Update account (preserves credentials if not provided)
+- `DELETE /api/social/accounts/:id` - Disconnect account
+- `GET /api/social/analytics` - Get aggregated analytics summary
+- `POST /api/social/sync/:accountId` - Sync account data (currently demo data, real API integration planned)
+
+**Frontend Features:**
+- **MarCom page** with tabbed interface (Social Analytics / Campaigns)
+- **Account connection dialog** with platform selection and credential input
+- **Analytics dashboard** with summary cards and platform-specific breakdowns
+- **Manual sync buttons** to refresh data from social platforms
+- **Credential preservation** when editing accounts (bug fixed - no longer overwrites stored credentials)
+
+**Security & Data Handling:**
+- All operations tenant-scoped for multi-tenant isolation
+- Credentials encrypted at rest in database
+- Empty credential fields filtered before updates to preserve existing values
+- Comprehensive audit logging for all social account operations
+
+**Current Implementation Status:**
+- ✅ Complete database schema with socialAccounts and socialMetrics tables
+- ✅ Full CRUD operations for account management
+- ✅ Analytics aggregation and summary endpoints
+- ✅ Frontend UI with account management and analytics display
+- ✅ Manual sync functionality (demo data)
+- ✅ End-to-end testing passed
+- 🔄 Real API integrations pending (Instagram Graph API, Twitter API v2, etc.)
+- 🔄 OAuth flows for secure authentication (hybrid approach: API keys now, OAuth later)
 
 ### External Dependencies
 

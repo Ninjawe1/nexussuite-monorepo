@@ -10,6 +10,7 @@ import {
   insertContractSchema,
   insertTenantSchema,
   insertInviteSchema,
+  insertSocialAccountSchema,
 } from "@shared/schema";
 import { randomBytes } from "crypto";
 import Stripe from "stripe";
@@ -944,6 +945,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting invite:", error);
       res.status(500).json({ message: "Failed to delete invite" });
+    }
+  });
+
+  // ==================== Social Media Routes ====================
+  
+  // Get all connected social accounts
+  app.get("/api/social/accounts", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const accounts = await storage.getSocialAccountsByTenant(tenantId);
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching social accounts:", error);
+      res.status(500).json({ message: "Failed to fetch social accounts" });
+    }
+  });
+
+  // Connect a new social account
+  app.post("/api/social/accounts", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const validatedData = insertSocialAccountSchema.parse({
+        ...req.body,
+        tenantId,
+      });
+      
+      const newAccount = await storage.createSocialAccount(validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Connected ${req.body.platform} account: ${req.body.accountName}`,
+        "socialAccount",
+        newAccount.id,
+        undefined,
+        newAccount,
+        "create"
+      );
+      
+      res.json(newAccount);
+    } catch (error) {
+      console.error("Error creating social account:", error);
+      res.status(500).json({ message: "Failed to connect social account" });
+    }
+  });
+
+  // Update social account
+  app.patch("/api/social/accounts/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const oldAccount = await storage.getSocialAccount(req.params.id, tenantId);
+      if (!oldAccount) {
+        return res.status(404).json({ message: "Social account not found" });
+      }
+      
+      const updatedAccount = await storage.updateSocialAccount(req.params.id, tenantId, req.body);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated ${updatedAccount.platform} account: ${updatedAccount.accountName}`,
+        "socialAccount",
+        req.params.id,
+        oldAccount,
+        updatedAccount,
+        "update"
+      );
+      
+      res.json(updatedAccount);
+    } catch (error) {
+      console.error("Error updating social account:", error);
+      res.status(500).json({ message: "Failed to update social account" });
+    }
+  });
+
+  // Delete social account
+  app.delete("/api/social/accounts/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const account = await storage.getSocialAccount(req.params.id, tenantId);
+      if (!account) {
+        return res.status(404).json({ message: "Social account not found" });
+      }
+      
+      await storage.deleteSocialAccount(req.params.id, tenantId);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Disconnected ${account.platform} account: ${account.accountName}`,
+        "socialAccount",
+        req.params.id,
+        account,
+        undefined,
+        "delete"
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting social account:", error);
+      res.status(500).json({ message: "Failed to disconnect social account" });
+    }
+  });
+
+  // Get social media analytics summary
+  app.get("/api/social/analytics", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const latestMetrics = await storage.getLatestMetricsByTenant(tenantId);
+      
+      // Aggregate metrics across all platforms
+      const summary = {
+        totalFollowers: latestMetrics.reduce((sum, m) => sum + (m.followers || 0), 0),
+        totalReach: latestMetrics.reduce((sum, m) => sum + (m.reach || 0), 0),
+        totalEngagement: latestMetrics.reduce((sum, m) => sum + Number(m.engagement || 0), 0),
+        avgEngagementRate: latestMetrics.length > 0 
+          ? latestMetrics.reduce((sum, m) => sum + Number(m.engagementRate || 0), 0) / latestMetrics.length 
+          : 0,
+        platforms: latestMetrics.map(m => ({
+          platform: m.platform,
+          accountId: m.accountId,
+          followers: m.followers,
+          reach: m.reach,
+          engagement: m.engagement,
+          engagementRate: m.engagementRate,
+          posts: m.posts,
+          impressions: m.impressions,
+        })),
+      };
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching social analytics:", error);
+      res.status(500).json({ message: "Failed to fetch social analytics" });
+    }
+  });
+
+  // Manual sync endpoint - fetch latest data from social platforms
+  app.post("/api/social/sync/:accountId", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const account = await storage.getSocialAccount(req.params.accountId, tenantId);
+      
+      if (!account) {
+        return res.status(404).json({ message: "Social account not found" });
+      }
+      
+      // TODO: Implement actual API calls to social platforms
+      // For now, create demo metrics
+      const demoMetric = await storage.createSocialMetric({
+        accountId: account.id,
+        tenantId,
+        platform: account.platform,
+        followers: Math.floor(Math.random() * 50000) + 10000,
+        following: Math.floor(Math.random() * 1000),
+        posts: Math.floor(Math.random() * 500) + 50,
+        reach: Math.floor(Math.random() * 100000) + 20000,
+        impressions: Math.floor(Math.random() * 200000) + 50000,
+        engagement: (Math.random() * 5000).toFixed(0),
+        engagementRate: (Math.random() * 5).toFixed(2),
+        profileViews: Math.floor(Math.random() * 10000),
+        websiteClicks: Math.floor(Math.random() * 2000),
+        date: new Date(),
+      });
+      
+      await storage.updateSocialAccount(account.id, tenantId, {
+        lastSyncedAt: new Date(),
+      });
+      
+      res.json({ success: true, metric: demoMetric });
+    } catch (error) {
+      console.error("Error syncing social account:", error);
+      res.status(500).json({ message: "Failed to sync social account" });
     }
   });
 

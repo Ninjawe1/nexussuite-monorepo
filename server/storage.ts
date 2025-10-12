@@ -8,6 +8,8 @@ import {
   contracts,
   auditLogs,
   invites,
+  socialAccounts,
+  socialMetrics,
   type User,
   type UpsertUser,
   type Tenant,
@@ -26,6 +28,10 @@ import {
   type InsertAuditLog,
   type Invite,
   type InsertInvite,
+  type SocialAccount,
+  type InsertSocialAccount,
+  type SocialMetric,
+  type InsertSocialMetric,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -95,6 +101,18 @@ export interface IStorage {
   createInvite(invite: InsertInvite): Promise<Invite>;
   updateInviteStatus(token: string, status: "pending" | "accepted" | "expired"): Promise<Invite>;
   deleteInvite(id: string, tenantId: string): Promise<void>;
+
+  // Social Media operations
+  getSocialAccountsByTenant(tenantId: string): Promise<SocialAccount[]>;
+  getSocialAccount(id: string, tenantId: string): Promise<SocialAccount | undefined>;
+  createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
+  updateSocialAccount(id: string, tenantId: string, account: Partial<InsertSocialAccount>): Promise<SocialAccount>;
+  deleteSocialAccount(id: string, tenantId: string): Promise<void>;
+  
+  getSocialMetricsByTenant(tenantId: string, limit?: number): Promise<SocialMetric[]>;
+  getSocialMetricsByAccount(accountId: string, limit?: number): Promise<SocialMetric[]>;
+  createSocialMetric(metric: InsertSocialMetric): Promise<SocialMetric>;
+  getLatestMetricsByTenant(tenantId: string): Promise<SocialMetric[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -421,6 +439,78 @@ export class DatabaseStorage implements IStorage {
 
   async getAllInvites(): Promise<Invite[]> {
     return db.select().from(invites).orderBy(desc(invites.createdAt));
+  }
+
+  // Social Media operations
+  async getSocialAccountsByTenant(tenantId: string): Promise<SocialAccount[]> {
+    return db.select().from(socialAccounts)
+      .where(eq(socialAccounts.tenantId, tenantId))
+      .orderBy(desc(socialAccounts.createdAt));
+  }
+
+  async getSocialAccount(id: string, tenantId: string): Promise<SocialAccount | undefined> {
+    const [account] = await db.select().from(socialAccounts)
+      .where(and(eq(socialAccounts.id, id), eq(socialAccounts.tenantId, tenantId)));
+    return account;
+  }
+
+  async createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount> {
+    const [newAccount] = await db.insert(socialAccounts).values(account).returning();
+    return newAccount;
+  }
+
+  async updateSocialAccount(id: string, tenantId: string, account: Partial<InsertSocialAccount>): Promise<SocialAccount> {
+    const existing = await this.getSocialAccount(id, tenantId);
+    if (!existing) {
+      throw new Error("Social account not found");
+    }
+    
+    const [updated] = await db.update(socialAccounts)
+      .set({ ...account, updatedAt: new Date() })
+      .where(and(eq(socialAccounts.id, id), eq(socialAccounts.tenantId, tenantId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteSocialAccount(id: string, tenantId: string): Promise<void> {
+    await db.delete(socialAccounts).where(and(eq(socialAccounts.id, id), eq(socialAccounts.tenantId, tenantId)));
+  }
+
+  async getSocialMetricsByTenant(tenantId: string, limit: number = 100): Promise<SocialMetric[]> {
+    return db.select().from(socialMetrics)
+      .where(eq(socialMetrics.tenantId, tenantId))
+      .orderBy(desc(socialMetrics.date))
+      .limit(limit);
+  }
+
+  async getSocialMetricsByAccount(accountId: string, limit: number = 30): Promise<SocialMetric[]> {
+    return db.select().from(socialMetrics)
+      .where(eq(socialMetrics.accountId, accountId))
+      .orderBy(desc(socialMetrics.date))
+      .limit(limit);
+  }
+
+  async createSocialMetric(metric: InsertSocialMetric): Promise<SocialMetric> {
+    const [newMetric] = await db.insert(socialMetrics).values(metric).returning();
+    return newMetric;
+  }
+
+  async getLatestMetricsByTenant(tenantId: string): Promise<SocialMetric[]> {
+    // Get the latest metric for each social account
+    const accounts = await this.getSocialAccountsByTenant(tenantId);
+    const latestMetrics: SocialMetric[] = [];
+    
+    for (const account of accounts) {
+      const [latestMetric] = await db.select().from(socialMetrics)
+        .where(eq(socialMetrics.accountId, account.id))
+        .orderBy(desc(socialMetrics.date))
+        .limit(1);
+      if (latestMetric) {
+        latestMetrics.push(latestMetric);
+      }
+    }
+    
+    return latestMetrics;
   }
 
   // Super Admin export operations

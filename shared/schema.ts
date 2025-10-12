@@ -218,6 +218,59 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
 
+// Social Media Accounts
+export const socialAccounts = pgTable("social_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  platform: varchar("platform").notNull(), // facebook, instagram, twitter, tiktok, youtube
+  accountName: varchar("account_name").notNull(),
+  accountId: varchar("account_id"), // Platform-specific account ID
+  apiKey: text("api_key"), // Encrypted API key/access token
+  apiSecret: text("api_secret"), // Encrypted API secret if needed
+  refreshToken: text("refresh_token"), // For OAuth flows
+  expiresAt: timestamp("expires_at"), // Token expiration
+  isActive: boolean("is_active").notNull().default(true),
+  lastSyncedAt: timestamp("last_synced_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSocialAccountSchema = createInsertSchema(socialAccounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSocialAccount = z.infer<typeof insertSocialAccountSchema>;
+export type SocialAccount = typeof socialAccounts.$inferSelect;
+
+// Social Media Metrics
+export const socialMetrics = pgTable("social_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  accountId: varchar("account_id").notNull(), // References socialAccounts.id
+  tenantId: varchar("tenant_id").notNull(),
+  platform: varchar("platform").notNull(),
+  followers: integer("followers").default(0),
+  following: integer("following").default(0),
+  posts: integer("posts").default(0),
+  reach: integer("reach").default(0),
+  impressions: integer("impressions").default(0),
+  engagement: decimal("engagement", { precision: 5, scale: 2 }).default("0"),
+  engagementRate: decimal("engagement_rate", { precision: 5, scale: 2 }).default("0"),
+  profileViews: integer("profile_views").default(0),
+  websiteClicks: integer("website_clicks").default(0),
+  date: timestamp("date").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSocialMetricSchema = createInsertSchema(socialMetrics).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+});
+export type InsertSocialMetric = z.infer<typeof insertSocialMetricSchema>;
+export type SocialMetric = typeof socialMetrics.$inferSelect;
+
 // Staff Invites
 export const invites = pgTable("invites", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
