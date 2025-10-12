@@ -120,18 +120,72 @@ export const insertPayrollSchema = createInsertSchema(payroll).omit({
 export type InsertPayroll = z.infer<typeof insertPayrollSchema>;
 export type Payroll = typeof payroll.$inferSelect;
 
-// Matches/Tournaments
+// Tournaments (parent structure)
+export const tournaments = pgTable("tournaments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  name: varchar("name").notNull(),
+  game: varchar("game").notNull(),
+  format: varchar("format").notNull(), // single_elimination, double_elimination, round_robin, league, custom
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  prizePool: decimal("prize_pool", { precision: 10, scale: 2 }),
+  status: varchar("status").notNull().default("upcoming"), // upcoming, ongoing, completed, cancelled
+  description: text("description"),
+  rules: text("rules"),
+  maxTeams: integer("max_teams"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTournamentSchema = createInsertSchema(tournaments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  startDate: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  endDate: z.union([z.date(), z.string().transform(val => new Date(val))]).optional(),
+});
+export type InsertTournament = z.infer<typeof insertTournamentSchema>;
+export type Tournament = typeof tournaments.$inferSelect;
+
+// Tournament Rounds/Stages (middle layer for brackets/groups)
+export const tournamentRounds = pgTable("tournament_rounds", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull(),
+  name: varchar("name").notNull(), // e.g., "Group A", "Quarterfinals", "Semifinals", "Finals"
+  roundNumber: integer("round_number").notNull(), // 1, 2, 3, etc. for ordering
+  format: varchar("format"), // bracket, group, best_of_3, best_of_5
+  startDate: timestamp("start_date"),
+  status: varchar("status").notNull().default("upcoming"), // upcoming, ongoing, completed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTournamentRoundSchema = createInsertSchema(tournamentRounds).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  startDate: z.union([z.date(), z.string().transform(val => new Date(val))]).optional(),
+});
+export type InsertTournamentRound = z.infer<typeof insertTournamentRoundSchema>;
+export type TournamentRound = typeof tournamentRounds.$inferSelect;
+
+// Matches (updated to reference tournament and round)
 export const matches = pgTable("matches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull(),
+  tournamentId: varchar("tournament_id"), // Reference to tournament (null for standalone matches)
+  roundId: varchar("round_id"), // Reference to round (optional)
   teamA: varchar("team_a").notNull(),
   teamB: varchar("team_b").notNull(),
   scoreA: integer("score_a"),
   scoreB: integer("score_b"),
   date: timestamp("date").notNull(),
-  tournament: varchar("tournament").notNull(),
+  tournament: varchar("tournament"), // Legacy field, kept for backward compatibility
   game: varchar("game").notNull(),
   venue: varchar("venue"),
+  matchNumber: integer("match_number"), // For ordering within a round
+  nextMatchId: varchar("next_match_id"), // For bracket progression (winner goes to this match)
   status: varchar("status").notNull().default("upcoming"), // upcoming, live, completed
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
