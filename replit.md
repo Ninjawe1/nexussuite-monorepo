@@ -16,7 +16,7 @@ The frontend is built with **React** and **TypeScript**, using **Vite** for fast
 
 ### Backend Architecture
 
-The backend uses **Node.js** with **Express** and **TypeScript**. **Drizzle ORM** is employed for type-safe database interactions with **Neon PostgreSQL**. Authentication is handled via **Replit Auth** (OpenID Connect) and **Passport.js**, with session management using `express-session` and a PostgreSQL store. The system supports multi-tenancy, isolating each club's data through automatic tenant context injection and database-level filtering. RESTful APIs are designed with middleware-based authentication, consistent error handling, and automatic audit logging. Role-Based Access Control (RBAC) allows granular permissions for various roles across different modules.
+The backend uses **Node.js** with **Express** and **TypeScript**. **Drizzle ORM** is employed for type-safe database interactions with **Neon PostgreSQL**. Authentication is handled via a **custom username/password authentication system** with session management using `express-session` and a PostgreSQL store. Passwords are securely hashed with **bcrypt**. Session cookies use httpOnly flag for XSS protection and conditional secure flag (production only) to support development environments. The system supports multi-tenancy, isolating each club's data through automatic tenant context injection and database-level filtering. RESTful APIs are designed with middleware-based authentication, consistent error handling, and automatic audit logging. Role-Based Access Control (RBAC) allows granular permissions for various roles across different modules.
 
 ### Data Storage Solutions
 
@@ -74,11 +74,46 @@ The tenant suspension system enables Super Admins to suspend and reactivate club
 - One-click reactivation for suspended tenants
 - Full audit logging of all suspension and reactivation actions
 
+### Custom Authentication System
+
+The platform uses a fully custom username/password authentication system without any third-party OAuth dependencies.
+
+**Security Implementation:**
+- Password hashing using **bcrypt** (10 salt rounds)
+- Session-based authentication with PostgreSQL session store
+- Session regeneration on login/register to prevent fixation attacks
+- httpOnly cookies to prevent XSS attacks
+- Conditional secure flag (HTTPS-only in production, allows HTTP in development)
+- Session TTL: 7 days
+
+**User Registration Flow:**
+- New users provide: email, password, first name, last name, and organization name
+- System automatically creates both user account and tenant organization
+- First user of each tenant automatically receives 14-day trial subscription
+- Session is established immediately after registration
+
+**Authentication Routes:**
+- `POST /api/auth/register` - Create new account with tenant
+- `POST /api/auth/login` - Authenticate with email/password
+- `POST /api/auth/logout` - Destroy session
+- `GET /api/auth/user` - Get current authenticated user
+
+**Frontend Pages:**
+- `/login` - Login form with email and password
+- `/register` - Registration form with organization creation
+- Unauthenticated users automatically redirected to login page
+- Protected routes require valid session cookie
+
+**User Schema:**
+- Users identified by unique email (required)
+- Password stored as bcrypt hash (required)
+- Each user belongs to one tenant organization
+- Super Admin flag for platform-wide administrative access
+
 ## External Dependencies
 
 ### Third-Party Services
 
--   **Replit Authentication**: OAuth/OIDC provider for user authentication.
 -   **Neon PostgreSQL**: Serverless PostgreSQL database.
 
 ### UI Component Dependencies
