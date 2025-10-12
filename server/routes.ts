@@ -11,6 +11,7 @@ import {
   insertTenantSchema,
   insertInviteSchema,
   insertSocialAccountSchema,
+  insertTransactionSchema,
 } from "@shared/schema";
 import { randomBytes } from "crypto";
 import Stripe from "stripe";
@@ -1328,6 +1329,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error syncing social account:", error);
       res.status(500).json({ message: "Failed to sync social account" });
+    }
+  });
+
+  // ==================== Finance Routes ====================
+  
+  // Get all transactions for tenant
+  app.get("/api/finance", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const transactionList = await storage.getTransactionsByTenant(tenantId);
+      res.json(transactionList);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Create a new transaction
+  app.post("/api/finance", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const validatedData = insertTransactionSchema.parse({ 
+        ...req.body, 
+        tenantId,
+        createdBy: userId 
+      });
+      const newTransaction = await storage.createTransaction(validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Added ${newTransaction.type} transaction: ${newTransaction.description || newTransaction.category}`,
+        "transaction",
+        newTransaction.id,
+        undefined,
+        newTransaction,
+        "create"
+      );
+      
+      res.json(newTransaction);
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      res.status(500).json({ message: "Failed to create transaction" });
+    }
+  });
+
+  // Update a transaction
+  app.patch("/api/finance/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const oldTransaction = await storage.getTransaction(req.params.id, tenantId);
+      if (!oldTransaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      const validatedData = insertTransactionSchema.partial().parse(req.body);
+      const updatedTransaction = await storage.updateTransaction(req.params.id, tenantId, validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated ${updatedTransaction.type} transaction: ${updatedTransaction.description || updatedTransaction.category}`,
+        "transaction",
+        updatedTransaction.id,
+        oldTransaction,
+        updatedTransaction,
+        "update"
+      );
+      
+      res.json(updatedTransaction);
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+      res.status(500).json({ message: "Failed to update transaction" });
+    }
+  });
+
+  // Delete a transaction
+  app.delete("/api/finance/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const transaction = await storage.getTransaction(req.params.id, tenantId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+      
+      await storage.deleteTransaction(req.params.id, tenantId);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Deleted ${transaction.type} transaction: ${transaction.description || transaction.category}`,
+        "transaction",
+        req.params.id,
+        transaction,
+        undefined,
+        "delete"
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      res.status(500).json({ message: "Failed to delete transaction" });
     }
   });
 
