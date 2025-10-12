@@ -20,7 +20,7 @@ The backend uses **Node.js** with **Express** and **TypeScript**. **Drizzle ORM*
 
 ### Data Storage Solutions
 
-**PostgreSQL** serves as the primary data store, managed by **Drizzle ORM** for type-safe queries and schema migrations. Core entities include `sessions`, `users`, `tenants`, `staff`, `payroll`, `matches`, `campaigns`, `contracts`, `socialAccounts`, `socialMetrics`, and `auditLogs`. **Zod schemas**, shared between frontend and backend, ensure data validation. Data operations are tenant-scoped, and a repository-like storage layer abstracts CRUD operations.
+**PostgreSQL** serves as the primary data store, managed by **Drizzle ORM** for type-safe queries and schema migrations. Core entities include `sessions`, `users`, `tenants`, `staff`, `payroll`, `tournaments`, `tournamentRounds`, `matches`, `campaigns`, `contracts`, `socialAccounts`, `socialMetrics`, and `auditLogs`. **Zod schemas**, shared between frontend and backend, ensure data validation. Data operations are tenant-scoped, and a repository-like storage layer abstracts CRUD operations.
 
 ### Social Media Analytics System
 
@@ -29,6 +29,23 @@ This system supports multi-platform social media integration (Instagram, Twitter
 ### Finance & Transaction Management System
 
 This system provides comprehensive tracking of income and expenses with categorization, real-time profit/loss reporting, and summary dashboards. Transactions are stored in a `transactions` table with details like type, category, amount, date, description, and payment method. CRUD APIs are available for managing transactions, with a frontend UI offering filtering, sorting, and real-time financial summaries.
+
+### Tournament Management System
+
+The tournament management system provides hierarchical organization of competitive events using a three-tier structure: **Tournaments → Rounds → Matches**. This allows clubs to organize complex multi-stage competitions with different formats (single elimination, double elimination, round robin, league, Swiss, custom).
+
+**Data Model:**
+- `tournaments` table stores top-level tournament information including name, description, format, game, dates, max teams, and status
+- `tournamentRounds` table stores intermediate stages/rounds with round numbers, formats, and dates
+- `matches` table is enhanced with `tournamentId` and `roundId` foreign keys to link matches to the hierarchy
+
+**Features:**
+- Full CRUD operations for tournaments and rounds with tenant isolation
+- Expandable UI cards showing hierarchical structure
+- Support for multiple tournament formats and status tracking (upcoming, ongoing, completed, cancelled)
+- Automatic cascade deletion (deleting a tournament removes all rounds and matches)
+- Full audit logging for all create, update, and delete operations
+- Modal dialogs for creating and editing tournaments and rounds with form validation
 
 ## External Dependencies
 
