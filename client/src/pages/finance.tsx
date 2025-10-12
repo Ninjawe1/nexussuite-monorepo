@@ -54,7 +54,18 @@ import {
   Trash2,
   Calendar,
   Filter,
+  Download,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const incomeCategories = [
   { value: "sponsorship", label: "Sponsorship" },
@@ -95,6 +106,42 @@ export default function Finance() {
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/finance"],
   });
+
+  const { data: monthlyData = [] } = useQuery<Array<{
+    month: string;
+    income: number;
+    expenses: number;
+    profit: number;
+  }>>({
+    queryKey: ["/api/finance/monthly"],
+  });
+
+  const handleExport = async () => {
+    try {
+      const response = await fetch("/api/finance/export", {
+        credentials: "include",
+      });
+      
+      if (!response.ok) throw new Error("Export failed");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `transactions-${format(new Date(), "yyyy-MM-dd")}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({ title: "Transactions exported successfully" });
+    } catch (error) {
+      toast({
+        title: "Failed to export transactions",
+        variant: "destructive",
+      });
+    }
+  };
 
   const form = useForm<any>({
     resolver: zodResolver(insertTransactionSchema),
@@ -229,13 +276,22 @@ export default function Finance() {
             Track income, expenses, and financial health
           </p>
         </div>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => closeDialog()} data-testid="button-add-transaction">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Transaction
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleExport}
+            data-testid="button-export-transactions"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => closeDialog()} data-testid="button-add-transaction">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Transaction
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl" data-testid="dialog-transaction">
             <DialogHeader>
               <DialogTitle>
@@ -422,7 +478,8 @@ export default function Finance() {
               </form>
             </Form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -477,6 +534,68 @@ export default function Finance() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Monthly Trend Chart */}
+      {monthlyData.length > 0 && (
+        <Card data-testid="card-monthly-trend">
+          <CardHeader>
+            <CardTitle>Monthly Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="month" 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--popover))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                  }}
+                  labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                  formatter={(value: number) => [`$${value.toFixed(2)}`]}
+                />
+                <Legend 
+                  wrapperStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="income" 
+                  stroke="hsl(var(--success))" 
+                  strokeWidth={2}
+                  name="Income"
+                  data-testid="line-income"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="expenses" 
+                  stroke="hsl(var(--destructive))" 
+                  strokeWidth={2}
+                  name="Expenses"
+                  data-testid="line-expenses"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="profit" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  name="Net Profit"
+                  data-testid="line-profit"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card>
