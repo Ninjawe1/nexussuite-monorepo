@@ -12,6 +12,8 @@ import {
   insertInviteSchema,
   insertSocialAccountSchema,
   insertTransactionSchema,
+  insertTournamentSchema,
+  insertTournamentRoundSchema,
 } from "@shared/schema";
 import { randomBytes } from "crypto";
 import Stripe from "stripe";
@@ -572,6 +574,255 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== Tournament Routes ====================
+  
+  // Get all tournaments for tenant
+  app.get("/api/tournaments", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const tournamentList = await storage.getTournamentsByTenant(tenantId);
+      res.json(tournamentList);
+    } catch (error) {
+      console.error("Error fetching tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch tournaments" });
+    }
+  });
+
+  // Get single tournament
+  app.get("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const tournament = await storage.getTournament(req.params.id, tenantId);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+      res.json(tournament);
+    } catch (error) {
+      console.error("Error fetching tournament:", error);
+      res.status(500).json({ message: "Failed to fetch tournament" });
+    }
+  });
+
+  // Create tournament
+  app.post("/api/tournaments", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const validatedData = insertTournamentSchema.parse({ ...req.body, tenantId });
+      const newTournament = await storage.createTournament(validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Created tournament: ${newTournament.name}`,
+        "tournament",
+        newTournament.id,
+        undefined,
+        newTournament,
+        "create"
+      );
+      
+      res.json(newTournament);
+    } catch (error) {
+      console.error("Error creating tournament:", error);
+      res.status(500).json({ message: "Failed to create tournament" });
+    }
+  });
+
+  // Update tournament
+  app.patch("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const oldTournament = await storage.getTournament(req.params.id, tenantId);
+      if (!oldTournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+      
+      const validatedData = insertTournamentSchema.partial().parse(req.body);
+      const updatedTournament = await storage.updateTournament(req.params.id, tenantId, validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated tournament: ${updatedTournament.name}`,
+        "tournament",
+        updatedTournament.id,
+        oldTournament,
+        updatedTournament,
+        "update"
+      );
+      
+      res.json(updatedTournament);
+    } catch (error) {
+      console.error("Error updating tournament:", error);
+      res.status(500).json({ message: "Failed to update tournament" });
+    }
+  });
+
+  // Delete tournament
+  app.delete("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      const tournament = await storage.getTournament(req.params.id, tenantId);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+      
+      await storage.deleteTournament(req.params.id, tenantId);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Deleted tournament: ${tournament.name}`,
+        "tournament",
+        req.params.id,
+        tournament,
+        undefined,
+        "delete"
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting tournament:", error);
+      res.status(500).json({ message: "Failed to delete tournament" });
+    }
+  });
+
+  // ==================== Tournament Round Routes ====================
+  
+  // Get rounds for a tournament
+  app.get("/api/tournaments/:tournamentId/rounds", isAuthenticated, async (req: any, res) => {
+    try {
+      const rounds = await storage.getRoundsByTournament(req.params.tournamentId);
+      res.json(rounds);
+    } catch (error) {
+      console.error("Error fetching rounds:", error);
+      res.status(500).json({ message: "Failed to fetch rounds" });
+    }
+  });
+
+  // Create round
+  app.post("/api/tournaments/:tournamentId/rounds", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const tenantId = await getTenantId(req);
+      
+      const validatedData = insertTournamentRoundSchema.parse({ 
+        ...req.body, 
+        tournamentId: req.params.tournamentId 
+      });
+      const newRound = await storage.createRound(validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Created tournament round: ${newRound.name}`,
+        "tournament_round",
+        newRound.id,
+        undefined,
+        newRound,
+        "create"
+      );
+      
+      res.json(newRound);
+    } catch (error) {
+      console.error("Error creating round:", error);
+      res.status(500).json({ message: "Failed to create round" });
+    }
+  });
+
+  // Update round
+  app.patch("/api/rounds/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const tenantId = await getTenantId(req);
+      
+      const { tournamentId } = req.body;
+      if (!tournamentId) {
+        return res.status(400).json({ message: "Tournament ID is required" });
+      }
+      
+      const oldRound = await storage.getRound(req.params.id, tournamentId);
+      if (!oldRound) {
+        return res.status(404).json({ message: "Round not found" });
+      }
+      
+      const validatedData = insertTournamentRoundSchema.partial().parse(req.body);
+      const updatedRound = await storage.updateRound(req.params.id, tournamentId, validatedData);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated tournament round: ${updatedRound.name}`,
+        "tournament_round",
+        updatedRound.id,
+        oldRound,
+        updatedRound,
+        "update"
+      );
+      
+      res.json(updatedRound);
+    } catch (error) {
+      console.error("Error updating round:", error);
+      res.status(500).json({ message: "Failed to update round" });
+    }
+  });
+
+  // Delete round
+  app.delete("/api/rounds/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const tenantId = await getTenantId(req);
+      
+      const { tournamentId } = req.query;
+      if (!tournamentId || typeof tournamentId !== 'string') {
+        return res.status(400).json({ message: "Tournament ID is required" });
+      }
+      
+      const round = await storage.getRound(req.params.id, tournamentId);
+      if (!round) {
+        return res.status(404).json({ message: "Round not found" });
+      }
+      
+      await storage.deleteRound(req.params.id, tournamentId);
+      
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Deleted tournament round: ${round.name}`,
+        "tournament_round",
+        req.params.id,
+        round,
+        undefined,
+        "delete"
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting round:", error);
+      res.status(500).json({ message: "Failed to delete round" });
+    }
+  });
+
+  // ==================== Match Routes ====================
+  
   // Match routes
   app.get("/api/matches", isAuthenticated, async (req: any, res) => {
     try {

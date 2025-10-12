@@ -35,6 +35,12 @@ import {
   transactions,
   type Transaction,
   type InsertTransaction,
+  tournaments,
+  type Tournament,
+  type InsertTournament,
+  tournamentRounds,
+  type TournamentRound,
+  type InsertTournamentRound,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -66,8 +72,24 @@ export interface IStorage {
   updatePayroll(id: string, tenantId: string, payroll: Partial<InsertPayroll>): Promise<Payroll>;
   deletePayroll(id: string, tenantId: string): Promise<void>;
 
+  // Tournament operations
+  getTournamentsByTenant(tenantId: string): Promise<Tournament[]>;
+  getTournament(id: string, tenantId: string): Promise<Tournament | undefined>;
+  createTournament(tournament: InsertTournament): Promise<Tournament>;
+  updateTournament(id: string, tenantId: string, tournament: Partial<InsertTournament>): Promise<Tournament>;
+  deleteTournament(id: string, tenantId: string): Promise<void>;
+
+  // Tournament Round operations
+  getRoundsByTournament(tournamentId: string): Promise<TournamentRound[]>;
+  getRound(id: string, tournamentId: string): Promise<TournamentRound | undefined>;
+  createRound(round: InsertTournamentRound): Promise<TournamentRound>;
+  updateRound(id: string, tournamentId: string, round: Partial<InsertTournamentRound>): Promise<TournamentRound>;
+  deleteRound(id: string, tournamentId: string): Promise<void>;
+
   // Match operations
   getMatchesByTenant(tenantId: string): Promise<Match[]>;
+  getMatchesByTournament(tournamentId: string): Promise<Match[]>;
+  getMatchesByRound(roundId: string): Promise<Match[]>;
   getMatch(id: string, tenantId: string): Promise<Match | undefined>;
   createMatch(match: InsertMatch): Promise<Match>;
   updateMatch(id: string, tenantId: string, match: Partial<InsertMatch>): Promise<Match>;
@@ -274,9 +296,90 @@ export class DatabaseStorage implements IStorage {
     await db.delete(payroll).where(and(eq(payroll.id, id), eq(payroll.tenantId, tenantId)));
   }
 
+  // Tournament operations
+  async getTournamentsByTenant(tenantId: string): Promise<Tournament[]> {
+    return db.select().from(tournaments).where(eq(tournaments.tenantId, tenantId)).orderBy(desc(tournaments.startDate));
+  }
+
+  async getTournament(id: string, tenantId: string): Promise<Tournament | undefined> {
+    const [tournament] = await db
+      .select()
+      .from(tournaments)
+      .where(and(eq(tournaments.id, id), eq(tournaments.tenantId, tenantId)));
+    return tournament;
+  }
+
+  async createTournament(tournamentData: InsertTournament): Promise<Tournament> {
+    const [tournament] = await db.insert(tournaments).values(tournamentData).returning();
+    return tournament;
+  }
+
+  async updateTournament(id: string, tenantId: string, tournamentData: Partial<InsertTournament>): Promise<Tournament> {
+    const [tournament] = await db
+      .update(tournaments)
+      .set({ ...tournamentData, updatedAt: new Date() })
+      .where(and(eq(tournaments.id, id), eq(tournaments.tenantId, tenantId)))
+      .returning();
+    return tournament;
+  }
+
+  async deleteTournament(id: string, tenantId: string): Promise<void> {
+    // Delete associated rounds and matches first
+    const rounds = await this.getRoundsByTournament(id);
+    for (const round of rounds) {
+      await this.deleteRound(round.id, id);
+    }
+    // Delete matches directly associated with tournament
+    await db.delete(matches).where(eq(matches.tournamentId, id));
+    // Delete tournament
+    await db.delete(tournaments).where(and(eq(tournaments.id, id), eq(tournaments.tenantId, tenantId)));
+  }
+
+  // Tournament Round operations
+  async getRoundsByTournament(tournamentId: string): Promise<TournamentRound[]> {
+    return db.select().from(tournamentRounds).where(eq(tournamentRounds.tournamentId, tournamentId)).orderBy(tournamentRounds.roundNumber);
+  }
+
+  async getRound(id: string, tournamentId: string): Promise<TournamentRound | undefined> {
+    const [round] = await db
+      .select()
+      .from(tournamentRounds)
+      .where(and(eq(tournamentRounds.id, id), eq(tournamentRounds.tournamentId, tournamentId)));
+    return round;
+  }
+
+  async createRound(roundData: InsertTournamentRound): Promise<TournamentRound> {
+    const [round] = await db.insert(tournamentRounds).values(roundData).returning();
+    return round;
+  }
+
+  async updateRound(id: string, tournamentId: string, roundData: Partial<InsertTournamentRound>): Promise<TournamentRound> {
+    const [round] = await db
+      .update(tournamentRounds)
+      .set(roundData)
+      .where(and(eq(tournamentRounds.id, id), eq(tournamentRounds.tournamentId, tournamentId)))
+      .returning();
+    return round;
+  }
+
+  async deleteRound(id: string, tournamentId: string): Promise<void> {
+    // Delete associated matches first
+    await db.delete(matches).where(eq(matches.roundId, id));
+    // Delete round
+    await db.delete(tournamentRounds).where(and(eq(tournamentRounds.id, id), eq(tournamentRounds.tournamentId, tournamentId)));
+  }
+
   // Match operations
   async getMatchesByTenant(tenantId: string): Promise<Match[]> {
     return db.select().from(matches).where(eq(matches.tenantId, tenantId)).orderBy(desc(matches.date));
+  }
+
+  async getMatchesByTournament(tournamentId: string): Promise<Match[]> {
+    return db.select().from(matches).where(eq(matches.tournamentId, tournamentId)).orderBy(matches.matchNumber);
+  }
+
+  async getMatchesByRound(roundId: string): Promise<Match[]> {
+    return db.select().from(matches).where(eq(matches.roundId, roundId)).orderBy(matches.matchNumber);
   }
 
   async getMatch(id: string, tenantId: string): Promise<Match | undefined> {
