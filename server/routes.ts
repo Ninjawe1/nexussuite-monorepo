@@ -58,6 +58,39 @@ async function requireSuperAdmin(req: any, res: any, next: any) {
   }
 }
 
+// Middleware to check if tenant is suspended
+async function checkTenantSuspension(req: any, res: any, next: any) {
+  try {
+    // Skip check for super admins
+    const superAdmin = await isSuperAdmin(req);
+    if (superAdmin) {
+      return next();
+    }
+
+    const userId = req.user.claims.sub;
+    const user = await storage.getUser(userId);
+    
+    if (!user || !user.tenantId) {
+      return next();
+    }
+
+    const tenant = await storage.getTenant(user.tenantId);
+    
+    if (tenant && tenant.subscriptionStatus === "suspended") {
+      return res.status(403).json({
+        message: "Your account has been suspended",
+        reason: tenant.suspensionReason || "Please contact support for more information",
+        suspendedAt: tenant.suspendedAt,
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Error checking tenant suspension:", error);
+    next();
+  }
+}
+
 // Helper to create audit log
 async function createAuditLog(
   tenantId: string,
@@ -248,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  app.post("/api/auth/change-password", isAuthenticated, async (req: any, res) => {
+  app.post("/api/auth/change-password", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { currentPassword, newPassword } = req.body;
@@ -285,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/auth/user", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -297,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tenant routes
-  app.get("/api/tenant", isAuthenticated, async (req: any, res) => {
+  app.get("/api/tenant", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const tenant = await storage.getTenant(tenantId);
@@ -308,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tenant", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/tenant", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -338,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Staff routes
-  app.get("/api/staff", isAuthenticated, async (req: any, res) => {
+  app.get("/api/staff", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const staffList = await storage.getStaffByTenant(tenantId);
@@ -349,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/staff", isAuthenticated, async (req: any, res) => {
+  app.post("/api/staff", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -404,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/staff/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/staff/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -437,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/staff/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/staff/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -470,7 +503,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payroll routes
-  app.get("/api/payroll", isAuthenticated, async (req: any, res) => {
+  app.get("/api/payroll", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const payrollList = await storage.getPayrollByTenant(tenantId);
@@ -481,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payroll", isAuthenticated, async (req: any, res) => {
+  app.post("/api/payroll", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -509,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/payroll/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/payroll/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -542,7 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/payroll/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/payroll/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -577,7 +610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Tournament Routes ====================
   
   // Get all tournaments for tenant
-  app.get("/api/tournaments", isAuthenticated, async (req: any, res) => {
+  app.get("/api/tournaments", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const tournamentList = await storage.getTournamentsByTenant(tenantId);
@@ -589,7 +622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single tournament
-  app.get("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/tournaments/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const tournament = await storage.getTournament(req.params.id, tenantId);
@@ -604,7 +637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create tournament
-  app.post("/api/tournaments", isAuthenticated, async (req: any, res) => {
+  app.post("/api/tournaments", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -633,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update tournament
-  app.patch("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/tournaments/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -667,7 +700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete tournament
-  app.delete("/api/tournaments/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/tournaments/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -702,7 +735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Tournament Round Routes ====================
   
   // Get rounds for a tournament
-  app.get("/api/tournaments/:tournamentId/rounds", isAuthenticated, async (req: any, res) => {
+  app.get("/api/tournaments/:tournamentId/rounds", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const rounds = await storage.getRoundsByTournament(req.params.tournamentId);
       res.json(rounds);
@@ -713,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create round
-  app.post("/api/tournaments/:tournamentId/rounds", isAuthenticated, async (req: any, res) => {
+  app.post("/api/tournaments/:tournamentId/rounds", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -745,7 +778,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update round
-  app.patch("/api/rounds/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/rounds/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -784,7 +817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete round
-  app.delete("/api/rounds/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/rounds/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -824,7 +857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Match Routes ====================
   
   // Match routes
-  app.get("/api/matches", isAuthenticated, async (req: any, res) => {
+  app.get("/api/matches", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const matchList = await storage.getMatchesByTenant(tenantId);
@@ -835,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/matches", isAuthenticated, async (req: any, res) => {
+  app.post("/api/matches", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -863,7 +896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/matches/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/matches/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -896,7 +929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/matches/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/matches/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -929,7 +962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.get("/api/campaigns", isAuthenticated, async (req: any, res) => {
+  app.get("/api/campaigns", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const campaignList = await storage.getCampaignsByTenant(tenantId);
@@ -940,7 +973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/campaigns", isAuthenticated, async (req: any, res) => {
+  app.post("/api/campaigns", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -968,7 +1001,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/campaigns/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1001,7 +1034,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/campaigns/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1034,7 +1067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contract routes
-  app.get("/api/contracts", isAuthenticated, async (req: any, res) => {
+  app.get("/api/contracts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const contractList = await storage.getContractsByTenant(tenantId);
@@ -1045,7 +1078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/contracts", isAuthenticated, async (req: any, res) => {
+  app.post("/api/contracts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1073,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/contracts/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/contracts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1106,7 +1139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/contracts/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/contracts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1139,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Audit log routes
-  app.get("/api/audit-logs", isAuthenticated, async (req: any, res) => {
+  app.get("/api/audit-logs", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -1191,6 +1224,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting club:", error);
       res.status(500).json({ message: "Failed to delete club" });
+    }
+  });
+
+  app.post("/api/admin/clubs/:id/suspend", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const { reason } = req.body;
+      const tenantId = req.params.id;
+      const userId = req.user.claims.sub;
+      
+      const tenant = await storage.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const updatedTenant = await storage.updateTenantAdmin(tenantId, {
+        subscriptionStatus: "suspended",
+        suspendedAt: new Date(),
+        suspensionReason: reason || "Suspended by administrator",
+        suspendedBy: userId,
+      });
+
+      // Create audit log
+      const user = await storage.getUser(userId);
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Super Admin',
+        `Suspended tenant: ${reason || 'No reason provided'}`,
+        "tenant",
+        tenantId,
+        { subscriptionStatus: tenant.subscriptionStatus },
+        { subscriptionStatus: "suspended", suspensionReason: reason },
+        "update"
+      );
+
+      res.json(updatedTenant);
+    } catch (error) {
+      console.error("Error suspending tenant:", error);
+      res.status(500).json({ message: "Failed to suspend tenant" });
+    }
+  });
+
+  app.post("/api/admin/clubs/:id/reactivate", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const tenantId = req.params.id;
+      const userId = req.user.claims.sub;
+      
+      const tenant = await storage.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ message: "Tenant not found" });
+      }
+
+      const updatedTenant = await storage.updateTenantAdmin(tenantId, {
+        subscriptionStatus: "active",
+        suspendedAt: null,
+        suspensionReason: null,
+        suspendedBy: null,
+      });
+
+      // Create audit log
+      const user = await storage.getUser(userId);
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Super Admin',
+        "Reactivated suspended tenant",
+        "tenant",
+        tenantId,
+        { subscriptionStatus: tenant.subscriptionStatus },
+        { subscriptionStatus: "active" },
+        "update"
+      );
+
+      res.json(updatedTenant);
+    } catch (error) {
+      console.error("Error reactivating tenant:", error);
+      res.status(500).json({ message: "Failed to reactivate tenant" });
     }
   });
 
@@ -1247,7 +1357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Invite routes
-  app.get("/api/invites", isAuthenticated, async (req: any, res) => {
+  app.get("/api/invites", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const invitesList = await storage.getInvitesByTenant(tenantId);
@@ -1258,7 +1368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/invites", isAuthenticated, async (req: any, res) => {
+  app.post("/api/invites", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1308,7 +1418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/invites/accept/:token", isAuthenticated, async (req: any, res) => {
+  app.post("/api/invites/accept/:token", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const userEmail = req.user.claims.email;
@@ -1363,7 +1473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/invites/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/invites/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1401,7 +1511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Social Media Routes ====================
   
   // Get all connected social accounts
-  app.get("/api/social/accounts", isAuthenticated, async (req: any, res) => {
+  app.get("/api/social/accounts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const accounts = await storage.getSocialAccountsByTenant(tenantId);
@@ -1413,7 +1523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Connect a new social account
-  app.post("/api/social/accounts", isAuthenticated, async (req: any, res) => {
+  app.post("/api/social/accounts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1446,7 +1556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update social account
-  app.patch("/api/social/accounts/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1479,7 +1589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete social account
-  app.delete("/api/social/accounts/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1512,7 +1622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get social media analytics summary
-  app.get("/api/social/analytics", isAuthenticated, async (req: any, res) => {
+  app.get("/api/social/analytics", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const latestMetrics = await storage.getLatestMetricsByTenant(tenantId);
@@ -1545,7 +1655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual sync endpoint - fetch latest data from social platforms
-  app.post("/api/social/sync/:accountId", isAuthenticated, async (req: any, res) => {
+  app.post("/api/social/sync/:accountId", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const account = await storage.getSocialAccount(req.params.accountId, tenantId);
@@ -1586,7 +1696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Finance Routes ====================
   
   // Get all transactions for tenant
-  app.get("/api/finance", isAuthenticated, async (req: any, res) => {
+  app.get("/api/finance", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const transactionList = await storage.getTransactionsByTenant(tenantId);
@@ -1598,7 +1708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new transaction
-  app.post("/api/finance", isAuthenticated, async (req: any, res) => {
+  app.post("/api/finance", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1631,7 +1741,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update a transaction
-  app.patch("/api/finance/:id", isAuthenticated, async (req: any, res) => {
+  app.patch("/api/finance/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1665,7 +1775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete a transaction
-  app.delete("/api/finance/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/finance/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1698,7 +1808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get monthly aggregated transaction data
-  app.get("/api/finance/monthly", isAuthenticated, async (req: any, res) => {
+  app.get("/api/finance/monthly", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const transactions = await storage.getTransactionsByTenant(tenantId);
@@ -1740,7 +1850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export transactions as CSV
-  app.get("/api/finance/export", isAuthenticated, async (req: any, res) => {
+  app.get("/api/finance/export", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const transactions = await storage.getTransactionsByTenant(tenantId);
@@ -1776,7 +1886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ==================== Stripe Subscription Routes ====================
   
   // Create Stripe checkout session for subscription
-  app.post("/api/subscriptions/create-checkout", isAuthenticated, async (req: any, res) => {
+  app.post("/api/subscriptions/create-checkout", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const tenant = await storage.getTenant(tenantId);
@@ -1863,7 +1973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Sync subscription from Stripe session (for environments where webhooks don't work)
-  app.post("/api/subscriptions/sync-session", isAuthenticated, async (req: any, res) => {
+  app.post("/api/subscriptions/sync-session", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const { sessionId } = req.body;
@@ -1928,7 +2038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create Stripe billing portal session
-  app.post("/api/subscriptions/create-portal", isAuthenticated, async (req: any, res) => {
+  app.post("/api/subscriptions/create-portal", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const tenant = await storage.getTenant(tenantId);
