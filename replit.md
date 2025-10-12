@@ -73,6 +73,49 @@ The platform now uses OAuth 2.0 authorization code flow for connecting social me
 5. User redirected to /marcom with success/error message
 6. Data automatically refreshes to show connected account
 
+**Analytics Fetcher System (October 2025):**
+
+The platform now includes production-ready analytics fetchers that retrieve real metrics from all supported platforms:
+
+**Implementation:**
+- `server/analytics-fetcher.ts` - Platform-specific analytics fetchers
+- Each platform fetcher makes actual API calls to retrieve metrics
+- Automatic sync triggered after OAuth connection
+- Manual sync button available in UI for all connected accounts
+
+**Platform-Specific Metrics:**
+- **Twitter/X**: Followers, following, posts, engagement (listed_count proxy), calculated engagement rate
+- **Instagram**: Followers, posts, reach/impressions, profile views, total_interactions (with Business Account requirement), 3% fallback estimate when insights unavailable
+- **YouTube**: Subscribers, videos, total views, calculated avg views per video, engagement rate
+- **TikTok**: Followers, videos, total likes, calculated engagement from likes
+- **Twitch**: Followers, view count, current stream viewers (when live), 5% engagement estimate when stream analytics unavailable
+- **Facebook**: Page followers, insights (reach, impressions, engagement), 2% estimate when insights permissions missing
+
+**Error Handling:**
+- All API calls capture HTTP status and response body on error
+- Comprehensive error logging for debugging (status + body)
+- Graceful fallbacks with documented estimates when permissions limited
+- Required metrics (followers) throw errors to prevent silent failures
+- Optional metrics (insights, stream data) logged but don't break flow
+- Network errors properly caught and wrapped with full context
+
+**Engagement Rate Calculations:**
+- Twitter: (listed_count / followers) × 100
+- Instagram: (total_interactions / followers) × 100
+- YouTube: (avg views per video / subscribers) × 100
+- TikTok: (total likes / followers) × 100
+- Twitch: (engagement / followers) × 100
+- Facebook: (engagement / followers) × 100
+
+**Data Flow:**
+1. OAuth connection established → Access token saved
+2. Automatic analytics sync triggered via callback
+3. Platform API called with access token
+4. Metrics extracted and calculated
+5. Data stored in socialMetrics table with timestamp
+6. Frontend displays aggregated metrics in dashboard
+7. Manual re-sync available for all connected accounts
+
 ### Finance & Transaction Management System
 
 This system provides comprehensive tracking of income and expenses with categorization, real-time profit/loss reporting, and summary dashboards. Transactions are stored in a `transactions` table with details like type, category, amount, date, description, and payment method. CRUD APIs are available for managing transactions, with a frontend UI offering filtering, sorting, and real-time financial summaries.
