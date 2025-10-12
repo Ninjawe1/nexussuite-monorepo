@@ -8,11 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 import type { Tenant, User } from "@shared/schema";
 
 const clubSchema = z.object({
@@ -22,10 +24,15 @@ const clubSchema = z.object({
   subscriptionStatus: z.enum(["active", "suspended", "canceled", "trial"]),
 });
 
+const suspendSchema = z.object({
+  reason: z.string().min(1, "Please provide a reason for suspension"),
+});
+
 export default function AdminPage() {
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingClub, setEditingClub] = useState<Tenant | null>(null);
+  const [suspendingClub, setSuspendingClub] = useState<Tenant | null>(null);
 
   const { data: clubs = [], isLoading: loadingClubs } = useQuery<Tenant[]>({
     queryKey: ["/api/admin/clubs"],
@@ -76,6 +83,33 @@ export default function AdminPage() {
     },
   });
 
+  const suspendClubMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      return await apiRequest(`/api/admin/clubs/${id}/suspend`, "POST", { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/clubs"] });
+      setSuspendingClub(null);
+      toast({ title: "Success", description: "Club suspended successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to suspend club", variant: "destructive" });
+    },
+  });
+
+  const reactivateClubMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest(`/api/admin/clubs/${id}/reactivate`, "POST", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/clubs"] });
+      toast({ title: "Success", description: "Club reactivated successfully" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to reactivate club", variant: "destructive" });
+    },
+  });
+
   const form = useForm<z.infer<typeof clubSchema>>({
     resolver: zodResolver(clubSchema),
     defaultValues: {
@@ -83,6 +117,13 @@ export default function AdminPage() {
       clubTag: "",
       subscriptionPlan: "starter",
       subscriptionStatus: "trial",
+    },
+  });
+
+  const suspendForm = useForm<z.infer<typeof suspendSchema>>({
+    resolver: zodResolver(suspendSchema),
+    defaultValues: {
+      reason: "",
     },
   });
 
@@ -104,11 +145,21 @@ export default function AdminPage() {
     });
   };
 
-  const suspendClub = (club: Tenant) => {
-    updateClubMutation.mutate({
-      id: club.id,
-      data: { subscriptionStatus: club.subscriptionStatus === "suspended" ? "active" : "suspended" },
-    });
+  const onSuspendSubmit = (data: z.infer<typeof suspendSchema>) => {
+    if (suspendingClub) {
+      suspendClubMutation.mutate({ id: suspendingClub.id, reason: data.reason });
+    }
+  };
+
+  const handleSuspendClick = (club: Tenant) => {
+    if (club.subscriptionStatus === "suspended") {
+      // Reactivate without dialog
+      reactivateClubMutation.mutate(club.id);
+    } else {
+      // Show suspension dialog
+      setSuspendingClub(club);
+      suspendForm.reset({ reason: "" });
+    }
   };
 
   const downloadDatabase = async () => {
@@ -333,6 +384,16 @@ export default function AdminPage() {
                         {users.filter((u) => u.tenantId === club.id).length} users
                       </span>
                     </div>
+                    {club.subscriptionStatus === "suspended" && club.suspensionReason && (
+                      <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-sm">
+                        <p className="text-destructive font-medium">Suspended: {club.suspensionReason}</p>
+                        {club.suspendedAt && (
+                          <p className="text-muted-foreground text-xs mt-1">
+                            Since {format(new Date(club.suspendedAt), "PPP")}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -346,11 +407,20 @@ export default function AdminPage() {
                     <Button
                       variant={club.subscriptionStatus === "suspended" ? "default" : "outline"}
                       size="sm"
-                      onClick={() => suspendClub(club)}
+                      onClick={() => handleSuspendClick(club)}
                       data-testid={`button-suspend-club-${club.id}`}
                     >
-                      <Ban className="h-4 w-4 mr-1" />
-                      {club.subscriptionStatus === "suspended" ? "Activate" : "Suspend"}
+                      {club.subscriptionStatus === "suspended" ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Reactivate
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="h-4 w-4 mr-1" />
+                          Suspend
+                        </>
+                      )}
                     </Button>
                     <Button
                       variant="destructive"
@@ -371,6 +441,63 @@ export default function AdminPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Suspension Dialog */}
+      <Dialog open={!!suspendingClub} onOpenChange={(open) => {
+        if (!open) {
+          setSuspendingClub(null);
+          suspendForm.reset();
+        }
+      }}>
+        <DialogContent data-testid="dialog-suspend-club">
+          <DialogHeader>
+            <DialogTitle>Suspend Club</DialogTitle>
+            <DialogDescription>
+              Provide a reason for suspending {suspendingClub?.name}. The club will lose access immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...suspendForm}>
+            <form onSubmit={suspendForm.handleSubmit(onSuspendSubmit)} className="space-y-4">
+              <FormField
+                control={suspendForm.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Suspension Reason</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="e.g., Payment failure, Terms violation, etc."
+                        rows={4}
+                        data-testid="input-suspension-reason"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSuspendingClub(null)}
+                  data-testid="button-cancel-suspend"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={suspendClubMutation.isPending}
+                  data-testid="button-confirm-suspend"
+                >
+                  {suspendClubMutation.isPending ? "Suspending..." : "Suspend Club"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
