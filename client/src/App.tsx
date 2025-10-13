@@ -14,6 +14,7 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
+import Team from "@/pages/team";
 import Payroll from "@/pages/payroll";
 import Analytics from "@/pages/analytics";
 import Matches from "@/pages/matches";
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/staff" component={Staff} />
+      <Route path="/team" component={Team} />
       <Route path="/payroll" component={Payroll} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/matches" component={Matches} />

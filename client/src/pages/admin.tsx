@@ -442,6 +442,9 @@ export default function AdminPage() {
         </CardContent>
       </Card>
 
+      {/* Users Management Section */}
+      <UsersManagement users={users} loadingUsers={loadingUsers} />
+
       {/* Suspension Dialog */}
       <Dialog open={!!suspendingClub} onOpenChange={(open) => {
         if (!open) {
@@ -499,5 +502,213 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// Users Management Component
+function UsersManagement({ users, loadingUsers }: { users: User[]; loadingUsers: boolean }) {
+  const { toast } = useToast();
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  const userEditSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal("")),
+  });
+
+  const userForm = useForm<z.infer<typeof userEditSchema>>({
+    resolver: zodResolver(userEditSchema),
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: z.infer<typeof userEditSchema> }) => {
+      // Remove empty password from request
+      const payload = { ...data };
+      if (!payload.password) {
+        delete payload.password;
+      }
+      return await apiRequest(`/api/admin/users/${id}`, "PATCH", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setEditingUser(null);
+      toast({ title: "Success", description: "User updated successfully" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to update user", 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    userForm.reset({
+      email: user.email,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      password: "",
+    });
+  };
+
+  const onUserSubmit = (data: z.infer<typeof userEditSchema>) => {
+    if (editingUser) {
+      updateUserMutation.mutate({ id: editingUser.id, data });
+    }
+  };
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Users</CardTitle>
+          <CardDescription>Manage user accounts across all clubs</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingUsers ? (
+            <p className="text-muted-foreground">Loading users...</p>
+          ) : users.length === 0 ? (
+            <p className="text-muted-foreground">No users yet</p>
+          ) : (
+            <div className="space-y-4">
+              {users.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                  data-testid={`user-item-${user.id}`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">
+                        {user.firstName} {user.lastName}
+                      </h3>
+                      {user.isSuperAdmin && (
+                        <Badge variant="default">Super Admin</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-muted-foreground">{user.email}</span>
+                      <Badge variant="outline">{user.role}</Badge>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditUser(user)}
+                    data-testid={`button-edit-user-${user.id}`}
+                  >
+                    Edit Credentials
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={(open) => {
+        if (!open) {
+          setEditingUser(null);
+          userForm.reset();
+        }
+      }}>
+        <DialogContent data-testid="dialog-edit-user">
+          <DialogHeader>
+            <DialogTitle>Edit User Credentials</DialogTitle>
+            <DialogDescription>
+              Update user's email, name, and password for support purposes
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...userForm}>
+            <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
+              <FormField
+                control={userForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} type="email" data-testid="input-user-email" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={userForm.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-user-firstname" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={userForm.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} data-testid="input-user-lastname" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={userForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="password" 
+                        placeholder="Leave empty to keep current password"
+                        data-testid="input-user-password" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingUser(null)}
+                  data-testid="button-cancel-edit-user"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateUserMutation.isPending}
+                  data-testid="button-submit-edit-user"
+                >
+                  {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

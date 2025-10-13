@@ -1,84 +1,107 @@
 import { useEffect, useState } from "react";
-import { useParams, useLocation } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRoute, useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/useAuth";
-import { Building2, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import type { Invite, Tenant } from "@shared/schema";
 
 export default function InviteAccept() {
-  const { token } = useParams();
-  const [, navigate] = useLocation();
-  const { isAuthenticated, user } = useAuth();
-  const [invite, setInvite] = useState<Invite | null>(null);
-  const [tenant, setTenant] = useState<Tenant | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [accepting, setAccepting] = useState(false);
+  const [, params] = useRoute("/invite/:token");
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  useEffect(() => {
-    if (!token) return;
+  const token = params?.token;
 
-    // Verify invite (no auth required)
-    fetch(`/api/invites/verify/${token}`)
-      .then(res => res.json())
-      .then(async data => {
-        if (data.message) {
-          setError(data.message);
-        } else {
-          setInvite(data);
-          // Fetch tenant info
-          const tenantRes = await fetch(`/api/admin/clubs`);
-          if (tenantRes.ok) {
-            const clubs = await tenantRes.json();
-            const club = clubs.find((c: Tenant) => c.id === data.tenantId);
-            if (club) setTenant(club);
-          }
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load invite");
-        setLoading(false);
-      });
-  }, [token]);
-
-  // Auto-accept if user is logged in and email matches
-  useEffect(() => {
-    if (isAuthenticated && user && invite && !error && !accepting) {
-      if (user.email?.toLowerCase() === invite.email.toLowerCase()) {
-        handleAccept();
-      } else if (user.email) {
-        setError(`This invite was sent to ${invite.email}, but you're logged in as ${user.email}`);
+  // Fetch invite details
+  const { data: invite, isLoading, error } = useQuery({
+    queryKey: ["/api/invites", token],
+    queryFn: async () => {
+      const res = await fetch(`/api/invites/${token}`);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to fetch invite");
       }
-    }
-  }, [isAuthenticated, user, invite, error]);
+      return res.json();
+    },
+    enabled: !!token,
+  });
 
-  const handleAccept = async () => {
-    if (!token) return;
-    setAccepting(true);
-    try {
-      const result = await apiRequest(`/api/invites/accept/${token}`, "POST", {});
-      // Clear pending token from sessionStorage
-      sessionStorage.removeItem("pendingInviteToken");
-      window.location.href = "/dashboard";
-    } catch (err: any) {
-      setError(err.message || "Failed to accept invite");
-      setAccepting(false);
+  // Accept invite mutation
+  const acceptMutation = useMutation({
+    mutationFn: async (data: { firstName: string; lastName: string; password: string }) => {
+      const res = await fetch(`/api/invites/${token}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create account");
+      }
+      
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account created successfully!",
+        description: "You can now log in with your credentials.",
+      });
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        setLocation("/login");
+      }, 2000);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create account",
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Passwords do not match",
+      });
+      return;
     }
+
+    if (formData.password.length < 8) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Password must be at least 8 characters",
+      });
+      return;
+    }
+
+    acceptMutation.mutate({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      password: formData.password,
+    });
   };
 
-  const handleLogin = () => {
-    // Store token in sessionStorage so we can auto-accept after login
-    sessionStorage.setItem("pendingInviteToken", token || "");
-    window.location.href = "/login";
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
           <p className="mt-4 text-muted-foreground">Loading invite...</p>
@@ -87,24 +110,26 @@ export default function InviteAccept() {
     );
   }
 
-  if (error) {
+  if (error || !invite) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="flex items-center justify-center min-h-screen bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                <XCircle className="w-6 h-6 text-destructive" />
-              </div>
-              <div>
-                <CardTitle>Invalid Invite</CardTitle>
-                <CardDescription>{error}</CardDescription>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="w-6 h-6 text-destructive" />
+              <CardTitle>Invalid Invite</CardTitle>
             </div>
+            <CardDescription>
+              {error?.message || "This invite link is invalid or has expired."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/")} className="w-full" data-testid="button-go-home">
-              Go to Home
+            <Button
+              onClick={() => setLocation("/login")}
+              className="w-full"
+              data-testid="button-goto-login"
+            >
+              Go to Login
             </Button>
           </CardContent>
         </Card>
@@ -112,76 +137,88 @@ export default function InviteAccept() {
     );
   }
 
-  if (!invite) {
-    return null;
-  }
-
-  if (accepting) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-4 text-muted-foreground">Accepting invite...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <CardTitle>You're Invited!</CardTitle>
-              <CardDescription>Join {tenant?.name || "a club"} on Nexus Suite</CardDescription>
-            </div>
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle2 className="w-6 h-6 text-primary" />
+            <CardTitle>Join {invite.tenantName}</CardTitle>
           </div>
+          <CardDescription>
+            {invite.inviterName} has invited you to join as a {invite.role}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
-              <span className="text-sm text-muted-foreground">Email</span>
-              <span className="font-medium">{invite.email}</span>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={invite.email}
+                disabled
+                data-testid="input-email"
+              />
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
-              <span className="text-sm text-muted-foreground">Role</span>
-              <Badge>{invite.role}</Badge>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
-              <span className="text-sm text-muted-foreground">Invited by</span>
-              <span className="font-medium">{invite.inviterName}</span>
-            </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Expires: {new Date(invite.expiresAt).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
 
-          {!isAuthenticated ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground text-center">
-                Login with the email address {invite.email} to accept this invitation
-              </p>
-              <Button onClick={handleLogin} className="w-full" data-testid="button-login-to-accept">
-                Login to Accept Invite
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                required
+                data-testid="input-firstname"
+              />
             </div>
-          ) : user?.email?.toLowerCase() === invite.email.toLowerCase() ? (
-            <div className="flex items-center justify-center gap-2 text-green-600">
-              <CheckCircle className="w-5 h-5" />
-              <span>Accepting invite...</span>
+
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                required
+                data-testid="input-lastname"
+              />
             </div>
-          ) : (
-            <p className="text-sm text-destructive text-center">
-              Please login with {invite.email} to accept this invite
-            </p>
-          )}
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={8}
+                data-testid="input-password"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                required
+                minLength={8}
+                data-testid="input-confirm-password"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={acceptMutation.isPending}
+              data-testid="button-accept-invite"
+            >
+              {acceptMutation.isPending ? "Creating Account..." : "Accept Invite & Create Account"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

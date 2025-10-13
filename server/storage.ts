@@ -49,6 +49,7 @@ export interface IStorage {
   // User operations - Required for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUsersByTenant(tenantId: string): Promise<User[]>;
   createUser(userData: UpsertUser): Promise<User>;
   updateUser(id: string, userData: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser & { tenantId?: string }): Promise<User>;
@@ -125,6 +126,7 @@ export interface IStorage {
 
   // Invite operations
   getInvitesByTenant(tenantId: string): Promise<Invite[]>;
+  getInvite(id: string): Promise<Invite | undefined>;
   getInviteByToken(token: string): Promise<Invite | undefined>;
   createInvite(invite: InsertInvite): Promise<Invite>;
   updateInviteStatus(token: string, status: "pending" | "accepted" | "expired"): Promise<Invite>;
@@ -160,6 +162,10 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
+  }
+
+  async getUsersByTenant(tenantId: string): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.tenantId, tenantId));
   }
 
   async createUser(userData: UpsertUser): Promise<User> {
@@ -548,6 +554,11 @@ export class DatabaseStorage implements IStorage {
 
   async getInviteByToken(token: string): Promise<Invite | undefined> {
     const [invite] = await db.select().from(invites).where(eq(invites.token, token));
+    return invite;
+  }
+
+  async getInvite(id: string): Promise<Invite | undefined> {
+    const [invite] = await db.select().from(invites).where(eq(invites.id, id));
     return invite;
   }
 

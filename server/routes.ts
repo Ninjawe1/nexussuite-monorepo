@@ -1395,84 +1395,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/invites/verify/:token", async (req: any, res) => {
-    try {
-      const invite = await storage.getInviteByToken(req.params.token);
-      
-      if (!invite) {
-        return res.status(404).json({ message: "Invite not found" });
-      }
-      
-      if (invite.status !== "pending") {
-        return res.status(400).json({ message: "Invite already used or expired" });
-      }
-      
-      if (new Date() > new Date(invite.expiresAt)) {
-        await storage.updateInviteStatus(req.params.token, "expired");
-        return res.status(400).json({ message: "Invite has expired" });
-      }
-      
-      res.json(invite);
-    } catch (error) {
-      console.error("Error verifying invite:", error);
-      res.status(500).json({ message: "Failed to verify invite" });
-    }
-  });
-
-  app.post("/api/invites/accept/:token", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const userEmail = req.user.claims.email;
-      const invite = await storage.getInviteByToken(req.params.token);
-      
-      if (!invite) {
-        return res.status(404).json({ message: "Invite not found" });
-      }
-      
-      // SECURITY: Verify the logged-in user's email matches the invite
-      if (invite.email.toLowerCase() !== userEmail?.toLowerCase()) {
-        return res.status(403).json({ message: "This invite was sent to a different email address" });
-      }
-      
-      if (invite.status !== "pending") {
-        return res.status(400).json({ message: "Invite already used or expired" });
-      }
-      
-      if (new Date() > new Date(invite.expiresAt)) {
-        await storage.updateInviteStatus(req.params.token, "expired");
-        return res.status(400).json({ message: "Invite has expired" });
-      }
-      
-      // Add user to tenant and create staff entry
-      await storage.updateUserAdmin(userId, { tenantId: invite.tenantId });
-      await storage.createStaff({
-        tenantId: invite.tenantId,
-        name: req.body.name || userEmail,
-        email: userEmail,
-        role: invite.role,
-        permissions: invite.permissions,
-      });
-      
-      await storage.updateInviteStatus(req.params.token, "accepted");
-      
-      await createAuditLog(
-        invite.tenantId,
-        userId,
-        userEmail || 'Unknown',
-        `Accepted invite and joined club`,
-        "invite",
-        invite.id,
-        undefined,
-        undefined,
-        "create"
-      );
-      
-      res.json({ success: true, tenantId: invite.tenantId });
-    } catch (error) {
-      console.error("Error accepting invite:", error);
-      res.status(500).json({ message: "Failed to accept invite" });
-    }
-  });
 
   app.delete("/api/invites/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
@@ -2391,6 +2313,249 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // ==================== Team Management Routes ====================
+  
+  // Get all users in the club (for club owners)
+  app.get("/api/team/users", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const users = await storage.getUsersByTenant(tenantId);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching team users:", error);
+      res.status(500).json({ message: "Failed to fetch team users" });
+    }
+  });
+
+  // Create a new user directly (for club owners)
+  app.post("/api/team/users", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const { email, firstName, lastName, role, password } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password || "Welcome123!", 10);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        tenantId,
+        role: role || "staff",
+        isTemporaryPassword: !password, // If no password provided, mark as temporary
+      });
+      
+      res.json(newUser);
+    } catch (error) {
+      console.error("Error creating team user:", error);
+      res.status(500).json({ message: "Failed to create team user" });
+    }
+  });
+
+  // Send an invite to join the club
+  app.post("/api/team/invites", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      const { email, role, permissions } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Generate unique token
+      const token = randomBytes(32).toString("hex");
+      
+      // Create invite (expires in 7 days)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      const invite = await storage.createInvite({
+        tenantId,
+        email,
+        role: role || "staff",
+        permissions: permissions || [],
+        token,
+        invitedBy: userId,
+        inviterName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || "Admin",
+        status: "pending",
+        expiresAt,
+      });
+      
+      res.json(invite);
+    } catch (error) {
+      console.error("Error creating invite:", error);
+      res.status(500).json({ message: "Failed to create invite" });
+    }
+  });
+
+  // Get all pending invites for the club
+  app.get("/api/team/invites", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const invites = await storage.getInvitesByTenant(tenantId);
+      res.json(invites);
+    } catch (error) {
+      console.error("Error fetching invites:", error);
+      res.status(500).json({ message: "Failed to fetch invites" });
+    }
+  });
+
+  // Delete an invite
+  app.delete("/api/team/invites/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const { id } = req.params;
+      
+      // Verify invite belongs to this tenant
+      const invite = await storage.getInvite(id);
+      if (!invite || invite.tenantId !== tenantId) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      await storage.deleteInvite(id, tenantId);
+      res.json({ message: "Invite deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting invite:", error);
+      res.status(500).json({ message: "Failed to delete invite" });
+    }
+  });
+
+  // Get invite details by token (public - no auth required)
+  app.get("/api/invites/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const invite = await storage.getInviteByToken(token);
+      
+      if (!invite) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      // Check if expired
+      if (new Date() > new Date(invite.expiresAt)) {
+        return res.status(400).json({ message: "Invite has expired" });
+      }
+      
+      // Check if already accepted
+      if (invite.status === "accepted") {
+        return res.status(400).json({ message: "Invite has already been accepted" });
+      }
+      
+      // Get tenant info
+      const tenant = await storage.getTenant(invite.tenantId);
+      
+      res.json({
+        ...invite,
+        tenantName: tenant?.name,
+      });
+    } catch (error) {
+      console.error("Error fetching invite:", error);
+      res.status(500).json({ message: "Failed to fetch invite" });
+    }
+  });
+
+  // Accept invite and create account (public - no auth required)
+  app.post("/api/invites/:token/accept", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const { firstName, lastName, password } = req.body;
+      
+      const invite = await storage.getInviteByToken(token);
+      
+      if (!invite) {
+        return res.status(404).json({ message: "Invite not found" });
+      }
+      
+      // Check if expired
+      if (new Date() > new Date(invite.expiresAt)) {
+        return res.status(400).json({ message: "Invite has expired" });
+      }
+      
+      // Check if already accepted
+      if (invite.status === "accepted") {
+        return res.status(400).json({ message: "Invite has already been accepted" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(invite.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Create user
+      const newUser = await storage.createUser({
+        email: invite.email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        tenantId: invite.tenantId,
+        role: invite.role,
+        isTemporaryPassword: false,
+      });
+      
+      // Mark invite as accepted
+      await storage.updateInviteStatus(token, "accepted");
+      
+      res.json({ message: "Account created successfully", user: newUser });
+    } catch (error) {
+      console.error("Error accepting invite:", error);
+      res.status(500).json({ message: "Failed to accept invite" });
+    }
+  });
+
+  // ==================== Admin User Management Routes ====================
+  
+  // Get all users across all clubs (Super Admin only)
+  app.get("/api/admin/users", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Edit any user's credentials (Super Admin only)
+  app.patch("/api/admin/users/:id", isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { email, firstName, lastName, password } = req.body;
+      
+      const updates: any = {};
+      
+      if (email) updates.email = email;
+      if (firstName) updates.firstName = firstName;
+      if (lastName) updates.lastName = lastName;
+      
+      if (password) {
+        updates.password = await bcrypt.hash(password, 10);
+        updates.isTemporaryPassword = false;
+        updates.lastPasswordChange = new Date();
+      }
+      
+      const updatedUser = await storage.updateUser(id, updates);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // Webhook endpoint for Stripe events
   app.post("/api/webhooks/stripe", async (req, res) => {
     const sig = req.headers['stripe-signature'];
