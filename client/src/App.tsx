@@ -15,6 +15,7 @@ import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
 import Team from "@/pages/team";
+import Players from "@/pages/players";
 import Payroll from "@/pages/payroll";
 import Analytics from "@/pages/analytics";
 import Matches from "@/pages/matches";
@@ -65,8 +66,9 @@ function Router() {
       <Route path="/" component={user?.isSuperAdmin ? Admin : Dashboard} />
       <Route path="/admin" component={Admin} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/staff" component={Staff} />
+      {/* removed Staff route */}
       <Route path="/team" component={Team} />
+      <Route path="/players" component={Players} />
       <Route path="/payroll" component={Payroll} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/matches" component={Matches} />

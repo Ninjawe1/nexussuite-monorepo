@@ -99,30 +99,45 @@ export const insertStaffSchema = createInsertSchema(staff).omit({
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type Staff = typeof staff.$inferSelect;
 
-// Payroll entries
-export const payroll = pgTable("payroll", {
+// Player Rosters
+export const rosters = pgTable("rosters", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull(),
-  staffId: varchar("staff_id"),
-  name: varchar("name").notNull(),
-  role: varchar("role").notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  type: varchar("type").notNull(), // monthly, weekly, one-time
-  status: varchar("status").notNull().default("pending"), // paid, pending
-  date: timestamp("date").notNull(),
+  playerId: varchar("player_id").notNull(),
+  game: varchar("game").notNull(),
+  role: varchar("role").notNull(), // e.g., Player, Coach, Sub
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertPayrollSchema = createInsertSchema(payroll).omit({
+export const insertRosterSchema = createInsertSchema(rosters).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-}).extend({
-  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
 });
-export type InsertPayroll = z.infer<typeof insertPayrollSchema>;
-export type Payroll = typeof payroll.$inferSelect;
+export type InsertRoster = z.infer<typeof insertRosterSchema>;
+export type Roster = typeof rosters.$inferSelect;
+
+// Wallets
+export const wallets = pgTable("wallets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  name: varchar("name").notNull(),
+  type: varchar("type").notNull().default("cash"), // cash, bank, card, paypal, crypto, other
+  currency: varchar("currency").notNull().default("usd"), // e.g., usd, eur
+  balance: decimal("balance", { precision: 12, scale: 2 }).notNull().default("0"),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWalletSchema = createInsertSchema(wallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+export type Wallet = typeof wallets.$inferSelect;
 
 // Tournaments (parent structure)
 export const tournaments = pgTable("tournaments", {
@@ -365,6 +380,7 @@ export const transactions = pgTable("transactions", {
   date: timestamp("date").notNull(),
   paymentMethod: varchar("payment_method"), // cash, bank_transfer, credit_card, paypal, etc
   reference: varchar("reference"), // invoice number, receipt number, etc
+  walletId: varchar("wallet_id"), // Optional: which wallet was used
   createdBy: varchar("created_by").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -379,3 +395,31 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
 });
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
+
+// Payroll schema
+export const payroll = pgTable("payroll", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").notNull(),
+  staffId: varchar("staff_id"),
+  name: varchar("name").notNull(),
+  role: varchar("role").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: varchar("type").notNull(), // monthly, weekly, one-time
+  status: varchar("status").notNull().default("pending"), // paid, pending
+  date: timestamp("date").notNull(),
+  walletId: varchar("wallet_id"), // Optional: which wallet was used
+  createdBy: varchar("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPayrollSchema = createInsertSchema(payroll).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+});
+export type InsertPayroll = z.infer<typeof insertPayrollSchema>;
+export type Payroll = typeof payroll.$inferSelect;
+// ... existing code ...

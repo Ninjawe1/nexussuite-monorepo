@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin } from "lucide-react";
 import { format } from "date-fns";
+import { formatDateSafe } from "@/lib/date";
 
 interface MatchCardProps {
   id: string;
@@ -61,7 +62,7 @@ export function MatchCard({ id, teamA, teamB, scoreA, scoreB, date, tournament, 
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
-            <span>{format(date, 'MMM dd, HH:mm')}</span>
+            <span>{formatDateSafe(date, 'MMM dd, HH:mm')}</span>
           </div>
           {venue && (
             <div className="flex items-center gap-1">

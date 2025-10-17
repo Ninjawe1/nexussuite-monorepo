@@ -41,6 +41,12 @@ import {
   tournamentRounds,
   type TournamentRound,
   type InsertTournamentRound,
+  rosters,
+  type Roster,
+  type InsertRoster,
+  wallets,            // <-- add
+  type Wallet,        // <-- add
+  type InsertWallet,  // <-- add
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -150,6 +156,13 @@ export interface IStorage {
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   updateTransaction(id: string, tenantId: string, transaction: Partial<InsertTransaction>): Promise<Transaction>;
   deleteTransaction(id: string, tenantId: string): Promise<void>;
+
+  // Wallet operations
+  getWalletsByTenant(tenantId: string): Promise<Wallet[]>;
+  getWallet(id: string, tenantId: string): Promise<Wallet | undefined>;
+  createWallet(wallet: InsertWallet): Promise<Wallet>;
+  updateWallet(id: string, tenantId: string, wallet: Partial<InsertWallet>): Promise<Wallet>;
+  deleteWallet(id: string, tenantId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -682,34 +695,71 @@ export class DatabaseStorage implements IStorage {
 
   // Finance operations
   async getTransactionsByTenant(tenantId: string): Promise<Transaction[]> {
-    return db.select().from(transactions)
+    const rows = await db
+      .select()
+      .from(transactions)
       .where(eq(transactions.tenantId, tenantId))
       .orderBy(desc(transactions.date));
+    return rows;
   }
 
   async getTransaction(id: string, tenantId: string): Promise<Transaction | undefined> {
-    const [transaction] = await db.select().from(transactions)
+    const [row] = await db
+      .select()
+      .from(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)));
-    return transaction;
+    return row;
   }
 
-  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    const [newTransaction] = await db.insert(transactions).values(transaction).returning();
-    return newTransaction;
+  async createTransaction(transactionData: InsertTransaction): Promise<Transaction> {
+    const [row] = await db.insert(transactions).values(transactionData).returning();
+    return row;
   }
 
   async updateTransaction(id: string, tenantId: string, transactionData: Partial<InsertTransaction>): Promise<Transaction> {
-    const [transaction] = await db
+    const [row] = await db
       .update(transactions)
       .set({ ...transactionData, updatedAt: new Date() })
       .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)))
       .returning();
-    return transaction;
+    return row;
   }
 
   async deleteTransaction(id: string, tenantId: string): Promise<void> {
     await db.delete(transactions).where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)));
   }
-}
 
-export const storage = new DatabaseStorage();
+  // Wallet operations (Postgres/Drizzle)
+  async getWalletsByTenant(tenantId: string): Promise<Wallet[]> {
+    const rows = await db.select().from(wallets).where(eq(wallets.tenantId, tenantId));
+    return rows;
+  }
+
+  async getWallet(id: string, tenantId: string): Promise<Wallet | undefined> {
+    const [row] = await db
+      .select()
+      .from(wallets)
+      .where(and(eq(wallets.id, id), eq(wallets.tenantId, tenantId)));
+    return row;
+  }
+
+  async createWallet(walletData: InsertWallet): Promise<Wallet> {
+    const [row] = await db.insert(wallets).values(walletData).returning();
+    return row;
+  }
+
+  async updateWallet(id: string, tenantId: string, walletData: Partial<InsertWallet>): Promise<Wallet> {
+    const [row] = await db
+      .update(wallets)
+      .set({ ...walletData, updatedAt: new Date() })
+      .where(and(eq(wallets.id, id), eq(wallets.tenantId, tenantId)))
+      .returning();
+    return row;
+  }
+
+  async deleteWallet(id: string, tenantId: string): Promise<void> {
+    await db.delete(wallets).where(and(eq(wallets.id, id), eq(wallets.tenantId, tenantId)));
+  }
+
+  // ... existing code ...
+}

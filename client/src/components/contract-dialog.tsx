@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { toDateSafe } from "@/lib/date";
 
 interface ContractDialogProps {
   open: boolean;
@@ -54,7 +55,10 @@ export function ContractDialog({ open, onOpenChange, contract }: ContractDialogP
       fileUrl: contract?.fileUrl || "",
       type: contract?.type || "Player",
       linkedPerson: contract?.linkedPerson || "",
-      expirationDate: contract?.expirationDate ? new Date(contract.expirationDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      expirationDate: (() => {
+        const d = toDateSafe(contract?.expirationDate) ?? new Date();
+        return d.toISOString().split('T')[0];
+      })(),
       status: contract?.status || "active",
     },
   });

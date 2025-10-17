@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { formatDateSafe } from "@/lib/date";
 
 interface TournamentDialogProps {
   open: boolean;
@@ -59,8 +60,8 @@ export function TournamentDialog({ open, onOpenChange, tournament }: TournamentD
           description: tournament.description || "",
           format: tournament.format,
           game: tournament.game || "",
-          startDate: tournament.startDate ? format(new Date(tournament.startDate), "yyyy-MM-dd") : "",
-          endDate: tournament.endDate ? format(new Date(tournament.endDate), "yyyy-MM-dd") : "",
+          startDate: tournament.startDate ? formatDateSafe(tournament.startDate, "yyyy-MM-dd") : "",
+          endDate: tournament.endDate ? formatDateSafe(tournament.endDate, "yyyy-MM-dd") : "",
           maxTeams: tournament.maxTeams || undefined,
           status: tournament.status,
         }

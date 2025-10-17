@@ -1,3 +1,4 @@
+// Top-level imports (showing only the lines to adjust)
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Transaction } from "@shared/schema";
@@ -5,6 +6,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WalletDialog } from "@/components/wallet-dialog";
 import {
   Dialog,
   DialogContent,
@@ -42,9 +44,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertTransactionSchema, type InsertTransaction } from "@shared/schema";
+import { insertTransactionSchema, type InsertTransaction, type Wallet } from "@shared/schema";
+
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { formatDateSafe } from "@/lib/date";
 import {
   Plus,
   TrendingUp,
@@ -66,6 +70,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const incomeCategories = [
   { value: "sponsorship", label: "Sponsorship" },
@@ -103,10 +108,23 @@ export default function Finance() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
 
+
+
+
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/finance"],
   });
 
+  const { data: wallets = [], isLoading: walletsLoading, isError: walletsError } = useQuery<Wallet[]>({
+    queryKey: ["/api/wallets"],
+  });
+  const walletMap = useMemo(() => Object.fromEntries(wallets.map((w) => [w.id, w])), [wallets]);
+
+  // Add default wallet resolution (if one default or only one wallet)
+  const defaultWallet = useMemo(
+    () => wallets.find((w) => w.isDefault) ?? (wallets.length === 1 ? wallets[0] : undefined),
+    [wallets]
+  );
   const { data: monthlyData = [] } = useQuery<Array<{
     month: string;
     income: number;
@@ -153,6 +171,7 @@ export default function Finance() {
       date: new Date().toISOString().split("T")[0],
       paymentMethod: "",
       reference: "",
+      walletId: "",
     },
   });
 
@@ -162,6 +181,7 @@ export default function Finance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Transaction created successfully" });
       setIsOpen(false);
       form.reset();
@@ -186,6 +206,7 @@ export default function Finance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Transaction updated successfully" });
       setIsOpen(false);
       setEditingTransaction(null);
@@ -205,6 +226,7 @@ export default function Finance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Transaction deleted successfully" });
     },
     onError: () => {
@@ -216,11 +238,19 @@ export default function Finance() {
   });
 
   const onSubmit = (data: any) => {
-    const submitData = {
+    const submitData: any = {
       ...data,
       amount: data.amount.toString(),
       date: new Date(data.date),
     };
+    // If no wallet selected, fallback to default wallet if available
+    if (!submitData.walletId || submitData.walletId === "") {
+      if (defaultWallet?.id) {
+        submitData.walletId = defaultWallet.id;
+      } else {
+        delete submitData.walletId;
+      }
+    }
     if (editingTransaction) {
       updateMutation.mutate({ id: editingTransaction.id, data: submitData });
     } else {
@@ -235,9 +265,10 @@ export default function Finance() {
       category: transaction.category,
       amount: transaction.amount,
       description: transaction.description || "",
-      date: format(new Date(transaction.date), "yyyy-MM-dd"),
+      date: formatDateSafe(transaction.date, "yyyy-MM-dd"),
       paymentMethod: transaction.paymentMethod || "",
       reference: transaction.reference || "",
+      walletId: transaction.walletId || "",
     });
     setIsOpen(true);
   };
@@ -290,151 +321,207 @@ export default function Finance() {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
+
+          {/* Wallet creation dialog component */}
+          <WalletDialog />
+
+          {/* Single, valid transaction dialog */}
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => closeDialog()} data-testid="button-add-transaction">
+              <Button onClick={() => setIsOpen(true)} data-testid="button-add-transaction">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Transaction
               </Button>
             </DialogTrigger>
-          <DialogContent className="max-w-2xl" data-testid="dialog-transaction">
-            <DialogHeader>
-              <DialogTitle>
-                {editingTransaction ? "Edit Transaction" : "Add Transaction"}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+
+            <DialogContent className="max-w-2xl" data-testid="dialog-transaction">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingTransaction ? "Edit Transaction" : "Add Transaction"}
+                </DialogTitle>
+              </DialogHeader>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              form.setValue("category", "");
+                            }}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger data-testid="select-type">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="income">Income</SelectItem>
+                              <SelectItem value="expense">Expense</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-category">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories.map((cat) => (
+                                <SelectItem key={cat.value} value={cat.value}>
+                                  {cat.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Amount</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              data-testid="input-amount"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Date</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="date"
+                              data-testid="input-date"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name="type"
+                    name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Type</FormLabel>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            placeholder="Transaction details..."
+                            data-testid="input-description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Payment Method (Optional)</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <FormControl>
+                              <SelectTrigger data-testid="select-payment-method">
+                                <SelectValue placeholder="Select method" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {paymentMethods.map((method) => (
+                                <SelectItem key={method.value} value={method.value}>
+                                  {method.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="reference"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Reference (Optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Invoice #, Receipt #, etc."
+                              data-testid="input-reference"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="walletId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Wallet (Optional)</FormLabel>
                         <Select
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            form.setValue("category", "");
-                          }}
-                          value={field.value}
+                          onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
+                          value={field.value === "" ? "none" : field.value}
                         >
                           <FormControl>
-                            <SelectTrigger data-testid="select-type">
-                              <SelectValue placeholder="Select type" />
+                            <SelectTrigger data-testid="select-wallet">
+                              <SelectValue placeholder="Select wallet" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="income">Income</SelectItem>
-                            <SelectItem value="expense">Expense</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-category">
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            data-testid="input-amount"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="date"
-                            data-testid="input-date"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Transaction details..."
-                          data-testid="input-description"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="paymentMethod"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payment Method (Optional)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ""}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-payment-method">
-                              <SelectValue placeholder="Select method" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {paymentMethods.map((method) => (
-                              <SelectItem key={method.value} value={method.value}>
-                                {method.label}
+                            <SelectItem key="none" value="none">
+                              No wallet
+                            </SelectItem>
+                            {wallets.map((w) => (
+                              <SelectItem key={w.id} value={w.id}>
+                                {w.name} ({w.currency.toUpperCase()})
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -444,44 +531,25 @@ export default function Finance() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="reference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Reference (Optional)</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Invoice #, Receipt #, etc."
-                            data-testid="input-reference"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeDialog}
-                    data-testid="button-cancel"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                    data-testid="button-submit"
-                  >
-                    {editingTransaction ? "Update" : "Create"} Transaction
-                  </Button>
-                </div>
-              </form>
-            </Form>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={closeDialog}
+                      data-testid="button-cancel"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={createMutation.isPending || updateMutation.isPending}
+                      data-testid="button-submit"
+                    >
+                      {editingTransaction ? "Update" : "Create"} Transaction
+                    </Button>
+                  </div>
+                </form>
+              </Form>
           </DialogContent>
           </Dialog>
         </div>
@@ -539,6 +607,77 @@ export default function Finance() {
           </CardContent>
         </Card>
       </div>
+  <div className="space-y-3">
+      <h2 className="text-lg font-semibold">Wallets</h2>
+
+      {walletsLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="hover-elevate">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16 mt-2" />
+                  </div>
+                  <Skeleton className="h-5 w-14 rounded-md" />
+                </div>
+                <Skeleton className="h-8 w-28" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : walletsError ? (
+        <div className="text-sm text-destructive">Failed to load wallets.</div>
+      ) : wallets.length === 0 ? (
+        <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">No wallets yet</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Create a wallet to track balances and link transactions.
+                  </p>
+                </div>
+                <WalletDialog />
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {wallets.map((w) => {
+              const typeLabel = w.type.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+              return (
+                <Card
+                  key={w.id}
+                  className="hover-elevate active-elevate-2 cursor-pointer"
+                  data-testid={`card-wallet-${w.id}`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-base leading-tight">{w.name}</CardTitle>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {typeLabel} • {w.currency.toUpperCase()}
+                        </div>
+                      </div>
+                      {w.isDefault && (
+                        <Badge className="bg-chart-2 text-primary-foreground text-xs" data-testid={`badge-default-${w.id}`}>
+                          Default
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="text-2xl font-bold font-mono">
+                      {formatCurrency(w.balance, w.currency)}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
       {/* Monthly Trend Chart */}
       {monthlyData.length > 0 && (
@@ -637,6 +776,7 @@ export default function Finance() {
           </Select>
         </CardContent>
       </Card>
+    </div>
 
       {/* Transactions List */}
       <Card>
@@ -686,13 +826,22 @@ export default function Finance() {
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(transaction.date), "MMM dd, yyyy")}
+                          {formatDateSafe(transaction.date, "MMM dd, yyyy")}
                         </span>
                         {transaction.paymentMethod && (
                           <span>{transaction.paymentMethod.replace(/_/g, " ")}</span>
                         )}
                         {transaction.reference && (
                           <span>Ref: {transaction.reference}</span>
+                        )}
+                        {/* Wallet label */}
+                        {transaction.walletId && (
+                          <span>
+                            Wallet: {walletMap[transaction.walletId]?.name ?? "Unknown"}{" "}
+                            {walletMap[transaction.walletId]?.currency
+                              ? `(${walletMap[transaction.walletId]?.currency.toUpperCase()})`
+                              : ""}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -755,4 +904,24 @@ export default function Finance() {
       </Card>
     </div>
   );
+
+  function formatCurrency(amount: string | number, currency?: string) {
+    const currencyMap: Record<string, string> = {
+      usd: "USD", eur: "EUR", gbp: "GBP", inr: "INR", sgd: "SGD",
+      aed: "AED", ngn: "NGN", cny: "CNY", jpy: "JPY", cad: "CAD",
+      aud: "AUD", zar: "ZAR",
+    };
+    const code =
+      currencyMap[currency?.toLowerCase?.() || ""] ||
+      currency?.toUpperCase?.() ||
+      "USD";
+    const numeric = typeof amount === "string" ? parseFloat(amount) : amount;
+    const safe = Number.isFinite(numeric) ? numeric : 0;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: 2,
+    }).format(safe);
+  }
+
 }

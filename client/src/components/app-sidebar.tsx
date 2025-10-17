@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 const clubMenuItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Team", url: "/team", icon: UserCog },
-  { title: "Staff", url: "/staff", icon: Users },
+  { title: "Players", url: "/players", icon: Users },
   { title: "Payroll", url: "/payroll", icon: DollarSign },
   { title: "Analytics", url: "/analytics", icon: BarChart3 },
   { title: "Matches", url: "/matches", icon: Calendar },

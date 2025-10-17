@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import type { Match, Campaign, AuditLog, Staff, Payroll } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
+import { toDateSafe } from "@/lib/date";
 
 export default function Dashboard() {
   const { data: matches = [] } = useQuery<Match[]>({
@@ -146,7 +147,12 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm">{activity.action}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {formatDistanceToNow(new Date(activity.timestamp!), { addSuffix: true })}
+                        {
+                          (() => {
+                            const d = toDateSafe(activity.timestamp);
+                            return d ? formatDistanceToNow(d, { addSuffix: true }) : "Unknown time";
+                          })()
+                        }
                       </p>
                     </div>
                   </div>

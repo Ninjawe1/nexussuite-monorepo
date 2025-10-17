@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { TournamentDialog } from "@/components/tournament-dialog";
 import { RoundDialog } from "@/components/round-dialog";
+import { formatDateSafe } from "@/lib/date";
 
 const formatStatusBadge = (status: string) => {
   const statusColors = {
@@ -165,12 +166,12 @@ function TournamentCard({ tournament, onEdit, onAddRound, onEditRound }: {
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
-            <span>{format(new Date(tournament.startDate), "MMM d, yyyy")}</span>
+            <span>{formatDateSafe(tournament.startDate, "MMM d, yyyy")}</span>
           </div>
           {tournament.endDate && (
             <div className="flex items-center gap-1">
               <span>-</span>
-              <span>{format(new Date(tournament.endDate), "MMM d, yyyy")}</span>
+              <span>{formatDateSafe(tournament.endDate, "MMM d, yyyy")}</span>
             </div>
           )}
           {tournament.maxTeams && (

@@ -1,19 +1,21 @@
 import { FileText, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 interface ContractRowProps {
   id: string;
   fileName: string;
   type: "Player" | "Staff" | "Sponsor";
   linkedPerson: string;
-  expirationDate: Date;
+  expirationDate: unknown;
   status: "active" | "expiring" | "expired";
 }
 
 export function ContractRow({ id, fileName, type, linkedPerson, expirationDate, status }: ContractRowProps) {
-  const daysUntilExpiration = differenceInDays(expirationDate, new Date());
+  const exp = toDateSafe(expirationDate);
+  const daysUntilExpiration = exp ? differenceInDays(exp, new Date()) : null;
   
   const statusColors = {
     active: 'bg-chart-2 text-primary-foreground',
@@ -44,8 +46,8 @@ export function ContractRow({ id, fileName, type, linkedPerson, expirationDate, 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="truncate">{linkedPerson}</span>
             <span>•</span>
-            <span className="shrink-0">Expires: {format(expirationDate, 'MMM dd, yyyy')}</span>
-            {daysUntilExpiration > 0 && daysUntilExpiration <= 30 && (
+            <span className="shrink-0">Expires: {formatDateSafe(expirationDate, 'MMM dd, yyyy')}</span>
+            {daysUntilExpiration !== null && daysUntilExpiration > 0 && daysUntilExpiration <= 30 && (
               <>
                 <span>•</span>
                 <span className="text-chart-4 shrink-0">{daysUntilExpiration} days left</span>

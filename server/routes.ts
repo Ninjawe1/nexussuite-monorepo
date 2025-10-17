@@ -1,7 +1,8 @@
 import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./useStorage";
 import { setupAuth, isAuthenticated } from "./auth";
+import { requirePermission, requireRoles } from "./rbac";
 import {
   insertStaffSchema,
   insertPayrollSchema,
@@ -14,20 +15,16 @@ import {
   insertTransactionSchema,
   insertTournamentSchema,
   insertTournamentRoundSchema,
+  insertRosterSchema,
+  insertWalletSchema,
 } from "@shared/schema";
 import { randomBytes } from "crypto";
-import Stripe from "stripe";
 import bcrypt from "bcrypt";
 import { getOAuthConfig, isOAuthConfigured, OAUTH_PLATFORMS } from "./oauth-config";
 
-// Initialize Stripe with testing keys (production keys can be added later)
-const stripeKey = process.env.TESTING_STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
-if (!stripeKey) {
-  throw new Error("Missing Stripe secret key (TESTING_STRIPE_SECRET_KEY or STRIPE_SECRET_KEY)");
-}
-const stripe = new Stripe(stripeKey, {
-  apiVersion: "2025-09-30.clover",
-});
+// Disable Stripe completely
+const stripeEnabled = false;
+const stripe: any = null;
 
 // Helper to get tenant ID from authenticated user
 async function getTenantId(req: any): Promise<string> {
@@ -142,27 +139,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Regenerate session to prevent fixation attacks
-      await new Promise((resolve, reject) => {
-        (req as any).session.regenerate((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
+      // Regenerate session to prevent fixation attacks (safe fallback)
+        await new Promise((resolve) => {
+          const sess: any = (req as any).session;
+          if (sess?.regenerate) {
+            sess.regenerate((err: any) => {
+              if (err) {
+                console.warn("Session regenerate failed; continuing without regenerate:", err);
+              }
+              resolve(true);
+            });
+          } else {
+            console.warn("Session regenerate unavailable; continuing without regenerate");
+            resolve(true);
+          }
         });
-      });
 
-      // Set session data compatible with existing middleware (req.user.claims.sub)
-      (req as any).session.passport = { 
-        user: { 
-          claims: { sub: user.id }
+        // Set session data compatible with existing middleware
+        const sess: any = (req as any).session;
+        if (sess) {
+          sess.passport = { 
+            user: { 
+              claims: { sub: user.id }
+            }
+          };
+          await new Promise((resolve) => {
+            if (sess.save) {
+              sess.save((err: any) => {
+                if (err) {
+                  console.warn("Session save failed; login will not persist:", err);
+                }
+                resolve(true);
+              });
+            } else {
+              console.warn("Session save unavailable; login will not persist");
+              resolve(true);
+            }
+          });
+        } else {
+          console.warn("No session object found; login will not persist");
         }
-      };
-      
-      await new Promise((resolve, reject) => {
-        (req as any).session.save((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
-        });
-      });
 
       res.json({ 
         user: {
@@ -232,27 +248,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw error;
       }
 
-      // Regenerate session to prevent fixation attacks
-      await new Promise((resolve, reject) => {
-        (req as any).session.regenerate((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
-        });
+      // Regenerate session to prevent fixation attacks (safe fallback)
+      await new Promise((resolve) => {
+        const sess: any = (req as any).session;
+        if (sess?.regenerate) {
+          sess.regenerate((err: any) => {
+            if (err) {
+              console.warn("Session regenerate failed after register; continuing:", err);
+            }
+            resolve(true);
+          });
+        } else {
+          console.warn("Session regenerate unavailable after register; continuing");
+          resolve(true);
+        }
       });
 
       // Set session data compatible with existing middleware
-      (req as any).session.passport = { 
-        user: { 
-          claims: { sub: user.id }
-        }
-      };
-      
-      await new Promise((resolve, reject) => {
-        (req as any).session.save((err: any) => {
-          if (err) reject(err);
-          else resolve(true);
+      const sess: any = (req as any).session;
+      if (sess) {
+        sess.passport = { 
+          user: { 
+            claims: { sub: user.id }
+          }
+        };
+        await new Promise((resolve) => {
+          if (sess.save) {
+            sess.save((err: any) => {
+              if (err) {
+                console.warn("Session save failed after register; login will not persist:", err);
+              }
+              resolve(true);
+            });
+          } else {
+            console.warn("Session save unavailable after register; login will not persist");
+            resolve(true);
+          }
         });
-      });
+      } else {
+        console.warn("No session object found after register; login will not persist");
+      }
 
       res.json({ 
         user: {
@@ -371,6 +406,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Roster routes
+  app.get("/api/rosters", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const list = await storage.getRostersByTenant(tenantId);
+      res.json(list);
+    } catch (error) {
+      console.error("Error fetching rosters:", error);
+      res.status(500).json({ message: "Failed to fetch rosters" });
+    }
+  });
+
+  app.post("/api/rosters", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const validated = insertRosterSchema.parse({ ...req.body, tenantId });
+      const created = await storage.createRoster(validated);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Assigned roster for player ${validated.playerId} (${validated.game})`,
+        "roster",
+        created.id,
+        undefined,
+        created,
+        "create"
+      );
+      res.json(created);
+    } catch (error) {
+      console.error("Error creating roster:", error);
+      res.status(500).json({ message: "Failed to create roster" });
+    }
+  });
+
+  app.patch("/api/rosters/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const old = await storage.getRoster(req.params.id, tenantId);
+      if (!old) {
+        return res.status(404).json({ message: "Roster not found" });
+      }
+
+      const validated = insertRosterSchema.partial().parse(req.body);
+      const updated = await storage.updateRoster(req.params.id, tenantId, validated);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated roster for player ${updated.playerId} (${updated.game})`,
+        "roster",
+        updated.id,
+        old,
+        updated,
+        "update"
+      );
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating roster:", error);
+      res.status(500).json({ message: "Failed to update roster" });
+    }
+  });
+
+  app.delete("/api/rosters/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const existing = await storage.getRoster(req.params.id, tenantId);
+      if (!existing) {
+        return res.status(404).json({ message: "Roster not found" });
+      }
+
+      await storage.deleteRoster(req.params.id, tenantId);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Removed roster for player ${existing.playerId} (${existing.game})`,
+        "roster",
+        req.params.id,
+        existing,
+        undefined,
+        "delete"
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting roster:", error);
+      res.status(500).json({ message: "Failed to delete roster" });
+    }
+  });
+
   // Staff routes
   app.get("/api/staff", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
@@ -383,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/staff", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/staff", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -438,7 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/staff/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/staff/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -471,7 +608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/staff/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/staff/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:staff"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -515,13 +652,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payroll", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/payroll", isAuthenticated, checkTenantSuspension, requirePermission("manage:payroll"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       const validatedData = insertPayrollSchema.parse({ ...req.body, tenantId });
+
+      if ((validatedData as any).walletId && String((validatedData as any).walletId).trim() !== "") {
+        const wallet = await storage.getWallet((validatedData as any).walletId as string, tenantId);
+        if (!wallet) {
+          return res.status(400).json({ message: "Invalid wallet selected" });
+        }
+      }
+
       const newPayroll = await storage.createPayroll(validatedData);
       
       await createAuditLog(
@@ -543,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/payroll/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/payroll/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:payroll"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -555,6 +700,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validatedData = insertPayrollSchema.partial().parse(req.body);
+
+      if ((validatedData as any).walletId !== undefined && String((validatedData as any).walletId).trim() !== "") {
+        const wallet = await storage.getWallet((validatedData as any).walletId as string, tenantId);
+        if (!wallet) {
+          return res.status(400).json({ message: "Invalid wallet selected" });
+        }
+      }
+
       const updatedPayroll = await storage.updatePayroll(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -576,7 +729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/payroll/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/payroll/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:payroll"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -869,7 +1022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/matches", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/matches", isAuthenticated, checkTenantSuspension, requirePermission("manage:matches"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -897,7 +1050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/matches/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/matches/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:matches"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -930,7 +1083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/matches/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/matches/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:matches"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -974,7 +1127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/campaigns", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/campaigns", isAuthenticated, checkTenantSuspension, requirePermission("manage:campaigns"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1002,7 +1155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:campaigns"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1035,7 +1188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/campaigns/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:campaigns"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1079,7 +1232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/contracts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/contracts", isAuthenticated, checkTenantSuspension, requirePermission("manage:contracts"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1107,7 +1260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/contracts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/contracts/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:contracts"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1140,7 +1293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/contracts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/contracts/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:contracts"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1335,14 +1488,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         version: "1.0",
         data: {
           tenants: await storage.getAllTenants(),
-          users: await storage.getAllUsers(),
-          staff: await storage.getAllStaff(),
-          payroll: await storage.getAllPayroll(),
-          matches: await storage.getAllMatches(),
-          campaigns: await storage.getAllCampaigns(),
-          contracts: await storage.getAllContracts(),
-          auditLogs: await storage.getAllAuditLogs(10000),
-          invites: await storage.getAllInvites(),
+          users: await storage.getUsers(),
+          staff: await storage.getStaff(),
+          payroll: await storage.getPayroll(),
+          matches: await storage.getMatches(),
+          campaigns: await storage.getCampaigns(),
+          contracts: await storage.getContracts(),
+          auditLogs: await storage.getAuditLogs(10000),
+          invites: await storage.getInvites(),
         }
       };
 
@@ -1369,7 +1522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/invites", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/invites", isAuthenticated, checkTenantSuspension, requirePermission("manage:invites"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1396,7 +1549,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.delete("/api/invites/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/invites/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:invites"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1446,7 +1599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Connect a new social account
-  app.post("/api/social/accounts", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/social/accounts", isAuthenticated, checkTenantSuspension, requirePermission("manage:social"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1479,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update social account
-  app.patch("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:social"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1512,7 +1665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete social account
-  app.delete("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/social/accounts/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:social"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1578,7 +1731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manual sync endpoint - fetch latest data from social platforms
-  app.post("/api/social/sync/:accountId", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/social/sync/:accountId", isAuthenticated, checkTenantSuspension, requirePermission("manage:social"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const account = await storage.getSocialAccount(req.params.accountId, tenantId);
@@ -1941,7 +2094,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== Finance Routes ====================
-  
+
+  // ==================== Wallet Routes ====================
+  app.get("/api/wallets", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const list = await storage.getWalletsByTenant(tenantId);
+      res.json(list);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      res.status(500).json({ message: "Failed to fetch wallets" });
+    }
+  });
+
+  app.post("/api/wallets", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const validated = insertWalletSchema.parse({ ...req.body, tenantId });
+      const created = await storage.createWallet(validated);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Created wallet ${created.name} (${created.type.toUpperCase()})`,
+        "wallet",
+        created.id,
+        undefined,
+        created,
+        "create"
+      );
+
+      res.json(created);
+    } catch (error) {
+      console.error("Error creating wallet:", error);
+      res.status(500).json({ message: "Failed to create wallet" });
+    }
+  });
+
+  app.patch("/api/wallets/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const existing = await storage.getWallet(req.params.id, tenantId);
+      if (!existing) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+
+      const validated = insertWalletSchema.partial().parse(req.body);
+      const updated = await storage.updateWallet(req.params.id, tenantId, validated);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Updated wallet ${existing.name}`,
+        "wallet",
+        updated.id,
+        existing,
+        updated,
+        "update"
+      );
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating wallet:", error);
+      res.status(500).json({ message: "Failed to update wallet" });
+    }
+  });
+
+  app.delete("/api/wallets/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
+    try {
+      const tenantId = await getTenantId(req);
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      const existing = await storage.getWallet(req.params.id, tenantId);
+      if (!existing) {
+        return res.status(404).json({ message: "Wallet not found" });
+      }
+
+      await storage.deleteWallet(req.params.id, tenantId);
+
+      await createAuditLog(
+        tenantId,
+        userId,
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'Unknown',
+        `Deleted wallet ${existing.name}`,
+        "wallet",
+        req.params.id,
+        existing,
+        undefined,
+        "delete"
+      );
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting wallet:", error);
+      res.status(500).json({ message: "Failed to delete wallet" });
+    }
+  });
+
   // Get all transactions for tenant
   app.get("/api/finance", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
@@ -1955,7 +2213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new transaction
-  app.post("/api/finance", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/finance", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -1966,6 +2224,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tenantId,
         createdBy: userId 
       });
+
+      // Validate walletId belongs to tenant (if provided)
+      const walletId = (validatedData as any).walletId;
+      if (walletId && String(walletId).trim() !== "") {
+        const wallet = await storage.getWallet(walletId, tenantId);
+        if (!wallet) {
+          return res.status(400).json({ message: "Invalid wallet selected" });
+        }
+      }
+
       const newTransaction = await storage.createTransaction(validatedData);
       
       await createAuditLog(
@@ -1988,7 +2256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update a transaction
-  app.patch("/api/finance/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.patch("/api/finance/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -2000,6 +2268,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validatedData = insertTransactionSchema.partial().parse(req.body);
+
+      // If walletId is being set/changed, ensure it belongs to tenant
+      if ((validatedData as any).walletId !== undefined && String((validatedData as any).walletId).trim() !== "") {
+        const wallet = await storage.getWallet((validatedData as any).walletId as string, tenantId);
+        if (!wallet) {
+          return res.status(400).json({ message: "Invalid wallet selected" });
+        }
+      }
+
       const updatedTransaction = await storage.updateTransaction(req.params.id, tenantId, validatedData);
       
       await createAuditLog(
@@ -2022,7 +2299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete a transaction
-  app.delete("/api/finance/:id", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.delete("/api/finance/:id", isAuthenticated, checkTenantSuspension, requirePermission("manage:finance"), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const userId = req.user.claims.sub;
@@ -2134,6 +2411,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Create Stripe checkout session for subscription
   app.post("/api/subscriptions/create-checkout", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    if (!stripeEnabled || !stripe) {
+      return res.status(503).json({ message: "Stripe is not configured in this environment" });
+    }
     try {
       const tenantId = await getTenantId(req);
       const tenant = await storage.getTenant(tenantId);
@@ -2221,6 +2501,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Sync subscription from Stripe session (for environments where webhooks don't work)
   app.post("/api/subscriptions/sync-session", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    if (!stripeEnabled || !stripe) {
+      return res.status(503).json({ message: "Stripe is not configured in this environment" });
+    }
     try {
       const tenantId = await getTenantId(req);
       const { sessionId } = req.body;
@@ -2286,6 +2569,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Create Stripe billing portal session
   app.post("/api/subscriptions/create-portal", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+    if (!stripeEnabled || !stripe) {
+      return res.status(503).json({ message: "Stripe is not configured in this environment" });
+    }
     try {
       const tenantId = await getTenantId(req);
       const tenant = await storage.getTenant(tenantId);
@@ -2328,7 +2614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new user directly (for club owners)
-  app.post("/api/team/users", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
+  app.post("/api/team/users", isAuthenticated, checkTenantSuspension, requireRoles(["owner", "admin"]), async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const { email, firstName, lastName, role, password } = req.body;
@@ -2558,6 +2844,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Webhook endpoint for Stripe events
   app.post("/api/webhooks/stripe", async (req, res) => {
+    if (!stripeEnabled || !stripe) {
+      return res.status(503).json({ message: "Stripe is not configured in this environment" });
+    }
     const sig = req.headers['stripe-signature'];
     
     try {

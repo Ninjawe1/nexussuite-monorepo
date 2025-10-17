@@ -389,7 +389,7 @@ export default function AdminPage() {
                         <p className="text-destructive font-medium">Suspended: {club.suspensionReason}</p>
                         {club.suspendedAt && (
                           <p className="text-muted-foreground text-xs mt-1">
-                            Since {format(new Date(club.suspendedAt), "PPP")}
+                            Since {formatDateSafe(club.suspendedAt, "PPP")}
                           </p>
                         )}
                       </div>
@@ -712,3 +712,32 @@ function UsersManagement({ users, loadingUsers }: { users: User[]; loadingUsers:
     </>
   );
 }
+
+// Safe date helpers for Firestore Timestamp/String/Number
+const toDateSafe = (value: unknown): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const v: any = value;
+  if (v && typeof v.toDate === "function") {
+    try {
+      const d = v.toDate();
+      return d instanceof Date ? d : null;
+    } catch {
+      return null;
+    }
+  }
+  if (v && typeof v.seconds === "number") {
+    const millis = v.seconds * 1000 + (v.nanoseconds || 0) / 1e6;
+    const d = new Date(millis);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+};
+const formatDateSafe = (value: unknown, fmt: string): string => {
+  const d = toDateSafe(value);
+  return d ? format(d, fmt) : "Invalid date";
+};

@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
+import { formatDateSafe } from "@/lib/date";
 
 interface RoundDialogProps {
   open: boolean;
@@ -57,7 +58,7 @@ export function RoundDialog({ open, onOpenChange, tournamentId, round }: RoundDi
           name: round.name,
           roundNumber: round.roundNumber,
           format: round.format || "",
-          startDate: round.startDate ? format(new Date(round.startDate), "yyyy-MM-dd") : "",
+          startDate: round.startDate ? formatDateSafe(round.startDate, "yyyy-MM-dd") : "",
           status: round.status,
         }
       : {

@@ -173,9 +173,10 @@ export default function Contracts() {
                 <div className="flex-1">
                   <ContractRow
                     {...contract}
-                    expirationDate={new Date(contract.expirationDate)}
+                    expirationDate={contract.expirationDate}
                   />
                 </div>
+                {/* actions menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity" data-testid={`button-menu-contract-${contract.id}`}>

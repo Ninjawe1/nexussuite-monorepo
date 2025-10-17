@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { insertPayrollSchema, type InsertPayroll, type Payroll } from "@shared/schema";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { insertPayrollSchema, type InsertPayroll, type Payroll, type Wallet } from "@shared/schema";
 import { z } from "zod";
 import {
   Dialog,
@@ -47,6 +46,10 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
     date: insertPayrollSchema.shape.date.or(z.string().transform(val => new Date(val))),
   });
 
+  const { data: wallets = [] } = useQuery<Wallet[]>({
+    queryKey: ["/api/wallets"],
+  });
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,6 +60,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
       type: payroll?.type || "monthly",
       status: payroll?.status || "pending",
       date: payroll?.date ? new Date(payroll.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      walletId: payroll?.walletId || "",
     },
   });
 
@@ -129,10 +133,14 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
   const onSubmit = async (data: InsertPayroll) => {
     setIsSubmitting(true);
     try {
+      const payload: InsertPayroll = { ...data };
+      if ((payload as any).walletId === "") {
+        delete (payload as any).walletId;
+      }
       if (payroll) {
-        await updateMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(payload);
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(payload);
       }
     } finally {
       setIsSubmitting(false);
@@ -151,6 +159,34 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Wallet selector */}
+            <FormField
+              control={form.control}
+              name="walletId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Wallet (Optional)</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-payroll-wallet">
+                        <SelectValue placeholder="Select wallet" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem key="none" value="">
+                        No wallet
+                      </SelectItem>
+                      {wallets.map((w) => (
+                        <SelectItem key={w.id} value={w.id}>
+                          {w.name} ({w.currency.toUpperCase()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"

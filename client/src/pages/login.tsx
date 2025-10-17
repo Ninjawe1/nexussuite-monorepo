@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { LogIn, Trophy } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -34,14 +35,16 @@ export default function Login() {
   async function onSubmit(data: LoginForm) {
     try {
       setIsLoading(true);
-      const response = await apiRequest("/api/auth/login", "POST", data);
-      
+      const res = await apiRequest("/api/auth/login", "POST", data);
+      const { user } = await res.json();
+      queryClient.setQueryData(["/api/auth/user"], user);
+
       toast({
         title: "Welcome back!",
         description: "Login successful",
       });
 
-      // Redirect to dashboard
+      // Redirect to dashboard (router picks Admin or Dashboard based on role)
       setLocation("/");
     } catch (error: any) {
       toast({

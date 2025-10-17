@@ -34,6 +34,19 @@ export default function Team() {
     queryKey: ["/api/team/invites"],
   });
 
+  // Staff management state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [staffDialogOpen, setStaffDialogOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | undefined>();
+
+  const { data: staffMembers = [], isLoading: staffLoading } = useQuery<Staff[]>({
+    queryKey: ["/api/staff"],
+  });
+  const { data: tenant } = useQuery<Tenant>({
+    queryKey: ["/api/tenant"],
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -75,6 +88,9 @@ export default function Team() {
           </TabsTrigger>
           <TabsTrigger value="invites" data-testid="tab-invites">
             Pending Invites ({invites.length})
+          </TabsTrigger>
+          <TabsTrigger value="staff" data-testid="tab-staff">
+            Staff ({staffMembers.length})
           </TabsTrigger>
         </TabsList>
 

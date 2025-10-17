@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { SiX, SiInstagram, SiYoutube, SiTiktok, SiTwitch } from "react-icons/si";
 import { TrendingUp, Eye, Heart } from "lucide-react";
 import { format } from "date-fns";
+import { formatDateSafe } from "@/lib/date";
 
 interface CampaignCardProps {
   id: string;
@@ -73,7 +74,7 @@ export function CampaignCard({ id, title, description, startDate, endDate, platf
         )}
       </CardContent>
       <CardFooter className="pt-0 pb-4 text-xs text-muted-foreground">
-        {format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yyyy')}
+        {formatDateSafe(startDate, 'MMM dd')} - {formatDateSafe(endDate, 'MMM dd, yyyy')}
       </CardFooter>
     </Card>
   );
