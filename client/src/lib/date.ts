@@ -2,7 +2,9 @@ import { format as formatDateFns } from "date-fns";
 
 export function toDateSafe(value: unknown): Date | null {
   if (!value) return null;
-  if (value instanceof Date) return value;
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : value;
+  }
   if (typeof value === "string" || typeof value === "number") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
@@ -11,7 +13,7 @@ export function toDateSafe(value: unknown): Date | null {
   if (v && typeof v.toDate === "function") {
     try {
       const d = v.toDate();
-      return d instanceof Date ? d : null;
+      return d instanceof Date && !isNaN(d.getTime()) ? d : null;
     } catch {
       return null;
     }

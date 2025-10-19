@@ -119,7 +119,7 @@ export default function Matches() {
                 <div key={match.id} className="relative group">
                   <MatchCard
                     {...match}
-                    date={new Date(match.date)}
+                    date={match.date}
                     scoreA={match.scoreA ?? undefined}
                     scoreB={match.scoreB ?? undefined}
                     status={match.status as "upcoming" | "live" | "completed"}

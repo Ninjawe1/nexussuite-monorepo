@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin } from "lucide-react";
-import { format } from "date-fns";
 import { formatDateSafe } from "@/lib/date";
 
 interface MatchCardProps {
@@ -10,7 +9,7 @@ interface MatchCardProps {
   teamB: string;
   scoreA?: number;
   scoreB?: number;
-  date: Date;
+  date: unknown;
   tournament: string | null;
   game: string;
   venue?: string | null;

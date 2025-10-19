@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { toDateSafe } from "@/lib/date";
 
 interface MatchDialogProps {
   open: boolean;
@@ -68,7 +69,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       teamB: match?.teamB || "",
       scoreA: match?.scoreA || undefined,
       scoreB: match?.scoreB || undefined,
-      date: match?.date ? new Date(match.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+      date: match?.date ? (toDateSafe(match.date)?.toISOString().slice(0, 16) ?? new Date().toISOString().slice(0, 16)) : new Date().toISOString().slice(0, 16),
       tournament: match?.tournament || "",
       game: match?.game || "",
       venue: match?.venue || "",
@@ -88,7 +89,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           teamB: match.teamB || "",
           scoreA: match.scoreA || undefined,
           scoreB: match.scoreB || undefined,
-          date: match.date ? new Date(match.date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
+          date: match.date ? (toDateSafe(match.date)?.toISOString().slice(0, 16) ?? new Date().toISOString().slice(0, 16)) : new Date().toISOString().slice(0, 16),
           tournament: match.tournament || "",
           game: match.game || "",
           venue: match.venue || "",
