@@ -16,7 +16,7 @@ import type {
   TournamentRound, InsertTournamentRound,
   Roster, InsertRoster,
   Wallet, InsertWallet, // <-- already present per your view
-} from "@shared/schema";
+} from "../shared/schema";
 import type { IStorage } from "./storage";
 
 type WithId<T> = T & { id: string };
@@ -32,13 +32,14 @@ function col(name: string) {
 async function getById<T>(collection: string, id: string): Promise<WithId<T> | undefined> {
   const snap = await col(collection).doc(id).get();
   if (!snap.exists) return undefined;
-  const data = snap.data() as T;
-  return { id: snap.id, ...data };
+  const raw = snap.data() as any;
+  const { id: _id, ...rest } = raw;
+  return { id: snap.id, ...rest } as WithId<T>;
 }
 
 async function listAll<T>(collection: string): Promise<WithId<T>[]> {
   const snap = await col(collection).get();
-  return snap.docs.map(d => ({ id: d.id, ...(d.data() as T) }));
+  return snap.docs.map(d => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
 }
 
 async function listByTenant<T>(collection: string, tenantId: string, orderField = "createdAt"): Promise<WithId<T>[]> {
@@ -47,13 +48,17 @@ async function listByTenant<T>(collection: string, tenantId: string, orderField 
       .where("tenantId", "==", tenantId)
       .orderBy(orderField, "desc")
       .get();
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as T) }));
+    return snap.docs.map(d => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
   } catch (err: any) {
     if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
       const snap = await col(collection)
         .where("tenantId", "==", tenantId)
         .get();
-      const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as T) }));
+      const items = snap.docs.map(d => {
+        const data = d.data() as any;
+        const { id: _id, ...rest } = data;
+        return { id: d.id, ...rest } as WithId<T>;
+      });
       items.sort((a: any, b: any) => {
         const av = (a as any)[orderField];
         const bv = (b as any)[orderField];
@@ -78,7 +83,9 @@ async function updateDoc<T>(collection: string, id: string, patch: any): Promise
   const payload = { ...patch, updatedAt: now() };
   await col(collection).doc(id).set(payload, { merge: true });
   const snap = await col(collection).doc(id).get();
-  return { id, ...(snap.data() as T) };
+  const raw = snap.data() as any;
+  const { id: _id, ...rest } = raw;
+  return { id, ...rest } as WithId<T>;
 }
 
 async function deleteDoc(collection: string, id: string): Promise<void> {
@@ -93,7 +100,7 @@ class FirestoreStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const snap = await col("users").where("email", "==", email).limit(1).get();
     const doc = snap.docs[0];
-    return doc ? ({ id: doc.id, ...(doc.data() as User) }) : undefined;
+    return doc ? (() => { const raw = doc.data() as User; const { id: _id, ...rest } = raw; return { id: doc.id, ...rest }; })() : undefined;
   }
   async getUsersByTenant(tenantId: string): Promise<User[]> {
     return await listByTenant<User>("users", tenantId);
@@ -183,6 +190,24 @@ class FirestoreStorage implements IStorage {
     return await listAll<Payroll>("payroll");
   }
 
+  // Rosters
+  async getRostersByTenant(tenantId: string): Promise<Roster[]> {
+    return await listByTenant<Roster>("rosters", tenantId);
+  }
+  async getRoster(id: string, tenantId: string): Promise<Roster | undefined> {
+    const s = await getById<Roster>("rosters", id);
+    return s && (s as any).tenantId === tenantId ? s : undefined;
+  }
+  async createRoster(data: InsertRoster): Promise<Roster> {
+    return await createDoc<Roster>("rosters", data);
+  }
+  async updateRoster(id: string, _tenantId: string, patch: Partial<InsertRoster>): Promise<Roster> {
+    return await updateDoc<Roster>("rosters", id, patch);
+  }
+  async deleteRoster(id: string, _tenantId: string): Promise<void> {
+    return await deleteDoc("rosters", id);
+  }
+
   // Tournaments
   async getTournamentsByTenant(tenantId: string): Promise<Tournament[]> {
     return await listByTenant<Tournament>("tournaments", tenantId);
@@ -204,7 +229,7 @@ class FirestoreStorage implements IStorage {
   // Rounds
   async getRoundsByTournament(tournamentId: string): Promise<TournamentRound[]> {
     const snap = await col("tournamentRounds").where("tournamentId", "==", tournamentId).orderBy("createdAt", "desc").get();
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as TournamentRound) }));
+    return snap.docs.map(d => { const data = d.data() as Omit<TournamentRound, "id">; return { id: d.id, ...data }; });
   }
   async getRound(id: string, tournamentId: string): Promise<TournamentRound | undefined> {
     const s = await getById<TournamentRound>("tournamentRounds", id);
@@ -223,6 +248,64 @@ class FirestoreStorage implements IStorage {
   // Matches
   async getMatchesByTenant(tenantId: string): Promise<Match[]> {
     return await listByTenant<Match>("matches", tenantId);
+  }
+  async getMatchesByTournament(tournamentId: string): Promise<Match[]> {
+    try {
+      const snap = await col("matches")
+        .where("tournamentId", "==", tournamentId)
+        .orderBy("matchNumber")
+        .get();
+      return snap.docs.map(d => {
+        const raw = d.data() as any;
+        const { id: _id, ...rest } = raw;
+        return { id: d.id, ...rest } as Match;
+      });
+    } catch (err: any) {
+      if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
+        const snap = await col("matches").where("tournamentId", "==", tournamentId).get();
+        const items = snap.docs.map(d => {
+          const raw = d.data() as any;
+          const { id: _id, ...rest } = raw;
+          return { id: d.id, ...rest } as Match;
+        });
+        items.sort((a: any, b: any) => {
+          const am = (a as any)?.matchNumber ?? 0;
+          const bm = (b as any)?.matchNumber ?? 0;
+          return am - bm;
+        });
+        return items;
+      }
+      throw err;
+    }
+  }
+  async getMatchesByRound(roundId: string): Promise<Match[]> {
+    try {
+      const snap = await col("matches")
+        .where("roundId", "==", roundId)
+        .orderBy("matchNumber")
+        .get();
+      return snap.docs.map(d => {
+        const raw = d.data() as any;
+        const { id: _id, ...rest } = raw;
+        return { id: d.id, ...rest } as Match;
+      });
+    } catch (err: any) {
+      if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
+        const snap = await col("matches").where("roundId", "==", roundId).get();
+        const items = snap.docs.map(d => {
+          const raw = d.data() as any;
+          const { id: _id, ...rest } = raw;
+          return { id: d.id, ...rest } as Match;
+        });
+        items.sort((a: any, b: any) => {
+          const am = (a as any)?.matchNumber ?? 0;
+          const bm = (b as any)?.matchNumber ?? 0;
+          return am - bm;
+        });
+        return items;
+      }
+      throw err;
+    }
   }
   async getMatch(id: string, tenantId: string): Promise<Match | undefined> {
     const s = await getById<Match>("matches", id);
@@ -294,13 +377,16 @@ class FirestoreStorage implements IStorage {
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
-      return snap.docs.map(d => ({ id: d.id, ...(d.data() as AuditLog) }));
+      return snap.docs.map(d => { const data = d.data() as Omit<AuditLog, "id">; return { id: d.id, ...data }; });
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("auditLogs")
           .where("tenantId", "==", tenantId)
           .get();
-        const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as AuditLog) }));
+        const items = snap.docs.map(d => {
+          const data = d.data() as Omit<AuditLog, "id">;
+          return { id: d.id, ...data };
+        });
         items.sort((a: any, b: any) => {
           const av = a?.createdAt;
           const bv = b?.createdAt;
@@ -315,7 +401,10 @@ class FirestoreStorage implements IStorage {
   }
   async getAllAuditLogs(limit = 1000): Promise<AuditLog[]> {
     const snap = await col("auditLogs").orderBy("createdAt", "desc").limit(limit).get();
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as AuditLog) }));
+    return snap.docs.map(d => {
+      const data = d.data() as Omit<AuditLog, "id">;
+      return { id: d.id, ...data };
+    });
   }
 
   // Invites
@@ -328,7 +417,7 @@ class FirestoreStorage implements IStorage {
   async getInviteByToken(token: string): Promise<Invite | undefined> {
     const snap = await col("invites").where("token", "==", token).limit(1).get();
     const doc = snap.docs[0];
-    return doc ? ({ id: doc.id, ...(doc.data() as Invite) }) : undefined;
+    return doc ? (() => { const raw = doc.data() as Invite; const { id: _id, ...rest } = raw; return { id: doc.id, ...rest }; })() : undefined;
   }
   async createInvite(data: InsertInvite): Promise<Invite> {
     return await createDoc<Invite>("invites", data);
@@ -336,10 +425,15 @@ class FirestoreStorage implements IStorage {
   async deleteInvite(id: string, _tenantId: string): Promise<void> {
     await deleteDoc("invites", id);
   }
-  async updateInviteStatus(token: string, status: string): Promise<void> {
+  async updateInviteStatus(token: string, status: "pending" | "accepted" | "expired"): Promise<Invite> {
     const snap = await col("invites").where("token", "==", token).limit(1).get();
     const doc = snap.docs[0];
-    if (doc) await doc.ref.set({ status, updatedAt: now() }, { merge: true });
+    if (!doc) throw new Error("Invite not found");
+    await doc.ref.set({ status, updatedAt: now() }, { merge: true });
+    const updated = await doc.ref.get();
+    const raw = updated.data() as Invite;
+    const { id: _id, ...rest } = raw || ({} as Invite);
+    return { id: updated.id, ...rest, status } as Invite;
   }
   async getAllInvites(): Promise<Invite[]> {
     return await listAll<Invite>("invites");
@@ -364,14 +458,91 @@ class FirestoreStorage implements IStorage {
   }
 
   // Social Metrics
-  async getLatestMetricsByTenant(tenantId: string): Promise<SocialMetric | undefined> {
-    const snap = await col("socialMetrics")
-      .where("tenantId", "==", tenantId)
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get();
-    const doc = snap.docs[0];
-    return doc ? ({ id: doc.id, ...(doc.data() as SocialMetric) }) : undefined;
+  async getSocialMetricsByTenant(tenantId: string, limit: number = 100): Promise<SocialMetric[]> {
+    try {
+      const snap = await col("socialMetrics")
+        .where("tenantId", "==", tenantId)
+        .orderBy("date", "desc")
+        .limit(limit)
+        .get();
+      return snap.docs.map(d => {
+        const raw = d.data() as any;
+        const { id: _id, ...rest } = raw;
+        return { id: d.id, ...rest } as SocialMetric;
+      });
+    } catch (err: any) {
+      if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
+        const snap = await col("socialMetrics")
+          .where("tenantId", "==", tenantId)
+          .get();
+        const items = snap.docs.map(d => {
+          const raw = d.data() as any;
+          const { id: _id, ...rest } = raw;
+          return { id: d.id, ...rest } as SocialMetric;
+        });
+        items.sort((a: any, b: any) => {
+          const av = (a as any)?.date;
+          const bv = (b as any)?.date;
+          const at = av?.toMillis ? av.toMillis() : (av ? new Date(av).getTime() : 0);
+          const bt = bv?.toMillis ? bv.toMillis() : (bv ? new Date(bv).getTime() : 0);
+          return bt - at;
+        });
+        return items.slice(0, limit);
+      }
+      throw err;
+    }
+  }
+
+  async getSocialMetricsByAccount(accountId: string, limit: number = 30): Promise<SocialMetric[]> {
+    try {
+      const snap = await col("socialMetrics")
+        .where("accountId", "==", accountId)
+        .orderBy("date", "desc")
+        .limit(limit)
+        .get();
+      return snap.docs.map(d => {
+        const raw = d.data() as any;
+        const { id: _id, ...rest } = raw;
+        return { id: d.id, ...rest } as SocialMetric;
+      });
+    } catch (err: any) {
+      if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
+        const snap = await col("socialMetrics")
+          .where("accountId", "==", accountId)
+          .get();
+        const items = snap.docs.map(d => {
+          const raw = d.data() as any;
+          const { id: _id, ...rest } = raw;
+          return { id: d.id, ...rest } as SocialMetric;
+        });
+        items.sort((a: any, b: any) => {
+          const av = (a as any)?.date;
+          const bv = (b as any)?.date;
+          const at = av?.toMillis ? av.toMillis() : (av ? new Date(av).getTime() : 0);
+          const bt = bv?.toMillis ? bv.toMillis() : (bv ? new Date(bv).getTime() : 0);
+          return bt - at;
+        });
+        return items.slice(0, limit);
+      }
+      throw err;
+    }
+  }
+  async getLatestMetricsByTenant(tenantId: string): Promise<SocialMetric[]> {
+    const accounts = await this.getSocialAccountsByTenant(tenantId);
+    const latest: SocialMetric[] = [];
+    for (const account of accounts) {
+      const snap = await col("socialMetrics")
+        .where("accountId", "==", account.id)
+        .orderBy("date", "desc")
+        .limit(1)
+        .get();
+      const doc = snap.docs[0];
+      if (doc) {
+        const data = doc.data() as Omit<SocialMetric, "id">;
+        latest.push({ id: doc.id, ...data });
+      }
+    }
+    return latest;
   }
   async createSocialMetric(data: InsertSocialMetric): Promise<SocialMetric> {
     return await createDoc<SocialMetric>("socialMetrics", data);

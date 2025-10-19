@@ -1,25 +1,24 @@
-// Custom authentication system
-import session from "express-session";
+import cookieSession from "cookie-session";
 import type { Express, RequestHandler } from "express";
-import memorystore from "memorystore";
 import { randomBytes } from "crypto";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const MemoryStore = memorystore(session);
-  const sessionStore = new MemoryStore({
-    checkPeriod: sessionTtl,
-  });
-  return session({
-    secret: process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: sessionTtl,
-    },
+
+  // In local/prod test environments (http://localhost), secure cookies prevent the browser
+  // from setting the session cookie, causing 401s on subsequent requests.
+  // Make cookie security configurable via env, defaulting to false for local testing.
+  const useSecureCookies = process.env.SESSION_COOKIE_SECURE
+    ? process.env.SESSION_COOKIE_SECURE === "true"
+    : false; // default to false to support local HTTP tests
+
+  return cookieSession({
+    name: "session",
+    keys: [process.env.SESSION_SECRET || randomBytes(32).toString("hex")],
+    httpOnly: true,
+    secure: useSecureCookies,
+    sameSite: "lax",
+    maxAge: sessionTtl,
   });
 }
 

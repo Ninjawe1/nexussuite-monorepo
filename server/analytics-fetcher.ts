@@ -1,4 +1,4 @@
-import type { InsertSocialMetric } from "@shared/schema";
+import type { InsertSocialMetric } from "../shared/schema";
 
 interface PlatformMetrics {
   followers?: number;

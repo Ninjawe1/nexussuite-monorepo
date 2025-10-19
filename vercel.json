@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "public": "server/public",
+  "buildCommand": "npm run build",
+  "outputDirectory": "server/public",
+  "functions": {
+    "api/[[...route]].ts": {
+      "includeFiles": ["server/**", "dist/**"],
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/[[...route]]" },
+    { "source": "/((?!api/).*)", "destination": "/" }
+  ]
+}

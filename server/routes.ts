@@ -17,9 +17,9 @@ import {
   insertTournamentRoundSchema,
   insertRosterSchema,
   insertWalletSchema,
-} from "@shared/schema";
+} from "../shared/schema";
 import { randomBytes } from "crypto";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { getOAuthConfig, isOAuthConfigured, OAUTH_PLATFORMS } from "./oauth-config";
 
 // Disable Stripe completely
@@ -117,6 +117,32 @@ async function createAuditLog(
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Health check
+  app.get("/api/health", (_req, res) => {
+    res.json({ ok: true });
+  });
+
+  // Debug: environment visibility for functions
+  app.get("/api/debug/env", (_req, res) => {
+    const svc = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const gc = process.env.GCLOUD_PROJECT;
+    const gcp = process.env.GOOGLE_CLOUD_PROJECT;
+    const fp = process.env.FIREBASE_PROJECT_ID;
+    res.json({
+      FIREBASE_SERVICE_ACCOUNT_JSON_present: !!svc,
+      FIREBASE_SERVICE_ACCOUNT_JSON_len: svc ? svc.length : 0,
+      GCLOUD_PROJECT: gc || null,
+      GOOGLE_CLOUD_PROJECT: gcp || null,
+      FIREBASE_PROJECT_ID: fp || null,
+    });
+  });
+
+  // Debug: list all environment keys (values hidden)
+  app.get("/api/debug/envkeys", (_req, res) => {
+    const keys = Object.keys(process.env || {}).sort();
+    res.json({ count: keys.length, keys });
+  });
 
   // Custom Authentication Routes
   app.post("/api/auth/login", async (req, res) => {
@@ -307,14 +333,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      res.clearCookie("connect.sid");
+    const sess: any = (req as any).session;
+    if (sess?.destroy) {
+      sess.destroy((err: any) => {
+        if (err) {
+          console.error("Logout error:", err);
+          return res.status(500).json({ message: "Logout failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } else {
+      // cookie-session fallback
+      (req as any).session = null;
       res.json({ message: "Logged out successfully" });
-    });
+    }
   });
 
   app.post("/api/auth/change-password", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
@@ -1488,14 +1520,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         version: "1.0",
         data: {
           tenants: await storage.getAllTenants(),
-          users: await storage.getUsers(),
-          staff: await storage.getStaff(),
-          payroll: await storage.getPayroll(),
-          matches: await storage.getMatches(),
-          campaigns: await storage.getCampaigns(),
-          contracts: await storage.getContracts(),
-          auditLogs: await storage.getAuditLogs(10000),
-          invites: await storage.getInvites(),
+          users: await storage.getAllUsers(),
+          staff: await storage.getAllStaff(),
+          payroll: await storage.getAllPayroll(),
+          matches: await storage.getAllMatches(),
+          campaigns: await storage.getAllCampaigns(),
+          contracts: await storage.getAllContracts(),
+          auditLogs: await storage.getAllAuditLogs(10000),
+          invites: await storage.getAllInvites(),
         }
       };
 

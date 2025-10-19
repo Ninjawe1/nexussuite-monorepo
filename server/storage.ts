@@ -47,7 +47,7 @@ import {
   wallets,            // <-- add
   type Wallet,        // <-- add
   type InsertWallet,  // <-- add
-} from "@shared/schema";
+} from "../shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 
@@ -71,6 +71,13 @@ export interface IStorage {
   createStaff(staff: InsertStaff): Promise<Staff>;
   updateStaff(id: string, tenantId: string, staff: Partial<InsertStaff>): Promise<Staff>;
   deleteStaff(id: string, tenantId: string): Promise<void>;
+
+  // Roster operations
+  getRostersByTenant(tenantId: string): Promise<Roster[]>;
+  getRoster(id: string, tenantId: string): Promise<Roster | undefined>;
+  createRoster(roster: InsertRoster): Promise<Roster>;
+  updateRoster(id: string, tenantId: string, roster: Partial<InsertRoster>): Promise<Roster>;
+  deleteRoster(id: string, tenantId: string): Promise<void>;
 
   // Payroll operations
   getPayrollByTenant(tenantId: string): Promise<Payroll[]>;
@@ -126,6 +133,15 @@ export interface IStorage {
   deleteTenant(id: string): Promise<void>;
   getAllUsers(): Promise<User[]>;
   updateUserAdmin(id: string, user: Partial<UpsertUser>): Promise<User>;
+  
+  // Super Admin export operations
+  getAllStaff(): Promise<Staff[]>;
+  getAllPayroll(): Promise<Payroll[]>;
+  getAllMatches(): Promise<Match[]>;
+  getAllCampaigns(): Promise<Campaign[]>;
+  getAllContracts(): Promise<Contract[]>;
+  getAllAuditLogs(limit?: number): Promise<AuditLog[]>;
+  getAllInvites(): Promise<Invite[]>;
   
   // Stripe operations
   updateTenantStripe(id: string, stripeData: Partial<Pick<Tenant, 'stripeCustomerId' | 'stripeSubscriptionId' | 'subscriptionPlan' | 'subscriptionStatus'>>): Promise<Tenant>;
@@ -313,6 +329,37 @@ export class DatabaseStorage implements IStorage {
 
   async deletePayroll(id: string, tenantId: string): Promise<void> {
     await db.delete(payroll).where(and(eq(payroll.id, id), eq(payroll.tenantId, tenantId)));
+  }
+
+  // Roster operations
+  async getRostersByTenant(tenantId: string): Promise<Roster[]> {
+    return db.select().from(rosters).where(eq(rosters.tenantId, tenantId)).orderBy(desc(rosters.createdAt));
+  }
+
+  async getRoster(id: string, tenantId: string): Promise<Roster | undefined> {
+    const [row] = await db
+      .select()
+      .from(rosters)
+      .where(and(eq(rosters.id, id), eq(rosters.tenantId, tenantId)));
+    return row;
+  }
+
+  async createRoster(rosterData: InsertRoster): Promise<Roster> {
+    const [row] = await db.insert(rosters).values(rosterData).returning();
+    return row;
+  }
+
+  async updateRoster(id: string, tenantId: string, rosterData: Partial<InsertRoster>): Promise<Roster> {
+    const [row] = await db
+      .update(rosters)
+      .set({ ...rosterData, updatedAt: new Date() })
+      .where(and(eq(rosters.id, id), eq(rosters.tenantId, tenantId)))
+      .returning();
+    return row;
+  }
+
+  async deleteRoster(id: string, tenantId: string): Promise<void> {
+    await db.delete(rosters).where(and(eq(rosters.id, id), eq(rosters.tenantId, tenantId)));
   }
 
   // Tournament operations
@@ -760,6 +807,4 @@ export class DatabaseStorage implements IStorage {
   async deleteWallet(id: string, tenantId: string): Promise<void> {
     await db.delete(wallets).where(and(eq(wallets.id, id), eq(wallets.tenantId, tenantId)));
   }
-
-  // ... existing code ...
 }
