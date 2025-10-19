@@ -1,7 +1,6 @@
 // Vercel serverless function wrapper for the existing Express app
 import express, { type Request, type Response, type NextFunction } from "express";
 import serverless from "serverless-http";
-import { registerRoutes } from "../server/routes";
 
 let cachedHandler: any;
 
@@ -10,8 +9,21 @@ async function buildHandler() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
-  // Register all API routes and middleware on the Express app
-  await registerRoutes(app);
+  try {
+    // Dynamically import routes to avoid crashing at module load time
+    const { registerRoutes } = await import("../server/routes");
+    await registerRoutes(app);
+  } catch (err: any) {
+    console.error("API init error:", err);
+    // Provide minimal fallback so health checks return useful info instead of a platform crash page
+    app.get("/api/health", (_req, res) => {
+      res.status(500).json({ ok: false, message: "Server initialization failed" });
+    });
+    app.all("/api/*", (_req, res) => {
+      const message = (err && err.message) ? err.message : "Initialization error";
+      res.status(500).json({ message });
+    });
+  }
 
   // Basic error handler (mirrors server/index.ts behavior without vite logging)
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -21,6 +21,10 @@ function initFirebase() {
     try {
       const jsonStr = Buffer.from(b64, "base64").toString("utf8");
       const json = JSON.parse(jsonStr);
+      // Normalize private_key newlines in case they are stored with escaped \n in env
+      if (json && typeof (json as any).private_key === "string") {
+        (json as any).private_key = (json as any).private_key.replace(/\\n/g, "\n");
+      }
       const projectId = resolveProjectId(json) || "esports-app-44b10";
       console.log("Firebase init: using FIREBASE_SERVICE_ACCOUNT_B64; projectId", projectId);
       return initializeApp({ credential: cert(json as any), projectId });
@@ -36,6 +40,10 @@ function initFirebase() {
     let json: any = null;
     try {
       json = JSON.parse(jsonStr);
+      // Normalize private_key newlines in case they are stored with escaped \n in env
+      if (json && typeof json.private_key === "string") {
+        json.private_key = json.private_key.replace(/\\n/g, "\n");
+      }
     } catch (e) {
       console.error("Invalid FIREBASE_SERVICE_ACCOUNT_JSON:", e);
     }
@@ -52,6 +60,9 @@ function initFirebase() {
     let json: any = null;
     try {
       json = JSON.parse(content);
+      if (json && typeof json.private_key === "string") {
+        json.private_key = json.private_key.replace(/\\n/g, "\n");
+      }
     } catch (e) {
       console.error("Invalid GOOGLE_APPLICATION_CREDENTIALS file JSON:", e);
     }
@@ -74,6 +85,9 @@ function initFirebase() {
         console.log("Firebase init: using bundled service account file:", p);
         const content = fs.readFileSync(p, "utf8");
         const json = JSON.parse(content);
+        if (json && typeof (json as any).private_key === "string") {
+          (json as any).private_key = (json as any).private_key.replace(/\\n/g, "\n");
+        }
         const projectId = resolveProjectId(json) || "esports-app-44b10";
         console.log("Firebase init: resolved projectId from bundled file", projectId);
         return initializeApp({ credential: cert(json as any), projectId });
