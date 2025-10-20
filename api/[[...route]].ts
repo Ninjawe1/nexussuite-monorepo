@@ -9,10 +9,22 @@ async function buildHandler() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
+  // Early bootstrap route so we can confirm the function starts even if route import fails
+  app.get("/api/bootstrap", (_req, res) => {
+    res.json({ ok: true, message: "Serverless function is alive" });
+  });
+
   try {
-    // Dynamically import routes to avoid crashing at module load time
-    const { registerRoutes } = await import("../server/routes");
+    const timeoutMs = parseInt(process.env.ROUTES_IMPORT_TIMEOUT_MS || "8000", 10);
+    console.log(`[api] Importing routes with timeout ${timeoutMs}ms...`);
+
+    const routesImport = import("../server/routes");
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Routes import timeout")), timeoutMs));
+    const mod: any = await Promise.race([routesImport, timeout]);
+
+    const { registerRoutes } = mod;
     await registerRoutes(app);
+    console.log("[api] Routes registered successfully");
   } catch (err: any) {
     console.error("API init error:", err);
     // Provide minimal fallback so health checks return useful info instead of a platform crash page
