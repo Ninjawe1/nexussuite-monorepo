@@ -97,10 +97,16 @@ function initFirebase() {
     }
   }
 
-  // Final fallback to application default credentials + hard-coded projectId
+  // Final fallback: optionally use Application Default Credentials only if explicitly allowed
   const projectId = resolveProjectId() || "esports-app-44b10";
-  console.warn("Firebase init: using applicationDefault credentials; projectId:", projectId);
-  return initializeApp({ credential: applicationDefault(), projectId });
+  if (process.env.FIREBASE_ALLOW_ADC === "true") {
+    console.warn("Firebase init: using applicationDefault credentials; projectId:", projectId);
+    return initializeApp({ credential: applicationDefault(), projectId });
+  }
+  // Fail fast to avoid hanging on serverless platforms when ADC is unavailable
+  throw new Error(
+    "Firebase credentials not provided (FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_B64). Set one in environment to initialize Firebase."
+  );
 }
 
 const app = initFirebase();
