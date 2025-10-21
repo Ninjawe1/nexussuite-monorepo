@@ -15,7 +15,8 @@ function startRoutesImport(app: Express) {
   const timeoutMs = parseInt(process.env.ROUTES_IMPORT_TIMEOUT_MS || "8000", 10);
   console.log(`[api] Starting routes import (timeout ${timeoutMs}ms)...`);
 
-  const routesImport = import("../server/routes");
+  // Prefer compiled bundle (dist) so Vercel can include it; fall back to TS source in dev
+  const routesImport = import("../dist/routes.js").catch(() => import("../server/routes"));
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Routes import timeout")), timeoutMs));
   Promise.race([routesImport, timeout])
     .then(async (mod: any) => {
@@ -26,9 +27,10 @@ function startRoutesImport(app: Express) {
       console.log("[api] Routes registered successfully");
       // Proactive Firebase warm-up (non-blocking): initialize Firestore in background
       try {
-        const fb = await import("../server/firebase");
-        if (typeof fb.getFirestoreDb === "function") {
-          fb.getFirestoreDb();
+        const fb = await import("../dist/firebase.js").catch(() => import("../server/firebase"));
+        const getDb = (fb as any).getFirestoreDb || fb?.default?.getFirestoreDb;
+        if (typeof getDb === "function") {
+          getDb();
           console.log("[api] Firebase Firestore warm-up triggered");
         }
       } catch (e) {

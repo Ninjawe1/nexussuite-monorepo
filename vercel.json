@@ -3,7 +3,8 @@
   "regions": ["iad1"],
   "functions": {
     "api/**": {
-      "memory": 1024
+      "memory": 1024,
+      "includeFiles": "dist/**"
     }
   },
   "rewrites": [
