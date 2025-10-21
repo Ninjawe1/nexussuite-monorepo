@@ -7,6 +7,14 @@ let initError: any = null;
 let initStarted = false;
 let initStartedAt = 0;
 
+// Shared readiness promise so requests can wait briefly for boot instead of immediate 503
+let readyResolve: (() => void) | null = null;
+let readyReject: ((err: any) => void) | null = null;
+let readyPromise: Promise<void> = new Promise<void>((resolve, reject) => {
+  readyResolve = resolve;
+  readyReject = reject;
+});
+
 function startRoutesImport(app: Express) {
   if (initStarted) return; // prevent duplicate imports on concurrent cold-start invocations
   initStarted = true;
@@ -24,6 +32,7 @@ function startRoutesImport(app: Express) {
       await registerRoutes(app);
       routesReady = true;
       initError = null;
+      if (readyResolve) readyResolve();
       console.log("[api] Routes registered successfully");
       // Proactive Firebase warm-up (non-blocking): initialize Firestore in background
       try {
@@ -41,6 +50,7 @@ function startRoutesImport(app: Express) {
       // Keep the app running with guard endpoints; report error fast
       initError = err;
       routesReady = false;
+      if (readyReject) readyReject(err);
       console.error("[api] Routes import/register failed:", err);
     });
 }
@@ -61,13 +71,23 @@ async function buildHandler() {
     res.status(503).json({ ok: false, message: "Server initializing" });
   });
 
-  // Guard: while routes are not ready, respond quickly to any /api/* requests
-  app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  // Guard: while routes are not ready, briefly wait for init before responding
+  app.use("/api", async (req: Request, res: Response, next: NextFunction) => {
     if (routesReady) return next();
     if (initError) {
       return res.status(500).json({ message: String(initError?.message || initError) });
     }
-    return res.status(503).json({ message: "Service initializing" });
+    const waitMs = parseInt(process.env.ROUTES_IMPORT_GUARD_WAIT_MS || "2500", 10);
+    try {
+      await Promise.race([
+        readyPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("init-timeout")), waitMs))
+      ]);
+      if (routesReady) return next();
+    } catch (_e) {
+      // fall through
+    }
+    return res.status(503).json({ message: "Service initializing", waitedMs: waitMs });
   });
 
   // Begin routes import asynchronously (do NOT await)
