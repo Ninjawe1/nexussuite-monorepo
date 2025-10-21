@@ -1,5 +1,12 @@
 {
   "version": 2,
+  "functions": {
+    "api/**": {
+      "runtime": "nodejs18.x",
+      "regions": ["iad1"],
+      "memory": 1024
+    }
+  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/[[...route]]" },
     { "source": "/(.*)", "destination": "/index.html" }

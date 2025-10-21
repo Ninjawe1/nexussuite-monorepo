@@ -1,6 +1,5 @@
 // Vercel serverless function wrapper for the existing Express app (non-blocking init)
 import express, { type Request, type Response, type NextFunction, type Express } from "express";
-import serverless from "serverless-http";
 
 let cachedHandler: any;
 let routesReady = false;
@@ -82,7 +81,8 @@ async function buildHandler() {
     } catch {}
   });
 
-  return serverless(app);
+  // Return a plain Node-style handler to avoid extra wrapper overhead
+  return (req: any, res: any) => app(req, res);
 }
 
 export default async function handler(req: any, res: any) {
