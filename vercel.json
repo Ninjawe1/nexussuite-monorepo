@@ -1,9 +1,9 @@
 {
   "version": 2,
+  "regions": ["iad1"],
   "functions": {
     "api/**": {
-      "runtime": "nodejs18.x",
-      "regions": ["iad1"],
+      "runtime": "nodejs20.x",
       "memory": 1024
     }
   },

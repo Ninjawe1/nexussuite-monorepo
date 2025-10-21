@@ -159,7 +159,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      const bcrypt = await import("bcryptjs");
+      const bcryptMod = await import("bcryptjs");
+      const bcrypt: any = (bcryptMod as any).default || bcryptMod;
       const passwordMatch = await bcrypt.compare(password, user.password);
       
       if (!passwordMatch) {
@@ -238,7 +239,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const bcrypt = await import("bcryptjs");
+      const bcryptMod = await import("bcryptjs");
+      const bcrypt: any = (bcryptMod as any).default || bcryptMod;
       const hashedPassword = await bcrypt.hash(password, 10);
 
       let tenant;
@@ -366,7 +368,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
-      const bcrypt = await import("bcryptjs");
+      const bcryptMod = await import("bcryptjs");
+      const bcrypt: any = (bcryptMod as any).default || bcryptMod;
       const passwordMatch = await bcrypt.compare(currentPassword, user.password);
       
       if (!passwordMatch) {
@@ -2661,7 +2664,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Hash password
-      const bcrypt = await import("bcryptjs");
+      const bcryptMod = await import("bcryptjs");
+      const bcrypt: any = (bcryptMod as any).default || bcryptMod;
       const hashedPassword = await bcrypt.hash(password || "Welcome123!", 10);
       
       // Create user
@@ -2816,7 +2820,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Hash password
-      const bcrypt = await import("bcryptjs");
+      const bcryptMod = await import("bcryptjs");
+      const bcrypt: any = (bcryptMod as any).default || bcryptMod;
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // Create user
@@ -2866,7 +2871,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (lastName) updates.lastName = lastName;
       
       if (password) {
-        const bcrypt = await import("bcryptjs");
+        const bcryptMod = await import("bcryptjs");
+        const bcrypt: any = (bcryptMod as any).default || bcryptMod;
         updates.password = await bcrypt.hash(password, 10);
         updates.isTemporaryPassword = false;
         updates.lastPasswordChange = new Date();
