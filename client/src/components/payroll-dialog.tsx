@@ -134,7 +134,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
     setIsSubmitting(true);
     try {
       const payload: InsertPayroll = { ...data };
-      if ((payload as any).walletId === "") {
+      if ((payload as any).walletId === "" || (payload as any).walletId === "none") {
         delete (payload as any).walletId;
       }
       if (payroll) {
@@ -173,7 +173,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem key="none" value="">
+                      <SelectItem key="none" value="none">
                         No wallet
                       </SelectItem>
                       {wallets.map((w) => (
