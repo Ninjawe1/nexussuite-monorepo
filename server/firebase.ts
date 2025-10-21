@@ -1,6 +1,6 @@
 // Module: firebase.ts imports
 import { initializeApp, applicationDefault, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore as adminGetFirestore } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
 
@@ -109,5 +109,12 @@ function initFirebase() {
   );
 }
 
-const app = initFirebase();
-export const firestore = getFirestore(app);
+let _app: any = null;
+let _firestore: any = null;
+
+export function getFirestoreDb() {
+  if (_firestore) return _firestore;
+  if (!_app) _app = initFirebase();
+  _firestore = adminGetFirestore(_app);
+  return _firestore;
+}

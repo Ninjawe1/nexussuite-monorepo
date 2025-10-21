@@ -25,6 +25,16 @@ function startRoutesImport(app: Express) {
       routesReady = true;
       initError = null;
       console.log("[api] Routes registered successfully");
+      // Proactive Firebase warm-up (non-blocking): initialize Firestore in background
+      try {
+        const fb = await import("../server/firebase");
+        if (typeof fb.getFirestoreDb === "function") {
+          fb.getFirestoreDb();
+          console.log("[api] Firebase Firestore warm-up triggered");
+        }
+      } catch (e) {
+        console.warn("[api] Firebase warm-up failed:", e);
+      }
     })
     .catch((err) => {
       // Keep the app running with guard endpoints; report error fast

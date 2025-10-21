@@ -19,7 +19,7 @@ import {
   insertWalletSchema,
 } from "../shared/schema";
 import { randomBytes } from "crypto";
-import * as bcrypt from "bcryptjs";
+/* bcryptjs will be lazily imported inside the specific routes that need it to reduce cold-start weight */
 import { getOAuthConfig, isOAuthConfigured, OAUTH_PLATFORMS } from "./oauth-config";
 
 // Disable Stripe completely
@@ -159,6 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      const bcrypt = await import("bcryptjs");
       const passwordMatch = await bcrypt.compare(password, user.password);
       
       if (!passwordMatch) {
@@ -237,6 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already exists" });
       }
 
+      const bcrypt = await import("bcryptjs");
       const hashedPassword = await bcrypt.hash(password, 10);
 
       let tenant;
@@ -364,6 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
+      const bcrypt = await import("bcryptjs");
       const passwordMatch = await bcrypt.compare(currentPassword, user.password);
       
       if (!passwordMatch) {
@@ -2658,6 +2661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Hash password
+      const bcrypt = await import("bcryptjs");
       const hashedPassword = await bcrypt.hash(password || "Welcome123!", 10);
       
       // Create user
@@ -2812,6 +2816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Hash password
+      const bcrypt = await import("bcryptjs");
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // Create user
@@ -2861,6 +2866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (lastName) updates.lastName = lastName;
       
       if (password) {
+        const bcrypt = await import("bcryptjs");
         updates.password = await bcrypt.hash(password, 10);
         updates.isTemporaryPassword = false;
         updates.lastPasswordChange = new Date();

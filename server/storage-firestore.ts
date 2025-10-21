@@ -1,4 +1,4 @@
-import { firestore } from "./firebase";
+import { getFirestoreDb } from "./firebase";
 import type {
   User, UpsertUser,
   Tenant, InsertTenant,
@@ -26,7 +26,7 @@ function now() {
 }
 
 function col(name: string) {
-  return firestore.collection(name);
+  return getFirestoreDb().collection(name);
 }
 
 async function getById<T>(collection: string, id: string): Promise<WithId<T> | undefined> {
