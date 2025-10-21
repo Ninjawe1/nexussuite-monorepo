@@ -138,11 +138,15 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
       if ((payload as any).walletId === "" || (payload as any).walletId === "none") {
         delete (payload as any).walletId;
       }
+      console.log("[PayrollDialog] Submitting payload:", payload);
       if (payroll) {
         await updateMutation.mutateAsync(payload);
       } else {
         await createMutation.mutateAsync(payload);
       }
+      console.log("[PayrollDialog] Submission finished");
+    } catch (err) {
+      console.error("[PayrollDialog] Submit error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -237,7 +241,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-payroll-type">
                           <SelectValue placeholder="Select type" />
@@ -262,7 +266,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-payroll-status">
                           <SelectValue placeholder="Select status" />
