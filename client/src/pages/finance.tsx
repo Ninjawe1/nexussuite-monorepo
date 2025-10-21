@@ -237,6 +237,24 @@ export default function Finance() {
     },
   });
 
+  // NEW: Wallet deletion mutation
+  const deleteWalletMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest(`/api/wallets/${id}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
+      toast({ title: "Wallet deleted successfully" });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to delete wallet",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: any) => {
     const submitData: any = {
       ...data,
@@ -661,11 +679,46 @@ export default function Finance() {
                           {typeLabel} • {w.currency.toUpperCase()}
                         </div>
                       </div>
-                      {w.isDefault && (
-                        <Badge className="bg-chart-2 text-primary-foreground text-xs" data-testid={`badge-default-${w.id}`}>
-                          Default
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {w.isDefault && (
+                          <Badge className="bg-chart-2 text-primary-foreground text-xs" data-testid={`badge-default-${w.id}`}>
+                            Default
+                          </Badge>
+                        )}
+                        {/* Wallet delete action */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              aria-label="Delete wallet"
+                              data-testid={`button-delete-wallet-${w.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete wallet?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the wallet "{w.name}".
+                                Transactions linked to this wallet will remain, but may show with an unknown wallet label.
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteWalletMutation.mutate(w.id)}
+                                data-testid={`confirm-delete-wallet-${w.id}`}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
