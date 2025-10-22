@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 interface PayrollDialogProps {
   open: boolean;
@@ -44,7 +45,11 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSchema = insertPayrollSchema.omit({ tenantId: true }).extend({
-    date: insertPayrollSchema.shape.date.or(z.string().transform(val => new Date(val))),
+    date: insertPayrollSchema.shape.date.or(
+      z.string()
+        .refine(v => !!toDateSafe(v), { message: "Invalid date" })
+        .transform(v => toDateSafe(v)!)
+    ),
   });
 
   const { data: wallets = [] } = useQuery<Wallet[]>({
@@ -60,7 +65,7 @@ export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProp
       amount: payroll?.amount || "0",
       type: payroll?.type || "monthly",
       status: payroll?.status || "pending",
-      date: payroll?.date ? new Date(payroll.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date: payroll?.date ? formatDateSafe(payroll.date, "yyyy-MM-dd") : new Date().toISOString().split('T')[0],
       walletId: payroll?.walletId || "",
     },
   });

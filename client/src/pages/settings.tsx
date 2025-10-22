@@ -2,13 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, UserPlus, Copy, Trash2, Check, Crown, Zap, Rocket } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Tenant, Invite } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { Upload, UserPlus, Copy, Trash2, Check, Crown, Zap, Rocket } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -155,7 +154,7 @@ function InviteManagement() {
                       {invite.status}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      Expires: {new Date(invite.expiresAt).toLocaleDateString()}
+                      Expires: {formatDateSafe(invite.expiresAt, "MMM dd, yyyy")}
                     </span>
                   </div>
                 </div>

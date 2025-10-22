@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const upcomingMatches = matches
     .filter(m => m.status === "upcoming")
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => (toDateSafe(a.date)?.getTime() ?? 0) - (toDateSafe(b.date)?.getTime() ?? 0))
     .slice(0, 2)
     .map(m => ({
       ...m,
@@ -70,7 +70,8 @@ export default function Dashboard() {
     : 0;
 
   const thisWeekMatches = matches.filter(m => {
-    const matchDate = new Date(m.date);
+    const matchDate = toDateSafe(m.date);
+    if (!matchDate) return false;
     const now = new Date();
     const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     return matchDate >= now && matchDate <= weekFromNow;

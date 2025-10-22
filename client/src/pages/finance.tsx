@@ -47,8 +47,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTransactionSchema, type InsertTransaction, type Wallet } from "@shared/schema";
 
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { formatDateSafe } from "@/lib/date";
+// removed direct date-fns format import; using formatDateSafe instead
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 import {
   Plus,
   TrendingUp,
@@ -146,7 +146,7 @@ export default function Finance() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `transactions-${format(new Date(), "yyyy-MM-dd")}.csv`;
+      a.download = `transactions-${formatDateSafe(new Date(), "yyyy-MM-dd")}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -256,10 +256,19 @@ export default function Finance() {
   });
 
   const onSubmit = (data: any) => {
+    const parsedDate = toDateSafe(data.date);
+    if (!parsedDate) {
+      toast({
+        title: "Invalid date",
+        description: "Please provide a valid date for the transaction.",
+        variant: "destructive",
+      });
+      return;
+    }
     const submitData: any = {
       ...data,
       amount: data.amount.toString(),
-      date: new Date(data.date),
+      date: parsedDate,
     };
     // If no wallet selected, fallback to default wallet if available
     if (!submitData.walletId || submitData.walletId === "") {
@@ -746,6 +755,15 @@ export default function Finance() {
                   dataKey="month" 
                   className="text-xs"
                   tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(value: any) => {
+                    const v = String(value ?? '');
+                    const m = v.match(/^(\d{4})-(\d{2})$/);
+                    if (m) {
+                      const d = new Date(Number(m[1]), Number(m[2]) - 1, 1);
+                      return isNaN(d.getTime()) ? v : d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+                    }
+                    return v || 'Unknown';
+                  }}
                 />
                 <YAxis 
                   className="text-xs"

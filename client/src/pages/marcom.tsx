@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 import type { Campaign as CampaignType, SocialAccount } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -276,9 +277,7 @@ export default function Marcom() {
                         </Button>
                       </div>
                       {account.lastSyncedAt && (
-                        <p className="text-xs text-muted-foreground">
-                          Last synced: {new Date(account.lastSyncedAt).toLocaleDateString()}
-                        </p>
+                        <p className="text-xs text-muted-foreground">Last synced: {formatDateSafe(account.lastSyncedAt, "MMM dd, yyyy")}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -489,8 +488,8 @@ export default function Marcom() {
                     {...campaign}
                     platforms={campaign.platforms as any}
                     status={campaign.status as any}
-                    startDate={new Date(campaign.startDate)}
-                    endDate={new Date(campaign.endDate)}
+                    startDate={toDateSafe(campaign.startDate) || new Date()}
+                    endDate={toDateSafe(campaign.endDate) || new Date()}
                     reach={campaign.reach ?? undefined}
                     engagement={campaign.engagement ? Number(campaign.engagement) : undefined}
                   />

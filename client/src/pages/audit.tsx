@@ -82,7 +82,7 @@ export default function Audit() {
                 user={log.userName}
                 action={log.action}
                 entity={log.entity}
-                timestamp={log.timestamp}
+                timestamp={log.timestamp ?? (log as any).createdAt}
                 oldValue={log.oldValue || undefined}
                 newValue={log.newValue || undefined}
                 actionType={log.actionType as "create" | "update" | "delete"}

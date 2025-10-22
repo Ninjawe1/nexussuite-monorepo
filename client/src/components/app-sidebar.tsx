@@ -32,6 +32,17 @@ const clubMenuItems = [
 
 const adminMenuItems = [
   { title: "Admin Dashboard", url: "/admin", icon: Crown },
+  { title: "Users", url: "/admin/users", icon: Users },
+  { title: "Billing", url: "/admin/billing", icon: DollarSign },
+  { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+  { title: "Content", url: "/admin/content", icon: FileText },
+  { title: "Settings", url: "/admin/settings", icon: Settings },
+  { title: "Logs", url: "/admin/logs", icon: Shield },
+  { title: "Communication", url: "/admin/communication", icon: Megaphone },
+  { title: "Security", url: "/admin/security", icon: Shield },
+  { title: "Roles", url: "/admin/roles", icon: UserCog },
+  { title: "Marketing", url: "/admin/marketing", icon: Wallet },
+  { title: "Reports", url: "/admin/reports", icon: FileText },
 ];
 
 export function AppSidebar() {

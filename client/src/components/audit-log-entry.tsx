@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { toDateSafe } from "@/lib/date";
+import { toDateSafe, formatDateSafe } from "@/lib/date";
 
 interface AuditLogEntryProps {
   id: string;
@@ -39,7 +39,9 @@ export function AuditLogEntry({ id, user, action, entity, timestamp, oldValue, n
           <span className="text-xs text-muted-foreground shrink-0">
             {(() => {
               const d = toDateSafe(timestamp);
-              return d ? formatDistanceToNow(d, { addSuffix: true }) : "Unknown time";
+              const absolute = formatDateSafe(timestamp, "MMM dd, yyyy HH:mm", "—");
+              const relative = d ? formatDistanceToNow(d, { addSuffix: true }) : "Unknown time";
+              return `${absolute} • ${relative}`;
             })()}
           </span>
         </div>

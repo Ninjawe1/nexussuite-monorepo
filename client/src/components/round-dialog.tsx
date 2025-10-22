@@ -30,8 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format } from "date-fns";
-import { formatDateSafe } from "@/lib/date";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 interface RoundDialogProps {
   open: boolean;
@@ -107,9 +106,18 @@ export function RoundDialog({ open, onOpenChange, tournamentId, round }: RoundDi
   });
 
   const onSubmit = (data: RoundFormData) => {
+    const start = data.startDate ? toDateSafe(data.startDate) : undefined;
+    if (data.startDate && !start) {
+      toast({
+        title: "Invalid date",
+        description: "Please enter a valid start date (YYYY-MM-DD).",
+        variant: "destructive",
+      });
+      return;
+    }
     const roundData: any = {
       ...data,
-      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      startDate: start,
     };
     mutation.mutate(roundData);
   };

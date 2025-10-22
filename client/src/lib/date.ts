@@ -26,7 +26,13 @@ export function toDateSafe(value: unknown): Date | null {
   return null;
 }
 
-export function formatDateSafe(value: unknown, fmt: string): string {
+export function formatDateSafe(value: unknown, fmt: string, fallback = ""): string {
   const d = toDateSafe(value);
-  return d ? formatDateFns(d, fmt) : "Invalid date";
+  if (d) return formatDateFns(d, fmt);
+  // If a custom fallback was provided, use it first
+  if (fallback) return fallback;
+  // Otherwise, preview the original input when possible
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return "";
 }

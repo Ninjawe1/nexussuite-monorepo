@@ -1,22 +1,17 @@
 import { PayrollDialog } from "@/components/payroll-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Download, DollarSign, TrendingUp, TrendingDown, Edit, Trash2 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import type { PayrollEntry } from "@shared/schema";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Payroll as PayrollType } from "@shared/schema";
+import { formatDateSafe } from "@/lib/date";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -24,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, DollarSign, TrendingUp, TrendingDown, Plus, Download, Edit, Trash2 } from "lucide-react";
 
 export default function Payroll() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -209,7 +204,7 @@ export default function Payroll() {
                       ${Number(entry.amount).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {new Date(entry.date).toLocaleDateString()}
+                      {formatDateSafe(entry.date, "MMM dd, yyyy")}
                     </TableCell>
                     <TableCell>
                       <Badge className={entry.status === 'paid' ? 'bg-chart-2 text-primary-foreground' : 'bg-chart-4 text-primary-foreground'}>

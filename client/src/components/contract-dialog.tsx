@@ -45,7 +45,11 @@ export function ContractDialog({ open, onOpenChange, contract }: ContractDialogP
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSchema = insertContractSchema.omit({ tenantId: true }).extend({
-    expirationDate: insertContractSchema.shape.expirationDate.or(z.string().transform(val => new Date(val))),
+    expirationDate: insertContractSchema.shape.expirationDate.or(
+      z.string()
+        .refine(v => !!toDateSafe(v), { message: "Invalid date" })
+        .transform(v => toDateSafe(v)!)
+    ),
   });
 
   const form = useForm({

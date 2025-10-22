@@ -27,6 +27,18 @@ import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
 import InviteAccept from "@/pages/invite-accept";
+// Admin section pages
+import AdminUsersPage from "@/pages/admin/users";
+import AdminBillingPage from "@/pages/admin/billing";
+import AdminAnalyticsPage from "@/pages/admin/analytics";
+import AdminContentPage from "@/pages/admin/content";
+import AdminSettingsPage from "@/pages/admin/settings";
+import AdminLogsPage from "@/pages/admin/logs";
+import AdminCommunicationPage from "@/pages/admin/communication";
+import AdminSecurityPage from "@/pages/admin/security";
+import AdminRolesPage from "@/pages/admin/roles";
+import AdminMarketingPage from "@/pages/admin/marketing";
+import AdminReportsPage from "@/pages/admin/reports";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -65,6 +77,19 @@ function Router() {
     <Switch>
       <Route path="/" component={user?.isSuperAdmin ? Admin : Dashboard} />
       <Route path="/admin" component={Admin} />
+      {/* Super Admin nested sections */}
+      <Route path="/admin/users" component={AdminUsersPage} />
+      <Route path="/admin/billing" component={AdminBillingPage} />
+      <Route path="/admin/analytics" component={AdminAnalyticsPage} />
+      <Route path="/admin/content" component={AdminContentPage} />
+      <Route path="/admin/settings" component={AdminSettingsPage} />
+      <Route path="/admin/logs" component={AdminLogsPage} />
+      <Route path="/admin/communication" component={AdminCommunicationPage} />
+      <Route path="/admin/security" component={AdminSecurityPage} />
+      <Route path="/admin/roles" component={AdminRolesPage} />
+      <Route path="/admin/marketing" component={AdminMarketingPage} />
+      <Route path="/admin/reports" component={AdminReportsPage} />
+
       <Route path="/dashboard" component={Dashboard} />
       {/* removed Staff route */}
       <Route path="/team" component={Team} />

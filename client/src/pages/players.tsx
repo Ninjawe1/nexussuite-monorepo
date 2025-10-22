@@ -10,7 +10,7 @@ import { Search, Plus, FileText } from "lucide-react";
 import { StaffCard } from "@/components/staff-card";
 import { PlayerRosterDialog } from "@/components/player-roster-dialog";
 import { PlayerAddDialog } from "@/components/player-add-dialog";
-import { formatDateSafe } from "@/lib/date";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 export default function Players() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,7 +46,9 @@ export default function Players() {
   const getSalaryText = (playerId: string) => {
     const entries = payroll.filter(p => p.staffId === playerId);
     if (!entries.length) return "No payroll set";
-    const latest = entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).at(-1)!;
+    const latest = entries
+      .sort((a, b) => (toDateSafe(a.date)?.getTime() ?? 0) - (toDateSafe(b.date)?.getTime() ?? 0))
+      .at(-1)!;
     return `${latest.amount} (${latest.type})`;
   };
 

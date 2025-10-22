@@ -24,6 +24,9 @@ export function MatchCard({ id, teamA, teamB, scoreA, scoreB, date, tournament, 
   };
 
   const winner = scoreA !== undefined && scoreB !== undefined ? (scoreA > scoreB ? 'A' : scoreA < scoreB ? 'B' : 'draw') : null;
+  const dateFormatted = formatDateSafe(date, 'MMM dd, HH:mm');
+  const rawDateText = typeof date === 'string' ? date : '';
+  const dateText = dateFormatted || rawDateText;
 
   return (
     <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-match-${id}`}>
@@ -60,8 +63,8 @@ export function MatchCard({ id, teamA, teamB, scoreA, scoreB, date, tournament, 
 
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
           <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            <span>{formatDateSafe(date, 'MMM dd, HH:mm')}</span>
+            {dateText && <Calendar className="w-3 h-3" />}
+            {dateText && <span>{dateText}</span>}
           </div>
           {venue && (
             <div className="flex items-center gap-1">

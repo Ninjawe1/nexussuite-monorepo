@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatDateSafe } from "@/lib/date";
 
 export default function Team() {
   const { toast } = useToast();
@@ -194,7 +195,7 @@ function InviteCard({ invite }: { invite: Invite }) {
             {invite.email}
           </CardTitle>
           <CardDescription>
-            Invited by {invite.inviterName} • Expires {new Date(invite.expiresAt).toLocaleDateString()}
+            Invited by {invite.inviterName} • Expires {formatDateSafe(invite.expiresAt, "MMM dd, yyyy")}
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">

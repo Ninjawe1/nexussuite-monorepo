@@ -1363,13 +1363,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug route for audit logs (temporary)
+  app.get("/api/debug/audit-logs", async (req: any, res) => {
+    try {
+      // Create some test audit logs if none exist
+      const existingLogs = await storage.getAllAuditLogs(5);
+      console.log("Debug: Found", existingLogs.length, "existing audit logs");
+      if (existingLogs.length === 0) {
+        console.log("Creating test audit logs...");
+        
+        // Create test logs with different timestamp formats
+        await storage.createAuditLog({
+          tenantId: "test-tenant",
+          userId: "test-user-1",
+          userName: "Test User",
+          action: "Created new match: Team A vs Team B",
+          entity: "match",
+          entityId: "match-123",
+          actionType: "create",
+          timestamp: new Date(), // Current date
+          oldValue: null,
+          newValue: JSON.stringify({ teamA: "Team A", teamB: "Team B" })
+        });
+        
+        await storage.createAuditLog({
+          tenantId: "test-tenant",
+          userId: "test-user-2", 
+          userName: "sda dsada",
+          action: "Added expense transaction: equipment",
+          entity: "transaction",
+          entityId: "trans-456",
+          actionType: "create",
+          timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+          oldValue: null,
+          newValue: JSON.stringify({ amount: 500, category: "equipment" })
+        });
+        
+        await storage.createAuditLog({
+          tenantId: "test-tenant",
+          userId: "test-user-3",
+          userName: "Admin User",
+          action: "Updated player profile",
+          entity: "player",
+          entityId: "player-789",
+          actionType: "update",
+          timestamp: "2024-01-15T10:30:00Z", // String timestamp
+          oldValue: JSON.stringify({ rank: "Silver" }),
+          newValue: JSON.stringify({ rank: "Gold" })
+        });
+      }
+      
+      // Get all audit logs without authentication for debugging
+      const auditLogs = await storage.getAllAuditLogs(100);
+      
+      console.log("Debug: Raw audit logs from storage:", JSON.stringify(auditLogs.slice(0, 2), null, 2));
+      
+      // Normalize timestamp across storage backends
+      function toDateSafeServer(value: any): Date | null {
+        if (!value) return null;
+        if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+        if (typeof value === "string" || typeof value === "number") {
+          const d = new Date(value);
+          return isNaN(d.getTime()) ? null : d;
+        }
+        const v: any = value;
+        if (v && typeof v.toDate === "function") {
+          try { const d = v.toDate(); return d instanceof Date && !isNaN(d.getTime()) ? d : null; } catch { return null; }
+        }
+        if (v && typeof v.seconds === "number") {
+          const millis = v.seconds * 1000 + (v.nanoseconds || 0) / 1e6;
+          const d = new Date(millis);
+          return isNaN(d.getTime()) ? null : d;
+        }
+        return null;
+      }
+
+      const normalized = auditLogs.map((log: any) => {
+        const tsInput = log.timestamp ?? log.createdAt;
+        const ts = toDateSafeServer(tsInput);
+        console.log(`Debug: Processing log ${log.id}, tsInput:`, tsInput, "normalized:", ts);
+        return { ...log, timestamp: ts ?? tsInput ?? new Date() };
+      });
+
+      console.log("Debug: Normalized audit logs:", JSON.stringify(normalized.slice(0, 2), null, 2));
+      res.json(normalized);
+    } catch (error) {
+      console.error("Error fetching debug audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch debug audit logs", error: error.message });
+    }
+  });
+
   // Audit log routes
   app.get("/api/audit-logs", isAuthenticated, checkTenantSuspension, async (req: any, res) => {
     try {
       const tenantId = await getTenantId(req);
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
       const auditLogs = await storage.getAuditLogsByTenant(tenantId, limit);
-      res.json(auditLogs);
+
+      // Normalize timestamp across storage backends
+      function toDateSafeServer(value: any): Date | null {
+        if (!value) return null;
+        if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+        if (typeof value === "string" || typeof value === "number") {
+          const d = new Date(value);
+          return isNaN(d.getTime()) ? null : d;
+        }
+        const v: any = value;
+        if (v && typeof v.toDate === "function") {
+          try { const d = v.toDate(); return d instanceof Date && !isNaN(d.getTime()) ? d : null; } catch { return null; }
+        }
+        if (v && typeof v.seconds === "number") {
+          const millis = v.seconds * 1000 + (v.nanoseconds || 0) / 1e6;
+          const d = new Date(millis);
+          return isNaN(d.getTime()) ? null : d;
+        }
+        return null;
+      }
+
+      const normalized = auditLogs.map((log: any) => {
+        const tsInput = log.timestamp ?? log.createdAt;
+        const ts = toDateSafeServer(tsInput);
+        return { ...log, timestamp: ts ?? tsInput ?? new Date() };
+      });
+
+      res.json(normalized);
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ message: "Failed to fetch audit logs" });
@@ -2374,19 +2491,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const tenantId = await getTenantId(req);
       const transactions = await storage.getTransactionsByTenant(tenantId);
+
+      // Helper to safely parse various date shapes (Date, string, Firestore Timestamp-like)
+      function toDateSafeServer(value: any): Date | null {
+        if (!value) return null;
+        if (value instanceof Date) {
+          return isNaN(value.getTime()) ? null : value;
+        }
+        if (typeof value === "string" || typeof value === "number") {
+          const d = new Date(value);
+          return isNaN(d.getTime()) ? null : d;
+        }
+        if (typeof value === "object") {
+          const v: any = value;
+          if (v && typeof v.toDate === "function") {
+            try {
+              const d = v.toDate();
+              return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+            } catch { return null; }
+          }
+          if (v && typeof v.seconds === "number") {
+            const millis = v.seconds * 1000 + (v.nanoseconds || 0) / 1e6;
+            const d = new Date(millis);
+            return isNaN(d.getTime()) ? null : d;
+          }
+        }
+        return null;
+      }
       
-      // Group transactions by month
-      const monthlyData: Record<string, { income: number; expenses: number }> = {};
+      // Group transactions by month, with graceful fallback for invalid dates
+      const monthlyData: Record<string, { income: number; expenses: number; ts?: number }> = {};
       
-      transactions.forEach(transaction => {
-        const date = new Date(transaction.date);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      transactions.forEach((transaction: any) => {
+        const d = toDateSafeServer(transaction.date);
+        const monthKey = d
+          ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          : (typeof transaction.date === 'string' && transaction.date.trim() ? transaction.date : 'Unknown');
         
         if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { income: 0, expenses: 0 };
+          monthlyData[monthKey] = { income: 0, expenses: 0, ts: d ? new Date(d.getFullYear(), d.getMonth(), 1).getTime() : undefined };
         }
         
-        const amount = parseFloat(transaction.amount);
+        const amount = parseFloat(String(transaction.amount));
         if (transaction.type === 'income') {
           monthlyData[monthKey].income += amount;
         } else {
@@ -2394,15 +2540,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // Convert to array and sort by date
+      // Convert to array and sort by timestamp (Unknowns last)
       const result = Object.entries(monthlyData)
         .map(([month, data]) => ({
           month,
           income: data.income,
           expenses: data.expenses,
-          profit: data.income - data.expenses
+          profit: data.income - data.expenses,
+          ts: data.ts ?? Number.MAX_SAFE_INTEGER,
         }))
-        .sort((a, b) => a.month.localeCompare(b.month));
+        .sort((a, b) => a.ts - b.ts)
+        .map(({ ts, ...rest }) => rest);
       
       res.json(result);
     } catch (error) {
@@ -2422,9 +2570,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create CSV rows
       const rows = transactions
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .map(t => {
-          const date = new Date(t.date).toISOString().split('T')[0];
+        .sort((a: any, b: any) => {
+          const toDate = (v: any): Date | null => {
+            if (!v) return null;
+            if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+            if (typeof v === 'string' || typeof v === 'number') { const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
+            const x: any = v;
+            if (x && typeof x.toDate === 'function') { try { const d = x.toDate(); return d instanceof Date && !isNaN(d.getTime()) ? d : null; } catch { return null; } }
+            if (x && typeof x.seconds === 'number') { const d = new Date(x.seconds * 1000 + (x.nanoseconds || 0) / 1e6); return isNaN(d.getTime()) ? null : d; }
+            return null;
+          };
+          const bd = toDate(b.date)?.getTime() ?? 0;
+          const ad = toDate(a.date)?.getTime() ?? 0;
+          return bd - ad;
+        })
+        .map((t: any) => {
+          const toDate = (v: any): Date | null => {
+            if (!v) return null;
+            if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+            if (typeof v === 'string' || typeof v === 'number') { const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
+            const x: any = v;
+            if (x && typeof x.toDate === 'function') { try { const d = x.toDate(); return d instanceof Date && !isNaN(d.getTime()) ? d : null; } catch { return null; } }
+            if (x && typeof x.seconds === 'number') { const d = new Date(x.seconds * 1000 + (x.nanoseconds || 0) / 1e6); return isNaN(d.getTime()) ? null : d; }
+            return null;
+          };
+          const d = toDate(t.date);
+          const date = d ? d.toISOString().split('T')[0] : (typeof t.date === 'string' ? t.date : '');
           const description = (t.description || '').replace(/"/g, '""');
           const paymentMethod = t.paymentMethod || '';
           const reference = t.reference || '';

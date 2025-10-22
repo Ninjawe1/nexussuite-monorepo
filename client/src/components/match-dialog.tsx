@@ -185,9 +185,20 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
+      // Safely parse and validate the date
+      const parsedDate = toDateSafe(data.date);
+      if (!parsedDate) {
+        toast({
+          title: "Invalid date",
+          description: "Please enter a valid match date (YYYY-MM-DD or ISO).",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const submitData = {
         ...data,
-        date: new Date(data.date),
+        date: parsedDate,
       };
       if (match) {
         await updateMutation.mutateAsync(submitData);

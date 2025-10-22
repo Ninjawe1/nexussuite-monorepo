@@ -2,7 +2,6 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { SiX, SiInstagram, SiYoutube, SiTiktok, SiTwitch } from "react-icons/si";
 import { TrendingUp, Eye, Heart } from "lucide-react";
-import { format } from "date-fns";
 import { formatDateSafe } from "@/lib/date";
 
 interface CampaignCardProps {
@@ -32,6 +31,8 @@ export function CampaignCard({ id, title, description, startDate, endDate, platf
     scheduled: 'bg-chart-4 text-primary-foreground',
   };
 
+  const startText = formatDateSafe(startDate, 'MMM dd');
+const endText = formatDateSafe(endDate, 'MMM dd, yyyy');
   return (
     <Card className="hover-elevate active-elevate-2 cursor-pointer" data-testid={`card-campaign-${id}`}>
       <CardHeader className="pb-3">
@@ -74,7 +75,7 @@ export function CampaignCard({ id, title, description, startDate, endDate, platf
         )}
       </CardContent>
       <CardFooter className="pt-0 pb-4 text-xs text-muted-foreground">
-        {formatDateSafe(startDate, 'MMM dd')} - {formatDateSafe(endDate, 'MMM dd, yyyy')}
+        {startText && endText ? `${startText} - ${endText}` : (startText || endText)}
       </CardFooter>
     </Card>
   );

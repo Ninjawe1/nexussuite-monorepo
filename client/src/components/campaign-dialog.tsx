@@ -33,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 interface CampaignDialogProps {
   open: boolean;
@@ -55,8 +56,16 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSchema = insertCampaignSchema.omit({ tenantId: true }).extend({
-    startDate: insertCampaignSchema.shape.startDate.or(z.string().transform(val => new Date(val))),
-    endDate: insertCampaignSchema.shape.endDate.or(z.string().transform(val => new Date(val))),
+    startDate: insertCampaignSchema.shape.startDate.or(
+      z.string()
+        .refine(v => !!toDateSafe(v), { message: "Invalid date" })
+        .transform(v => toDateSafe(v)!)
+    ),
+    endDate: insertCampaignSchema.shape.endDate.or(
+      z.string()
+        .refine(v => !!toDateSafe(v), { message: "Invalid date" })
+        .transform(v => toDateSafe(v)!)
+    ),
   });
 
   const form = useForm({
@@ -64,8 +73,8 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
     defaultValues: {
       title: campaign?.title || "",
       description: campaign?.description || "",
-      startDate: campaign?.startDate ? new Date(campaign.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      endDate: campaign?.endDate ? new Date(campaign.endDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      startDate: campaign?.startDate ? formatDateSafe(campaign.startDate, "yyyy-MM-dd") : new Date().toISOString().split('T')[0],
+      endDate: campaign?.endDate ? formatDateSafe(campaign.endDate, "yyyy-MM-dd") : new Date().toISOString().split('T')[0],
       platforms: campaign?.platforms || [],
       reach: campaign?.reach || undefined,
       engagement: campaign?.engagement || undefined,

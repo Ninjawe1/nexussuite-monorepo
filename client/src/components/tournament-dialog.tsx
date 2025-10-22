@@ -31,8 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format } from "date-fns";
-import { formatDateSafe } from "@/lib/date";
+import { formatDateSafe, toDateSafe } from "@/lib/date";
 
 interface TournamentDialogProps {
   open: boolean;
@@ -114,10 +113,28 @@ export function TournamentDialog({ open, onOpenChange, tournament }: TournamentD
   });
 
   const onSubmit = (data: TournamentFormData) => {
+    const start = toDateSafe(data.startDate);
+    if (!start) {
+      toast({
+        title: "Invalid date",
+        description: "Please enter a valid start date (YYYY-MM-DD).",
+        variant: "destructive",
+      });
+      return;
+    }
+    const end = data.endDate ? toDateSafe(data.endDate) : undefined;
+    if (data.endDate && !end) {
+      toast({
+        title: "Invalid date",
+        description: "Please enter a valid end date (YYYY-MM-DD).",
+        variant: "destructive",
+      });
+      return;
+    }
     const tournamentData: any = {
       ...data,
-      startDate: new Date(data.startDate),
-      endDate: data.endDate ? new Date(data.endDate) : undefined,
+      startDate: start,
+      endDate: end,
     };
     mutation.mutate(tournamentData);
   };

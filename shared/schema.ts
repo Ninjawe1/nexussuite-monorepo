@@ -162,8 +162,8 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  startDate: z.union([z.date(), z.string().transform(val => new Date(val))]),
-  endDate: z.union([z.date(), z.string().transform(val => new Date(val))]).optional(),
+  startDate: z.union([z.date(), z.string()]),
+  endDate: z.union([z.date(), z.string()]).optional(),
 });
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Tournament = typeof tournaments.$inferSelect;
@@ -184,7 +184,7 @@ export const insertTournamentRoundSchema = createInsertSchema(tournamentRounds).
   id: true,
   createdAt: true,
 }).extend({
-  startDate: z.union([z.date(), z.string().transform(val => new Date(val))]).optional(),
+  startDate: z.union([z.date(), z.string()]).optional(),
 });
 export type InsertTournamentRound = z.infer<typeof insertTournamentRoundSchema>;
 export type TournamentRound = typeof tournamentRounds.$inferSelect;
@@ -216,7 +216,7 @@ export const insertMatchSchema = createInsertSchema(matches).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  date: z.union([z.date(), z.string()]),
 });
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
 export type Match = typeof matches.$inferSelect;
@@ -242,8 +242,8 @@ export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  startDate: z.union([z.date(), z.string().transform(val => new Date(val))]),
-  endDate: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  startDate: z.union([z.date(), z.string()]),
+  endDate: z.union([z.date(), z.string()]),
 });
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type Campaign = typeof campaigns.$inferSelect;
@@ -267,7 +267,7 @@ export const insertContractSchema = createInsertSchema(contracts).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  expirationDate: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  expirationDate: z.union([z.date(), z.string()]),
 });
 export type InsertContract = z.infer<typeof insertContractSchema>;
 export type Contract = typeof contracts.$inferSelect;
@@ -342,7 +342,7 @@ export const insertSocialMetricSchema = createInsertSchema(socialMetrics).omit({
   id: true,
   createdAt: true,
 }).extend({
-  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  date: z.union([z.date(), z.string()]),
 });
 export type InsertSocialMetric = z.infer<typeof insertSocialMetricSchema>;
 export type SocialMetric = typeof socialMetrics.$inferSelect;
@@ -391,7 +391,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  date: z.union([z.date(), z.string()]),
 });
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
@@ -418,8 +418,7 @@ export const insertPayrollSchema = createInsertSchema(payroll).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  date: z.union([z.date(), z.string().transform(val => new Date(val))]),
+  date: z.union([z.date(), z.string()]),
 });
 export type InsertPayroll = z.infer<typeof insertPayrollSchema>;
 export type Payroll = typeof payroll.$inferSelect;
-// ... existing code ...

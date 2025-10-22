@@ -31,6 +31,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { toDateSafe } from "@/lib/date";
 
 interface PlayerAddDialogProps {
   open: boolean;
@@ -99,12 +100,21 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
 
       // 2) Optionally create contract
       if (values.includeContract && values.fileName && values.fileUrl && values.expirationDate) {
+        const exp = toDateSafe(values.expirationDate);
+        if (!exp) {
+          toast({
+            title: "Invalid date",
+            description: "Please enter a valid contract expiration date (YYYY-MM-DD).",
+            variant: "destructive",
+          });
+          throw new Error("Invalid contract expiration date");
+        }
         const contractPayload = {
           fileName: values.fileName,
           fileUrl: values.fileUrl,
           type: "Player",
           linkedPerson: staff.name, // now valid
-          expirationDate: new Date(values.expirationDate),
+          expirationDate: exp,
           status: values.contractStatus,
         };
         await apiRequest("/api/contracts", "POST", contractPayload);
@@ -112,6 +122,15 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
 
       // 3) Optionally create payroll
       if (values.includePayroll && values.amount && values.payrollDate) {
+        const payDate = toDateSafe(values.payrollDate);
+        if (!payDate) {
+          toast({
+            title: "Invalid date",
+            description: "Please enter a valid payroll date (YYYY-MM-DD).",
+            variant: "destructive",
+          });
+          throw new Error("Invalid payroll date");
+        }
         const payrollPayload = {
           staffId: staff.id, // now valid
           name: staff.name,
@@ -119,7 +138,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
           amount: values.amount,
           type: values.payrollType,
           status: values.payrollStatus,
-          date: new Date(values.payrollDate),
+          date: payDate,
         };
         await apiRequest("/api/payroll", "POST", payrollPayload);
       }
