@@ -21,7 +21,8 @@ export type Permission =
   | "manage:invites"
   | "manage:finance"
   | "manage:social"
-  | "manage:users";
+  | "manage:users"
+  | "manage:files";
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   owner: [
@@ -35,6 +36,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "manage:finance",
     "manage:social",
     "manage:users",
+    "manage:files",
   ],
   admin: [
     "manage:staff",
@@ -47,6 +49,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "manage:finance",
     "manage:social",
     "manage:users",
+    "manage:files",
   ],
   manager: [
     "manage:staff",
@@ -55,6 +58,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "manage:campaigns",
     "manage:contracts",
     "manage:invites",
+    "manage:files",
   ],
   finance: ["manage:finance", "manage:payroll"],
   marcom: ["manage:campaigns", "manage:social"],
@@ -118,6 +122,22 @@ export function requirePermission(permission: Permission): RequestHandler {
       next();
     } catch (error) {
       console.error("RBAC permission check error:", error);
+      res.status(500).json({ message: "Authorization check failed" });
+    }
+  };
+}
+
+// Export a middleware that requires super admin
+export function requireSuperAdmin(): RequestHandler {
+  return async (req: any, res, next) => {
+    try {
+      if (await isSuperAdmin(req)) return next();
+      return res.status(403).json({
+        message: "Forbidden",
+        reason: "Super admin access required",
+      });
+    } catch (error) {
+      console.error("RBAC super admin check error:", error);
       res.status(500).json({ message: "Authorization check failed" });
     }
   };

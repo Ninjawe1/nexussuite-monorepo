@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ import { LogOut } from "lucide-react";
 import { useEffect } from "react";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Staff from "@/pages/staff";
 import Team from "@/pages/team";
@@ -27,6 +28,7 @@ import Audit from "@/pages/audit";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
 import InviteAccept from "@/pages/invite-accept";
+import Profile from "@/pages/profile";
 // Admin section pages
 import AdminUsersPage from "@/pages/admin/users";
 import AdminBillingPage from "@/pages/admin/billing";
@@ -68,7 +70,7 @@ function Router() {
       <Switch>
         <Route path="/register" component={Register} />
         <Route path="/login" component={Login} />
-        <Route path="/" component={Login} />
+        <Route path="/" component={Landing} />
       </Switch>
     );
   }
@@ -101,6 +103,8 @@ function Router() {
       <Route path="/marcom" component={Marcom} />
       <Route path="/finance" component={Finance} />
       <Route path="/contracts" component={Contracts} />
+      <Route path="/profile" component={Profile} />
+      {/* Files page removed */}
       <Route path="/audit" component={Audit} />
       <Route path="/settings" component={Settings} />
     </Switch>
@@ -108,67 +112,87 @@ function Router() {
 }
 
 export default function App() {
+  // Align global CSS variables with SidebarProvider defaults.
+  // Desktop sidebar width bumped to 18rem for better spacing on larger screens.
   const style = {
-    "--sidebar-width": "280px",
-    "--sidebar-width-icon": "80px",
+    "--sidebar-width": "18rem",
+    "--sidebar-width-icon": "3rem",
   };
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthenticatedApp style={style as React.CSSProperties} />
+        <AppWithFlags style={style as React.CSSProperties} />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
   );
 }
 
-function AuthenticatedApp({ style }: { style: React.CSSProperties }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Check for pending invite token after login - runs once when auth completes
+function AppWithFlags({ style }: { style: React.CSSProperties }) {
+  // Redesign feature flags and theme selector.
+  // Usage:
+  //   ?nova=1                         -> enables nova theme
+  //   ?aqua=1                         -> enables aqua theme (teal)
+  //   ?atomic=1                       -> enables atomic theme (deep teal)
+  //   ?theme=nova|aqua|atomic         -> explicit theme selection
+  // Persists in localStorage under `design:theme`.
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      const pendingToken = sessionStorage.getItem("pendingInviteToken");
-      if (pendingToken) {
-        // Redirect to invite page with token
-        window.location.href = `/invite/${pendingToken}`;
-      }
-    }
-  }, [isAuthenticated, isLoading]);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const themeParam = params.get("theme");
+      const useNova = params.get("nova") === "1";
+      const useAqua = params.get("aqua") === "1";
+      const useAtomic = params.get("atomic") === "1";
 
+      let theme = themeParam === "aqua" || themeParam === "nova" || themeParam === "atomic" ? themeParam : undefined;
+      if (!theme) theme = useNova ? "nova" : useAqua ? "aqua" : useAtomic ? "atomic" : undefined;
+      if (theme) localStorage.setItem("design:theme", theme);
+
+      const saved = localStorage.getItem("design:theme") || "atomic"; // default atomic to match requested template
+      document.documentElement.classList.remove("nova", "aqua", "atomic");
+      document.documentElement.classList.add(saved);
+    } catch (_) {
+      // no-op
+    }
+  }, []);
+
+  return <AuthenticatedApp style={style} />;
+}
+
+function AuthenticatedApp({ style }: { style: React.CSSProperties }) {
+  const { isAuthenticated, isLoading, logout } = useAuth();
+
+  // If unauthenticated (or still loading), render Router without the app shell.
+  // This ensures the public Landing page is NOT wrapped by the sidebar/layout.
   if (isLoading || !isAuthenticated) {
     return <Router />;
   }
 
+  // Authenticated users get the full application shell with sidebar.
   return (
     <SidebarProvider style={style}>
-      <div className="flex h-screen w-full">
-        <AppSidebar />
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <header className="flex items-center justify-between p-4 border-b border-border bg-background">
-            <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                data-testid="button-logout"
-                onClick={async () => {
-                  await fetch("/api/auth/logout", { method: "POST" });
-                  window.location.href = "/login";
-                }}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-              <ThemeToggle />
-            </div>
-          </header>
-          <main className="flex-1 overflow-auto">
-            <Router />
-          </main>
-        </div>
-      </div>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-border bg-background">
+          <SidebarTrigger data-testid="button-sidebar-toggle" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="button-logout"
+              onClick={() => logout()}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className="min-h-screen p-4 overflow-auto">
+          <Router />
+        </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

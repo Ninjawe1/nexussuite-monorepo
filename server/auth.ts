@@ -29,10 +29,20 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Check if user ID exists in session
-  const userId = (req as any).session?.passport?.user?.claims?.sub;
+  const passportUser = (req as any).session?.passport?.user;
+  const userId = passportUser?.claims?.sub;
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  (req as any).user = { claims: { sub: userId } };
+  // Populate commonly used fields for downstream routes
+  const userName =
+    passportUser?.claims?.name ||
+    passportUser?.name ||
+    "Unknown";
+  (req as any).user = {
+    id: userId,
+    name: userName,
+    claims: passportUser?.claims ?? { sub: userId },
+  };
   next();
 };

@@ -123,6 +123,12 @@ export interface IStorage {
   updateContract(id: string, tenantId: string, contract: Partial<InsertContract>): Promise<Contract>;
   deleteContract(id: string, tenantId: string): Promise<void>;
 
+  // Contract file operations
+  getContractFiles(contractId: string): Promise<any[]>;
+  createContractFile(file: { contractId: string; fileName: string; fileUrl: string; [key: string]: any }): Promise<any>;
+  getContractFile(fileId: string, contractId: string): Promise<any | undefined>;
+  deleteContractFile(fileId: string, contractId: string): Promise<void>;
+
   // Audit log operations
   getAuditLogsByTenant(tenantId: string, limit?: number): Promise<AuditLog[]>;
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
@@ -541,6 +547,26 @@ export class DatabaseStorage implements IStorage {
 
   async deleteContract(id: string, tenantId: string): Promise<void> {
     await db.delete(contracts).where(and(eq(contracts.id, id), eq(contracts.tenantId, tenantId)));
+  }
+
+  // Contract file operations - placeholder implementations
+  async getContractFiles(contractId: string): Promise<any[]> {
+    // For now, return empty array - this would need proper file storage implementation
+    return [];
+  }
+
+  async createContractFile(file: { contractId: string; fileName: string; fileUrl: string; [key: string]: any }): Promise<any> {
+    // For now, return the file data with an ID - this would need proper file storage implementation
+    return { id: `file_${Date.now()}`, ...file, createdAt: new Date(), updatedAt: new Date() };
+  }
+
+  async getContractFile(fileId: string, contractId: string): Promise<any | undefined> {
+    // For now, return undefined - this would need proper file storage implementation
+    return undefined;
+  }
+
+  async deleteContractFile(fileId: string, contractId: string): Promise<void> {
+    // For now, do nothing - this would need proper file storage implementation
   }
 
   // Audit log operations

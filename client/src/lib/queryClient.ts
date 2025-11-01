@@ -18,6 +18,22 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Ensure we only attempt to parse JSON when the server actually returned JSON.
+// This prevents "JSON.parse: unexpected character" errors when an HTML page
+// (like the SPA index.html fallback) is returned with status 200.
+function ensureJsonResponse(res: Response) {
+  const contentType = (res.headers.get("content-type") || "").toLowerCase();
+  // Many servers include charset in content-type, so we check inclusion.
+  const isJson = contentType.includes("application/json");
+  if (!isJson) {
+    const status = res.status;
+    const ctDisplay = contentType || "unknown";
+    throw new Error(
+      `Expected JSON but received ${ctDisplay} (status ${status}). This usually happens when an unknown /api route returns an HTML page.`,
+    );
+  }
+}
+
 export async function apiRequest(
   url: string,
   method: string,
@@ -31,6 +47,8 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
+  // Guard against HTML fallbacks that return 200 but aren't JSON
+  ensureJsonResponse(res);
   return res;
 }
 
@@ -49,6 +67,7 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
+    ensureJsonResponse(res);
     return await res.json();
   };
 

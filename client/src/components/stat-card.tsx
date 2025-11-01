@@ -1,40 +1,29 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  trend?: number;
-  trendLabel?: string;
+  change?: string;
   subtitle?: string;
 }
 
-export function StatCard({ title, value, icon: Icon, trend, trendLabel, subtitle }: StatCardProps) {
-  const isPositive = trend !== undefined && trend > 0;
-  const isNegative = trend !== undefined && trend < 0;
-
+export function StatCard({ title, value, icon: Icon, change, subtitle }: StatCardProps) {
   return (
-    <Card className="hover-elevate">
+    <Card className="hover:bg-muted/50">
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-3xl font-bold font-heading" data-testid={`stat-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+        <div className="text-2xl font-bold" data-testid={`stat-${title.toLowerCase().replace(/\s+/g, '-')}`}>
           {value}
         </div>
-        {trend !== undefined && (
-          <div className="flex items-center gap-1 mt-1">
-            {isPositive && <TrendingUp className="h-3 w-3 text-chart-2" />}
-            {isNegative && <TrendingDown className="h-3 w-3 text-chart-5" />}
-            <span className={`text-xs font-medium ${isPositive ? 'text-chart-2' : isNegative ? 'text-chart-5' : 'text-muted-foreground'}`}>
-              {trend > 0 ? '+' : ''}{trend}%
-            </span>
-            {trendLabel && <span className="text-xs text-muted-foreground">{trendLabel}</span>}
-          </div>
-        )}
-        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+        <p className="text-xs text-muted-foreground">
+          {change && <span className={`mr-1 ${change.startsWith("+") ? "text-green-600" : "text-red-600"}`}>{change}</span>}
+          {subtitle}
+        </p>
       </CardContent>
     </Card>
   );

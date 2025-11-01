@@ -29,6 +29,16 @@ function col(name: string) {
   return getFirestoreDb().collection(name);
 }
 
+// Define an optional UploadedFile type for Firestore file storage helpers
+// This keeps file operations centralized if you later decide to move logic here
+export type UploadedFile = {
+  tenantId: string;
+  fileName: string;
+  base64: string;
+  contentType?: string | null;
+  createdAt?: any;
+  updatedAt?: any;
+};
 async function getById<T>(collection: string, id: string): Promise<WithId<T> | undefined> {
   const snap = await col(collection).doc(id).get();
   if (!snap.exists) return undefined;
@@ -363,7 +373,60 @@ class FirestoreStorage implements IStorage {
     return await deleteDoc("contracts", id);
   }
   async getAllContracts(): Promise<Contract[]> {
-    return await listAll<Contract>("contracts");
+    return listAll<Contract>("contracts");
+  }
+
+  // Contract file operations
+  async getContractFiles(contractId: string): Promise<any[]> {
+    try {
+      const snap = await col("contractFiles")
+        .where("contractId", "==", contractId)
+        .orderBy("createdAt", "desc")
+        .get();
+      return snap.docs.map(d => {
+        const data = d.data() as any;
+        const { id: _id, ...rest } = data;
+        return { id: d.id, ...rest };
+      });
+    } catch (err: any) {
+      if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
+        const snap = await col("contractFiles")
+          .where("contractId", "==", contractId)
+          .get();
+        const items = snap.docs.map(d => {
+          const data = d.data() as any;
+          const { id: _id, ...rest } = data;
+          return { id: d.id, ...rest };
+        });
+        items.sort((a: any, b: any) => {
+          const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+          const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+          return bt - at;
+        });
+        return items;
+      }
+      throw err;
+    }
+  }
+
+  async createContractFile(file: { contractId: string; fileName: string; fileUrl: string; [key: string]: any }): Promise<any> {
+    return createDoc<any>("contractFiles", file);
+  }
+
+  async getContractFile(fileId: string, contractId: string): Promise<any | undefined> {
+    const file = await getById<any>("contractFiles", fileId);
+    if (file && file.contractId === contractId) {
+      return file;
+    }
+    return undefined;
+  }
+
+  async deleteContractFile(fileId: string, contractId: string): Promise<void> {
+    // Verify the file belongs to the contract before deleting
+    const file = await this.getContractFile(fileId, contractId);
+    if (file) {
+      await deleteDoc("contractFiles", fileId);
+    }
   }
 
   // Audit Logs
@@ -652,6 +715,29 @@ class FirestoreStorage implements IStorage {
 
   async deleteWallet(id: string, _tenantId: string): Promise<void> {
     await deleteDoc("wallets", id);
+  }
+
+  // Files (optional helpers)
+  async getFilesByTenant(tenantId: string): Promise<WithId<UploadedFile>[]> {
+    return await listByTenant<UploadedFile>("files", tenantId, "createdAt");
+  }
+
+  async getFile(id: string, tenantId: string): Promise<WithId<UploadedFile> | undefined> {
+    const s = await getById<UploadedFile>("files", id);
+    return s && (s as any).tenantId === tenantId ? s : undefined;
+  }
+
+  async createFile(data: Omit<UploadedFile, "createdAt" | "updatedAt">): Promise<WithId<UploadedFile>> {
+    const payload = {
+      ...data,
+      createdAt: now(),
+      updatedAt: now(),
+    } as UploadedFile;
+    return await createDoc<UploadedFile>("files", payload);
+  }
+
+  async deleteFile(id: string, _tenantId: string): Promise<void> {
+    await deleteDoc("files", id);
   }
 }
 

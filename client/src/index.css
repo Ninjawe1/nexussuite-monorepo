@@ -316,3 +316,286 @@
     inset: -1px;
   }
 }
+
+/* === NOVA REDESIGN THEME ============================================ */
+/* Enable by adding the `nova` class on <html>. This keeps existing dark/light
+   tokens intact but adds glow, gradient, and glass effects inspired by the
+   provided visuals without refactoring components. */
+
+.nova body {
+  /* Subtle deep space gradient backdrop with soft purple/blue lighting */
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(98, 91, 235, 0.25), transparent 65%),
+    radial-gradient(900px 500px at -10% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(244, 114, 182, 0.12), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+.nova .shadcn-card {
+  /* Glassy surface with inner glow and faint border gradient */
+  background: linear-gradient(
+      180deg,
+      hsl(var(--card) / 0.75) 0%,
+      hsl(var(--card) / 0.6) 100%
+    );
+  backdrop-filter: blur(10px) saturate(110%);
+  border-color: hsl(var(--border) / 0.4);
+  box-shadow:
+    0 1px 0 hsl(var(--border) / 0.35),
+    0 8px 20px hsl(var(--primary) / 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.nova .shadcn-card::before {
+  /* Top edge light sweep */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.nova .shadcn-card::after {
+  /* Corner glow accent */
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(closest-side, hsl(var(--primary) / 0.18), transparent 60%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.nova .hover-elevate:hover::after,
+.nova .active-elevate-2:active::after {
+  /* Make default elevate effects slightly stronger in nova */
+  background-color: hsl(var(--accent) / 0.12) !important;
+}
+
+.nova .btn-primary,
+.nova button.bg-primary,
+.nova .button-primary {
+  box-shadow: 0 0 0 1px hsl(var(--primary-border)), 0 12px 24px hsl(var(--primary) / 0.22);
+}
+
+.nova .glow-text {
+  text-shadow: 0 0 6px hsl(var(--primary) / 0.35);
+}
+
+/* Header glass bar */
+.nova header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.65), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === AQUA (TEAL) REDESIGN THEME ===================================== */
+.aqua body {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1200px 600px at 90% -10%, rgba(16, 185, 129, 0.24), transparent 65%),
+    radial-gradient(900px 500px at -10% 40%, rgba(6, 182, 212, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(125, 211, 252, 0.12), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+.aqua .shadcn-card {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.78) 0%, hsl(var(--card) / 0.62) 100%);
+  backdrop-filter: blur(10px) saturate(115%);
+  border-color: hsl(var(--border) / 0.4);
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.35), 0 8px 24px rgba(6, 182, 212, 0.17);
+  position: relative;
+  overflow: hidden;
+}
+
+.aqua .shadcn-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.10), transparent 75%);
+  pointer-events: none;
+}
+
+.aqua .shadcn-card::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(closest-side, rgba(16, 185, 129, 0.22), transparent 60%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.aqua header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.6), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === ATOMIC (DEEP TEAL) THEME ====================================== */
+.atomic body {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1100px 600px at 85% -10%, rgba(14, 165, 146, 0.22), transparent 65%),
+    radial-gradient(900px 520px at -10% 30%, rgba(12, 204, 168, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(56, 189, 248, 0.10), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+/* Atomic color tokens – switch core brand to deep teal */
+.atomic {
+  --primary: 166 72% 45%; /* emerald */
+  --primary-foreground: 0 0% 98%;
+  --ring: 166 72% 45%;
+  --accent: 170 30% 22%;
+  --accent-foreground: 0 0% 92%;
+  --chart-1: 166 72% 50%;
+  --chart-2: 187 92% 45%;
+  --chart-3: 199 89% 48%;
+  --chart-4: 45 97% 55%;
+  --chart-5: 0 75% 55%;
+}
+
+.atomic .shadcn-card {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.70) 0%, hsl(var(--card) / 0.54) 100%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border-color: hsl(var(--border) / 0.40);
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.35), 0 12px 30px rgba(12, 204, 168, 0.16);
+  position: relative;
+  overflow: hidden;
+}
+
+.atomic .shadcn-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.10), transparent 75%);
+  pointer-events: none;
+}
+
+.atomic .shadcn-card::after {
+  content: ""; position: absolute; right: -60px; bottom: -60px; width: 220px; height: 220px;
+  background: radial-gradient(closest-side, rgba(16, 185, 129, 0.22), transparent 60%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.atomic header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.6), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === MOTION UTILITIES ================================================ */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--ring) / 0.0); }
+  50% { box-shadow: 0 0 0 6px hsl(var(--ring) / 0.12); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.fx-glow {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.fx-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.fx-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.fx-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+/* Cards respond to importance */
+.importance-high { border-color: hsl(var(--ring)); box-shadow: 0 10px 28px hsl(var(--ring) / 0.20); }
+.importance-high .text-muted-foreground { color: hsl(var(--foreground) / 0.75); }
+.importance-medium { box-shadow: 0 6px 18px hsl(var(--ring) / 0.12); }
+.importance-low { opacity: 0.92; }
+
+/* Card hover interactions */
+.nova .shadcn-card:hover,
+.aqua .shadcn-card:hover {
+  transform: translateY(-1px);
+}
+
+/* Ripple effect for buttons */
+.fx-ripple { position: relative; overflow: hidden; }
+.fx-ripple::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0; height: 0;
+  background: radial-gradient(closest-side, hsl(var(--ring) / 0.28), transparent 70%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+.fx-ripple:active::after { width: 160px; height: 160px; opacity: 1; transition: width 300ms ease, height 300ms ease, opacity 600ms ease; }
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .fx-glow, .fx-float, .fx-shimmer { animation: none !important; }
+  .fx-ripple::after { transition: none !important; }
+}
+
+/* === ATOMIC STYLE UTILITIES ========================================= */
+.glass {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.68) 0%, hsl(var(--card) / 0.50) 100%);
+  backdrop-filter: blur(12px) saturate(115%);
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+
+.border-glow {
+  box-shadow: 0 0 0 1px hsl(var(--ring) / 0.35), 0 10px 30px hsl(var(--ring) / 0.18);
+}
+
+.noise {
+  position: relative;
+}
+.noise::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="1" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.03"/></svg>');
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+.scanline::after {
+  content: ""; position: absolute; left: 0; top: -50%; width: 100%; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+  filter: blur(12px);
+  animation: scanDown 5s ease-in-out infinite;
+}
+@keyframes scanDown {
+  0% { top: -50%; }
+  50% { top: 120%; }
+  100% { top: 120%; }
+}
+
+.section-divider {
+  border-top: 1px solid hsl(var(--border) / 0.2);
+  box-shadow: 0 -1px 0 hsl(var(--border) / 0.35);
+}
