@@ -24,5 +24,29 @@ coverage/
 # Scratch and sandbox
 sandbox/
 
+# Local backups and restore artifacts
+revert_backup_*/
+design_backup_*/
+components_backup_*/
+pre_restore_backup/
+
+# Sensitive import data
+firebase-json-import/
+src/scripts/*.json
+
+# Temporary and backup files
+server/auth/*.bak
+server/cleanup-log.txt
+
 # Logs
 *.log
+
+# Local data dumps and scratch files
+cookies.txt
+login*.json
+seed_out.json
+replit_full_database.json
+src/scripts/replit_full_database.json
+.tmp-seed.json
+project_structure*.txt
+structure*.txt
