@@ -1,0 +1,16 @@
+Contract Attachment Test File
+============================
+
+This is a test file for verifying contract attachments functionality.
+
+Test Details:
+- File Type: Text Document
+- Purpose: Contract Attachments Testing
+- Created: For NexusSuite Contract Management System
+- Features to Test:
+  * File Upload
+  * File Preview
+  * File Download
+  * File Deletion
+
+This file should be uploaded, previewed, downloaded, and deleted successfully during the contract attachments testing process.

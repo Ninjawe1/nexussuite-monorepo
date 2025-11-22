@@ -1,10 +1,52 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
 # Local Netlify folder
 .netlify
+.clinerules/byterover-rules.md
+.kilocode/rules/byterover-rules.md
+.roo/rules/byterover-rules.md
+.windsurf/rules/byterover-rules.md
+.cursor/rules/byterover-rules.mdc
+.kiro/steering/byterover-rules.md
+.qoder/rules/byterover-rules.md
+.augment/rules/byterover-rules.md
 
-.vercel
+# Ignore all environment files except the unified one
+**/.env*
+
+# Node and build artifacts
+node_modules/
+dist/
+coverage/
+
+# Local tooling
+.vercel/
+.trae/
+
+# Scratch and sandbox
+sandbox/
+
+# Local backups and restore artifacts
+revert_backup_*/
+design_backup_*/
+components_backup_*/
+pre_restore_backup/
+
+# Sensitive import data
+firebase-json-import/
+src/scripts/*.json
+
+# Temporary and backup files
+server/auth/*.bak
+server/cleanup-log.txt
+
+# Logs
+*.log
+
+# Local data dumps and scratch files
+cookies.txt
+login*.json
+seed_out.json
+replit_full_database.json
+src/scripts/replit_full_database.json
+.tmp-seed.json
+project_structure*.txt
+structure*.txt

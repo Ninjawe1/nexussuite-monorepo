@@ -1,0 +1,450 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Registration with Valid Data",
+    "description": "Verify that a new user can register successfully with valid email and password, and password is hashed using bcryptjs.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the registration page."
+      },
+      {
+        "type": "action",
+        "description": "Input a valid email address and a strong password."
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that registration is successful and a new account is created."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the password is stored in hashed form (using bcryptjs) in the back-end."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User Login with Correct Credentials",
+    "description": "Check that a registered user can log in successfully using valid email and password.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page."
+      },
+      {
+        "type": "action",
+        "description": "Enter valid email and password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm successful login and redirection to user dashboard."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "User Login with Incorrect Credentials",
+    "description": "Verify system rejects login attempts with invalid email or password.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page."
+      },
+      {
+        "type": "action",
+        "description": "Enter an unregistered email or incorrect password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify login failure message is shown and user remains on login page."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Role-Based Access Control Enforcement",
+    "description": "Ensure that users only access features and data allowed by their assigned roles (Super Admin, Club Admin, Coach, Player).",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as each role: Super Admin, Club Admin, Coach, Player."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access restricted admin-only endpoints and UI elements."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm only authorized roles can access or perform restricted operations, others receive permission denied errors."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Create and Manage Club Profile",
+    "description": "Check that Club Admin can create club profile with valid details, update settings, and view current profile.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Club Admin."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Club Management page."
+      },
+      {
+        "type": "action",
+        "description": "Enter valid club profile information and save."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify club profile is created successfully and data is persisted."
+      },
+      {
+        "type": "action",
+        "description": "Update club profile details and save."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify profile updates are saved and correctly displayed."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Team Creation and Player Assignment",
+    "description": "Verify Club Admin and Coaches can create teams, add players with roles, and manage rosters.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Club Admin or Coach."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Teams Management module."
+      },
+      {
+        "type": "action",
+        "description": "Create a new team with a valid name and description."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm team creation success and visible in team list."
+      },
+      {
+        "type": "action",
+        "description": "Add existing players to the team with specific roles such as Captain or Member."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm player roster updates correctly with assigned roles."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Tournament Creation and Publishing",
+    "description": "Validate that Club Admins can create, edit, schedule, and publish tournaments and associated matches.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Club Admin."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Tournament module and start tournament creation."
+      },
+      {
+        "type": "action",
+        "description": "Input all required tournament details and save draft."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tournament saved in draft state correctly."
+      },
+      {
+        "type": "action",
+        "description": "Schedule matches and setup brackets for the tournament."
+      },
+      {
+        "type": "action",
+        "description": "Publish the tournament."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm tournament is publicly published and accessible to appropriate users."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Match Result Entry and Bracket Updates",
+    "description": "Ensure Coaches can enter match results correctly and bracket progression updates automatically.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Coach."
+      },
+      {
+        "type": "action",
+        "description": "Access scheduled matches for assigned teams."
+      },
+      {
+        "type": "action",
+        "description": "Enter valid match results (scores, winners)."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that match results are saved and displayed."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that tournament brackets update automatically to reflect match outcomes."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Financial Transaction Creation and Categorization",
+    "description": "Verify Club Admin can create income/expense transactions, categorize them, add notes and attachments.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Club Admin."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Financial Management module."
+      },
+      {
+        "type": "action",
+        "description": "Create a new income transaction with category, notes, and upload at least one attachment."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm transaction saved with correct details and attachment is accessible."
+      },
+      {
+        "type": "action",
+        "description": "Similarly create an expense transaction."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify transactions appear correctly in the ledger and summary views."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Viewing and Exporting Analytics Dashboards",
+    "description": "Ensure users can view updated social and platform analytics in dashboards and export data in CSV and JSON formats.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as any authorized user."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to the Analytics Dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the dashboard displays real-time social and platform metrics accurately."
+      },
+      {
+        "type": "action",
+        "description": "Use export options to download the displayed data as CSV and JSON files."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm exported files contain correct and complete data."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Firestore Security Rules Validation",
+    "description": "Verify Firestore security rules enforce role-based access and data restrictions according to GDPR and platform policies.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to read and write Firestore data directly using client SDK with different roles."
+      },
+      {
+        "type": "assertion",
+        "description": "Check read/write operations succeed only when authorized; unauthorized attempts are blocked."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm access rules comply with GDPR data handling requirements."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Session Management and Logout Functionality",
+    "description": "Test that users can log out and their session terminates preventing further authenticated requests.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login successfully."
+      },
+      {
+        "type": "action",
+        "description": "Click logout button or invoke logout API."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify session is invalidated and user is redirected to login page."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access a protected endpoint with old session token."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm access is denied due to session termination."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "API Performance Testing Under Load",
+    "description": "Ensure key API endpoints respond within 300ms p95 under simulated load conditions.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate concurrent requests to core endpoints: authentication, club/team CRUD, tournaments, financials."
+      },
+      {
+        "type": "assertion",
+        "description": "Measure response times and verify 95th percentile latency is under 300ms."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Uptime and Error Logging Verification",
+    "description": "Confirm system uptime meets 99.9% monthly and error reports and audit logs are properly generated and accessible.",
+    "category": "monitoring",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Check system uptime monitoring tools and logs for the past month."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate uptime is equal or above 99.9%."
+      },
+      {
+        "type": "action",
+        "description": "Trigger errors by making invalid API calls."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm error logs are recorded and accessible via debug/admin tools."
+      },
+      {
+        "type": "action",
+        "description": "Verify audit logs capture user actions accurately."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Data Consistency During Tournament Modifications",
+    "description": "Ensure that updates to tournaments, match schedules, and results maintain consistent state and integrity.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create a tournament and schedule matches."
+      },
+      {
+        "type": "action",
+        "description": "Edit tournament details and reschedule matches."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate updates are reflected immediately and consistent across related records."
+      },
+      {
+        "type": "action",
+        "description": "Enter match results and observe bracket updates."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no mismatched data or orphaned bracket entries exist."
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Player Profile Management and History Viewing",
+    "description": "Verify players can update their profiles and view participation schedules, tournament results, and financial transaction history.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Player."
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Profile and update personal details."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm profile changes are saved."
+      },
+      {
+        "type": "action",
+        "description": "View participation schedules, tournament results, and transaction summaries."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the data displayed is accurate and complete."
+      }
+    ]
+  }
+]
