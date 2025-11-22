@@ -1,0 +1,114 @@
+1) Purpose & Users
+
+Multi-tenant system where each Club has its own management portal.
+
+Roles:
+
+Super Admin / App Owner (me — developer): full control, can create/delete/suspend clubs and staff, view analytics, manage subscriptions.
+
+Club Owner: manages staff, teams, club-level settings, invites staff.
+
+Club Staff: role-based access to club management features (content, tournaments, calendar, marcom).
+
+Public users: subscribe or view public pages (marketing site).
+
+2) Core Functional Requirements (must be fully functional)
+Authentication & User Lifecycle
+
+Custom branded login page hosted on the app (not Replit auth UI).
+
+Support Google OAuth 2.0 (Sign in with Google) + classic email/password.
+
+Invite flow:
+
+Club Owner adds staff email → system sends invite email.
+
+Email contains secure token link (single-use, expires e.g., 72 hours).
+
+Follow link → complete registration (choose password or continue with Google).
+
+After successful registration, staff is attached to that club with assigned role.
+
+Super Admin has separate credentials and a dedicated Super Admin dashboard.
+
+Provide endpoints for: sign-up, sign-in, token refresh, password reset, invite accept, revoke invite, lock/unlock user.
+
+Multi-tenant Club Management
+
+Super Admin can create/delete/suspend clubs and see all clubs.
+
+When creating a club, generate a distinct management namespace (tenant_id).
+
+Club Owner management: create staff, assign roles, set club settings, view club analytics.
+
+Each staff must only access their club’s data; enforce tenant isolation in DB and APIs.
+
+Dashboard & UI
+
+Super Admin dashboard: create clubs, list clubs, view staff lists per club, suspend/delete staff/clubs, view billing and subscription status.
+
+Club dashboard: staff roster, upcoming tournaments, calendar, marcom analytics panel with realtime metrics, content manager.
+
+Each club must have a login column / unique login path to their management console.
+
+Calendar
+
+Fix: Calendar view must work (month/week/day) and be interactive.
+
+Calendar must support:
+
+Events assigned to teams/staff.
+
+Drag & drop rescheduling.
+
+Internal deadlines and external published events.
+
+Conflict detection and alerts.
+
+Sync with Google Calendar (2-way if possible) — include OAuth scopes and webhook handling.
+
+Provide a checklist of common failures and resolution steps (see debug checklist below).
+
+Social Media Connections & Real-time Analytics (MarCom page)
+
+Support connectors for: Twitter/X, Facebook Pages, Instagram (Graph API), YouTube, Twitch (minimum).
+
+OAuth-based connectors per platform; store tokens encrypted with rotation plan.
+
+Real-time analytics on MarCom page:
+
+Show live metrics (impressions, engagement, follower growth, recent posts).
+
+Use webhooks where available (e.g., YouTube/Twitch/IG webhooks) for immediate updates; fall back to scheduled polling with incremental diffs.
+
+Display time-series charts for last 7/30/90 days.
+
+Enable historical export (CSV).
+
+Provide a connector management UI (connect/disconnect/refresh tokens).
+
+Include rate-limit handling and backoff strategy.
+
+Subscriptions & Payments
+
+Use Stripe (recommended) for subscription management:
+
+Plans: Starter, Growth, Enterprise (billing interval monthly/annual).
+
+Ability to attach subscription to Club entity.
+
+Webhook handlers for invoice.payment_succeeded, invoice.payment_failed, customer.subscription.updated, customer.subscription.deleted.
+
+Trial period support and promo codes.
+
+Super Admin can view billing dashboard and manually change plan or suspend club access on payment failure.
+
+Super Admin / App Owner Privileges
+
+Create new clubs, define plan, provision initial Club Owner.
+
+View and manage all staff across all clubs (search, filter).
+
+Force-deactivate users, reassign or delete staff.
+
+View global logs and system health (integrations, recent webhook failures).

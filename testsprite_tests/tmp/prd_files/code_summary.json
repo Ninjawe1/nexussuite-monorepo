@@ -1,0 +1,150 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Node.js",
+    "Express",
+    "Vite (frontend build/dev server)",
+    "Tailwind CSS",
+    "Firebase Admin SDK (Firestore)",
+    "Drizzle ORM",
+    "Vercel (Serverless deployment)",
+    "Netlify (alt deployment)",
+    "bcryptjs"
+  ],
+  "features": [
+    {
+      "name": "Express Server Bootstrapping",
+      "description": "Initializes the Express app, JSON/urlencoded parsers, request logging, registers routes, sets global error handler, and starts HTTP server in production.",
+      "files": [
+        "server/index.ts",
+        "server/vite.ts",
+        "server/routes.ts"
+      ]
+    },
+    {
+      "name": "API Routes & Middleware",
+      "description": "Defines REST endpoints under /api (health, auth, transactions, tournaments, debug) and attaches middleware for logging and error handling.",
+      "files": [
+        "server/routes.ts",
+        "server/index.ts"
+      ]
+    },
+    {
+      "name": "Authentication (Register/Login/Logout)",
+      "description": "Provides user registration and login using bcryptjs for hashing. Handles session/token issuance and logout. Supports Replit auth helper.",
+      "files": [
+        "server/auth.ts",
+        "server/routes.ts",
+        "server/replitAuth.ts"
+      ]
+    },
+    {
+      "name": "Role-Based Access Control (RBAC)",
+      "description": "Implements role/permission checks for protected operations (e.g., admin vs. coach vs. player).",
+      "files": [
+        "server/rbac.ts",
+        "server/routes.ts"
+      ]
+    },
+    {
+      "name": "Storage Abstraction",
+      "description": "Abstracts persistence layer behind a storage interface with implementations for Firestore; used by API routes to read/write domain data.",
+      "files": [
+        "server/storage.ts",
+        "server/storage-firestore.ts",
+        "server/useStorage.ts",
+        "server/firebase.ts"
+      ]
+    },
+    {
+      "name": "Database & ORM (Drizzle)",
+      "description": "Drizzle ORM configuration for SQL-based persistence (optional/experimental alongside Firestore).",
+      "files": [
+        "server/db.ts",
+        "drizzle.config.ts"
+      ]
+    },
+    {
+      "name": "OAuth Configuration",
+      "description": "Centralized OAuth provider settings (e.g., Google, others) for sign-in flows.",
+      "files": [
+        "server/oauth-config.ts"
+      ]
+    },
+    {
+      "name": "Analytics Fetcher",
+      "description": "Fetches social or platform analytics to support dashboards and insights.",
+      "files": [
+        "server/analytics-fetcher.ts"
+      ]
+    },
+    {
+      "name": "Shared Domain Schema",
+      "description": "Defines TypeScript types and models shared between client and server (e.g., Tournament, Transaction, User, Club).",
+      "files": [
+        "shared/schema.ts"
+      ]
+    },
+    {
+      "name": "Frontend Application",
+      "description": "Vite-based frontend with Tailwind styling. Pages/components for auth, dashboard, tournaments, transactions, and club management.",
+      "files": [
+        "client/index.html",
+        "client/src/**/*",
+        "tailwind.config.ts",
+        "postcss.config.js"
+      ]
+    },
+    {
+      "name": "Serverless Adapter (Vercel)",
+      "description": "Bridges the Express app into Vercel serverless via a catch-all function entry (imports compiled dist/routes.js).",
+      "files": [
+        "api/[[...route]].ts",
+        "vercel.json",
+        "dist/index.js",
+        "dist/routes.js",
+        "types/routes.d.ts"
+      ]
+    },
+    {
+      "name": "Netlify Functions (Alternative)",
+      "description": "Scaffolding for Netlify functions as an alternative deployment target.",
+      "files": [
+        "netlify/functions/**/*",
+        "netlify.toml",
+        ".netlify/netlify.toml"
+      ]
+    },
+    {
+      "name": "Firebase Hosting & Security Rules",
+      "description": "Firebase hosting config and Firestore security rules, indexes for structured access and performance.",
+      "files": [
+        "firebase.json",
+        "firestore.rules",
+        "firestore.indexes.json"
+      ]
+    },
+    {
+      "name": "Data Import & Migration",
+      "description": "Scripts and JSON datasets to import or migrate existing data into the system.",
+      "files": [
+        "firebase-json-import/importAllData.js",
+        "firebase-json-import/replit_full_database.json",
+        "src/scripts/importAllData.js",
+        "src/scripts/replit_full_database.json"
+      ]
+    },
+    {
+      "name": "Build & Dev Config",
+      "description": "Project configuration files for TypeScript, Vite, Tailwind, and package management.",
+      "files": [
+        "tsconfig.json",
+        "NexusSuite/tsconfig.json",
+        "vite.config.ts",
+        "package.json",
+        "NexusSuite/package.json",
+        "components.json"
+      ]
+    }
+  ]
+}

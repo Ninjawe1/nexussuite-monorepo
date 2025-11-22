@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5000",
+  "executionArgs": {
+    "projectName": "NexusSuite",
+    "projectPath": "D:\\Nexus suite database\\NexusSuite Main\\NexusSuite",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-ZNcLvUxmhstgwdP4uLtGjx-z1npsIcRKZTHeS6LzUpQZ8h4uAy_SwXoUzkAm4WK4L8ng18KsOZbZcF18NqwhBRFiHPr6MSbQdZDkx8vuETz1pOk-xmAxqXF2EJ1Cinj5ePg"
+    }
+  },
+  "proxy": "http://ed57b8c6-cbcf-4266-8400-fbbf4e21c0e9:py9ChuDsDNM3wIdCbdFhSPptzxraTuHK@tun.testsprite.com:8080"
+}

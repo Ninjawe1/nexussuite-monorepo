@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "project": "Nexus Suite — Esports Club Management",
+    "date": "2025-10-18",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "Nexus Suite is a multi-tenant, role-based platform designed to streamline esports clubs' operations including team management, tournaments, finances, and analytics, all managed securely and scalably within club-specific portals.",
+  "core_goals": [
+    "Streamline club operations across teams, tournaments, finances, and analytics.",
+    "Ensure secure, scalable, and compliant data handling with role-based access control.",
+    "Deliver a responsive and modern UI utilizing Tailwind CSS and Vite.",
+    "Enable integration with Firestore and optional SQL databases via Drizzle ORM for analytical needs."
+  ],
+  "key_features": [
+    "User authentication and session management with email/password registration and bcryptjs password hashing.",
+    "Role-based access control allowing differentiated permissions for Super Admin, Club Admin, Coach, and Player roles.",
+    "Comprehensive club and team management including club profiles, team creation, player rosters, and role assignments.",
+    "Tournament orchestration covering creation, editing, publishing, match scheduling, bracket management, and results entry.",
+    "Financial management supporting creation and categorization of income and expense transactions with notes, attachments, ledger views, and summary analytics.",
+    "Analytics dashboards that fetch social and platform data supporting real-time insights and export capabilities in CSV and JSON formats.",
+    "Secure data storage backed by Firestore with SQL optionality via Drizzle ORM for advanced analytical queries.",
+    "Administrative and debugging tools including health checks, environment inspections, audit logging, and error tracking."
+  ],
+  "user_flow_summary": [
+    "Users register or log in using email and password authentication, with role assignments determining access levels.",
+    "Club Admins configure club settings and manage teams by creating teams and adding players with specific roles.",
+    "Coaches manage team rosters, coordinate schedules, and enter match results within the tournament module.",
+    "Players manage their profiles and view their participation schedules, tournament results, and transaction history.",
+    "Club Admins create and manage tournaments, schedule matches, publish results, and oversee financial transactions with full ledger and analytics support.",
+    "Super Admins oversee platform-wide settings, provision clubs, and review global reports and audit logs.",
+    "Users access analytics dashboards to view social and platform metrics, with options to export data for further analysis."
+  ],
+  "validation_criteria": [
+    "User authentication enforces password hashing and role-based access control to prevent unauthorized operations.",
+    "All CRUD operations for clubs, teams, tournaments, and transactions function correctly with appropriate permission checks.",
+    "Tournament scheduling supports match management, bracket updates, and results entry with data consistency.",
+    "Financial transactions allow categorization, note additions, attachments, and accurate ledger and summary analytics display.",
+    "Analytics data refreshes with social/platform metrics and supports export to CSV or JSON formats.",
+    "API response times meet performance targets (under 300ms p95) for core endpoints.",
+    "System achieves 99.9% monthly uptime and monitors API request logs and error reports effectively.",
+    "Data storage complies with GDPR and security policies with enforced Firestore security rules and audit logs."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "Node.js",
+      "Express",
+      "Vite (frontend build/dev server)",
+      "Tailwind CSS",
+      "Firebase Admin SDK (Firestore)",
+      "Drizzle ORM",
+      "Vercel (Serverless deployment)",
+      "Netlify (alt deployment)",
+      "bcryptjs"
+    ],
+    "features": [
+      {
+        "name": "Express Server Bootstrapping",
+        "description": "Initializes the Express app, JSON/urlencoded parsers, request logging, registers routes, sets global error handler, and starts HTTP server in production.",
+        "files": [
+          "server/index.ts",
+          "server/vite.ts",
+          "server/routes.ts"
+        ]
+      },
+      {
+        "name": "API Routes & Middleware",
+        "description": "Defines REST endpoints under /api (health, auth, transactions, tournaments, debug) and attaches middleware for logging and error handling.",
+        "files": [
+          "server/routes.ts",
+          "server/index.ts"
+        ]
+      },
+      {
+        "name": "Authentication (Register/Login/Logout)",
+        "description": "Provides user registration and login using bcryptjs for hashing. Handles session/token issuance and logout. Supports Replit auth helper.",
+        "files": [
+          "server/auth.ts",
+          "server/routes.ts",
+          "server/replitAuth.ts"
+        ]
+      },
+      {
+        "name": "Role-Based Access Control (RBAC)",
+        "description": "Implements role/permission checks for protected operations (e.g., admin vs. coach vs. player).",
+        "files": [
+          "server/rbac.ts",
+          "server/routes.ts"
+        ]
+      },
+      {
+        "name": "Storage Abstraction",
+        "description": "Abstracts persistence layer behind a storage interface with implementations for Firestore; used by API routes to read/write domain data.",
+        "files": [
+          "server/storage.ts",
+          "server/storage-firestore.ts",
+          "server/useStorage.ts",
+          "server/firebase.ts"
+        ]
+      },
+      {
+        "name": "Database & ORM (Drizzle)",
+        "description": "Drizzle ORM configuration for SQL-based persistence (optional/experimental alongside Firestore).",
+        "files": [
+          "server/db.ts",
+          "drizzle.config.ts"
+        ]
+      },
+      {
+        "name": "OAuth Configuration",
+        "description": "Centralized OAuth provider settings (e.g., Google, others) for sign-in flows.",
+        "files": [
+          "server/oauth-config.ts"
+        ]
+      },
+      {
+        "name": "Analytics Fetcher",
+        "description": "Fetches social or platform analytics to support dashboards and insights.",
+        "files": [
+          "server/analytics-fetcher.ts"
+        ]
+      },
+      {
+        "name": "Shared Domain Schema",
+        "description": "Defines TypeScript types and models shared between client and server (e.g., Tournament, Transaction, User, Club).",
+        "files": [
+          "shared/schema.ts"
+        ]
+      },
+      {
+        "name": "Frontend Application",
+        "description": "Vite-based frontend with Tailwind styling. Pages/components for auth, dashboard, tournaments, transactions, and club management.",
+        "files": [
+          "client/index.html",
+          "client/src/**/*",
+          "tailwind.config.ts",
+          "postcss.config.js"
+        ]
+      },
+      {
+        "name": "Serverless Adapter (Vercel)",
+        "description": "Bridges the Express app into Vercel serverless via a catch-all function entry (imports compiled dist/routes.js).",
+        "files": [
+          "api/[[...route]].ts",
+          "vercel.json",
+          "dist/index.js",
+          "dist/routes.js",
+          "types/routes.d.ts"
+        ]
+      },
+      {
+        "name": "Netlify Functions (Alternative)",
+        "description": "Scaffolding for Netlify functions as an alternative deployment target.",
+        "files": [
+          "netlify/functions/**/*",
+          "netlify.toml",
+          ".netlify/netlify.toml"
+        ]
+      },
+      {
+        "name": "Firebase Hosting & Security Rules",
+        "description": "Firebase hosting config and Firestore security rules, indexes for structured access and performance.",
+        "files": [
+          "firebase.json",
+          "firestore.rules",
+          "firestore.indexes.json"
+        ]
+      },
+      {
+        "name": "Data Import & Migration",
+        "description": "Scripts and JSON datasets to import or migrate existing data into the system.",
+        "files": [
+          "firebase-json-import/importAllData.js",
+          "firebase-json-import/replit_full_database.json",
+          "src/scripts/importAllData.js",
+          "src/scripts/replit_full_database.json"
+        ]
+      },
+      {
+        "name": "Build & Dev Config",
+        "description": "Project configuration files for TypeScript, Vite, Tailwind, and package management.",
+        "files": [
+          "tsconfig.json",
+          "NexusSuite/tsconfig.json",
+          "vite.config.ts",
+          "package.json",
+          "NexusSuite/package.json",
+          "components.json"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,182 @@
+⚡️ Base44 Ultimate App Prompt — “Esports Club Management System (Nexus Suite)”
+
+Build a fully functional Esports Club Management System called Nexus Esports Suite, a complete SaaS platform that allows esports organizations and clubs to manage their entire operations — from rosters, payroll, analytics, and finances to marketing and communications (Marcom), matches, and contracts.
+The platform will later be sold to other clubs as a subscription-based product, so it must be stable, optimized, and visually clean.
+
+🏗️ 1. System Architecture
+
+Multi-tenant SaaS app (each club = one tenant).
+
+Secure role-based access (Owner, Admin, Manager, Staff, Player, Marcom, Analyst, Finance).
+
+Every entity automatically linked to its tenant (no manual tenant_id input).
+
+Authentication and authorization included.
+
+Central dashboard overview with key insights (finance, analytics, active rosters, matches, campaigns, etc.).
+
+👥 2. User & Staff Management
+
+A Staff section where the club owner can:
+
+Add, edit, and delete users/staff.
+
+Assign roles and control access via checkboxes for each module (Payroll, Matches, Analytics, Marcom, Contracts, Settings, etc.).
+
+Upload staff profile photos and contact info.
+
+Fully functional CRUD (create, read, update, delete) with instant UI updates.
+
+The owner can change permissions or suspend staff accounts anytime.
+
+Activity logs recorded automatically.
+
+🧾 3. Contracts Management
+
+Upload and download contracts (PDF/DOCX) for players, staff, or sponsors.
+
+Link contracts to the respective user or department.
+
+Show expiration dates, renewal reminders, and contract types.
+
+Store files securely and allow direct preview/download.
+
+Contract uploads and edits are logged in the Audit Log.
+
+💸 4. Payroll & Finance
+
+Complete payroll system for both players and staff.
+
+Each payment can be recurring (monthly/weekly/custom) or one-time.
+
+Export payrolls to Excel or CSV.
+
+Finance dashboard summarizing:
+
+Total salaries
+
+Revenues (sponsors, tournaments, content)
+
+Profit/loss overview
+
+Expected vs actual payments
+
+Integrate categories like “Player Salaries,” “Staff Wages,” “Revenue from Tournaments,” etc.
+
+📊 5. Analytics Dashboard
+
+Comprehensive analytics by roster/game title (Valorant, LoL, PUBG, etc.).
+
+Track performance metrics such as:
+
+Win/loss rates
+
+Tournament placements
+
+Player statistics
+
+Content performance
+
+Marcom campaign metrics
+
+Visualize everything with charts and dynamic filters.
+
+📅 6. Matches Management
+
+Manage tournaments, scrims, and events.
+
+Two views:
+
+List view (detailed info)
+
+Calendar view (match schedule and results).
+
+Click any match on the calendar to open full details, teams, and outcomes.
+
+Ability to add results, attach match files, or notes.
+
+📣 7. Marcom Department
+
+Dedicated Marcom section with:
+
+Campaign management (title, description, dates, platforms, results, etc.).
+
+Option to connect social media APIs (Twitter/X, Instagram, YouTube, TikTok, Twitch).
+
+Automatically pull and display analytics from connected accounts (followers, reach, engagement, impressions).
+
+Campaign analytics dashboard showing total campaigns, ROI, and performance.
+
+Add campaign form must be functional and easy to use.
+
+Marcom settings page for connecting and managing social API keys.
+
+🧠 8. Audit Log
+
+Fully functional audit system tracking every action:
+
+Who made the change
+
+When it was made
+
+What was changed (old vs new value)
+
+Covers all entities (users, payroll, matches, contracts, marcom, etc.).
+
+Viewable by club owner or admin only.
+
+🎨 9. Club Branding & Customization
+
+Club owner can:
+
+Upload a custom app icon and logo.
+
+Change brand colors and theme (light/dark).
+
+Changes apply globally and persist after reload.
+
+Branding options stored per tenant.
+
+💼 10. Subscription & Commercial Setup
+
+App should support subscription-based access for clubs.
+
+Each tenant (club) has isolated data and billing info.
+
+Admin panel (super admin level) to manage all tenants and subscriptions.
+
+⚙️ 11. System Reliability & Performance
+
+All CRUD actions across the app (users, staff, contracts, matches, marcom, payroll) must work instantly — no stuck or pending requests.
+
+UI automatically updates after any add/edit/delete.
+
+Tenant_id automatically attached to all entities.
+
+Data integrity and error handling built in.
+
+✅ 12. Final Deliverables
+
+After completion, the app must include:
+
+Fully working multi-tenant logic
+
+Role-based access system
+
+Real-time updating UI
+
+Analytics by roster
+
+Payroll with recurring & export options
+
+Contracts upload/download
+
+Marcom department with social media API analytics
+
+Calendar view for matches
+
+Club branding customization
+
+Complete audit log (with before/after states)
+
+Ready to sell and host as a SaaS for esports clubs
