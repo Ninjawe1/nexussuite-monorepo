@@ -1,0 +1,674 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LIGHT MODE */
+:root {
+  --button-outline: rgba(0,0,0, .10);
+  --badge-outline: rgba(0,0,0, .05);
+
+  /* Automatic computation of border around primary / danger buttons */
+  --opaque-button-border-intensity: -8; /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(0,0,0, .03);
+  --elevate-2: rgba(0,0,0, .08);
+
+  --background: 0 0% 98%;
+
+  --foreground: 222 25% 15%;
+
+  --border: 0 0% 90%;
+
+  --card: 0 0% 96%;
+
+  --card-foreground: 222 25% 18%;
+
+  --card-border: 0 0% 92%;
+
+  --sidebar: 0 0% 94%;
+
+  --sidebar-foreground: 222 25% 20%;
+
+  --sidebar-border: 0 0% 90%;
+
+  --sidebar-primary: 270 85% 65%;
+
+  --sidebar-primary-foreground: 0 0% 98%;
+
+  --sidebar-accent: 0 0% 90%;
+
+  --sidebar-accent-foreground: 222 25% 20%;
+
+  --sidebar-ring: 270 85% 65%;
+
+  --popover: 0 0% 93%;
+
+  --popover-foreground: 222 25% 20%;
+
+  --popover-border: 0 0% 88%;
+
+  --primary: 270 85% 65%;
+
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 0 0% 88%;
+
+  --secondary-foreground: 222 25% 22%;
+
+  --muted: 0 0% 90%;
+
+  --muted-foreground: 222 20% 35%;
+
+  --accent: 270 15% 88%;
+
+  --accent-foreground: 222 25% 22%;
+
+  --destructive: 0 75% 60%;
+
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 0 0% 82%;
+  --ring: 270 85% 65%;
+  --chart-1: 270 85% 55%;
+  --chart-2: 142 70% 45%;
+  --chart-3: 200 85% 50%;
+  --chart-4: 35 90% 55%;
+  --chart-5: 0 75% 55%;
+
+  --font-sans: Inter, sans-serif;
+  --font-heading: Space Grotesk, sans-serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: .5rem; /* 8px */
+  --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.02);
+  --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.03);
+  --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.04), 0px 1px 2px -1px hsl(0 0% 0% / 0.05);
+  --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.06);
+  --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0.06), 0px 2px 4px -1px hsl(0 0% 0% / 0.07);
+  --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0.08), 0px 4px 6px -1px hsl(0 0% 0% / 0.09);
+  --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.10), 0px 8px 10px -1px hsl(0 0% 0% / 0.11);
+  --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.12);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
+
+  /* Fallback for older browsers */
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+.dark {
+  --button-outline: rgba(255,255,255, .10);
+  --badge-outline: rgba(255,255,255, .05);
+
+  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+
+  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .09);
+
+  --background: 222 25% 8%;
+
+  --foreground: 0 0% 95%;
+
+  --border: 222 22% 14%;
+
+  --card: 222 20% 10%;
+
+  --card-foreground: 0 0% 92%;
+
+  --card-border: 222 18% 13%;
+
+  --sidebar: 222 18% 12%;
+
+  --sidebar-foreground: 0 0% 90%;
+
+  --sidebar-border: 222 16% 15%;
+
+  --sidebar-primary: 270 85% 65%;
+
+  --sidebar-primary-foreground: 0 0% 98%;
+
+  --sidebar-accent: 222 16% 16%;
+
+  --sidebar-accent-foreground: 0 0% 88%;
+
+  --sidebar-ring: 270 85% 65%;
+
+  --popover: 222 18% 14%;
+
+  --popover-foreground: 0 0% 88%;
+
+  --popover-border: 222 16% 17%;
+
+  --primary: 270 85% 65%;
+
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 222 16% 18%;
+
+  --secondary-foreground: 0 0% 85%;
+
+  --muted: 222 14% 16%;
+
+  --muted-foreground: 0 0% 70%;
+
+  --accent: 270 18% 18%;
+
+  --accent-foreground: 0 0% 88%;
+
+  --destructive: 0 75% 60%;
+
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 222 18% 24%;
+  --ring: 270 85% 65%;
+  --chart-1: 270 85% 70%;
+  --chart-2: 142 70% 55%;
+  --chart-3: 200 85% 60%;
+  --chart-4: 35 90% 65%;
+  --chart-5: 0 75% 65%;
+
+  --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.15);
+  --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.20);
+  --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.30);
+  --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0.30), 0px 1px 2px -1px hsl(0 0% 0% / 0.35);
+  --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0.35), 0px 2px 4px -1px hsl(0 0% 0% / 0.40);
+  --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0.40), 0px 4px 6px -1px hsl(0 0% 0% / 0.45);
+  --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.45), 0px 8px 10px -1px hsl(0 0% 0% / 0.50);
+  --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.55);
+
+  /* Fallback for older browsers */
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  /* Fallback for older browsers */
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+/* NOVA THEME (dark, high-contrast, minimal chroma) */
+.nova {
+  --button-outline: rgba(255,255,255,.08);
+  --badge-outline: rgba(255,255,255,.06);
+  --opaque-button-border-intensity: 10;
+
+  /* Surfaces */
+  --background: 222 15% 6%;
+  --foreground: 0 0% 96%;
+
+  --border: 222 15% 14%;
+
+  --card: 222 15% 8%;
+  --card-foreground: 0 0% 94%;
+  --card-border: 222 14% 12%;
+
+  --sidebar: 222 15% 7%;
+  --sidebar-foreground: 0 0% 90%;
+  --sidebar-border: 222 15% 12%;
+
+  /* Accents: keep subtle colored accents while mostly monochrome */
+  --primary: 0 0% 96%; /* white accents for icons/text */
+  --primary-foreground: 222 15% 6%;
+  --secondary: 222 15% 12%;
+  --secondary-foreground: 0 0% 88%;
+  --muted: 222 14% 12%;
+  --muted-foreground: 0 0% 70%;
+  --accent: 222 16% 14%;
+  --accent-foreground: 0 0% 88%;
+  --destructive: 0 75% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --popover: 222 15% 10%;
+  --popover-foreground: 0 0% 88%;
+  --popover-border: 222 15% 14%;
+
+  --input: 222 18% 22%;
+  --ring: 0 0% 96%;
+
+  /* Charts: toned down saturation */
+  --chart-1: 222 20% 80%;
+  --chart-2: 0 0% 65%;
+  --chart-3: 200 30% 70%;
+  --chart-4: 35 50% 65%;
+  --chart-5: 270 30% 70%;
+
+  /* Shadows tuned for deep dark surfaces */
+  --shadow-2xs: 0 2px 0 0 hsl(0 0% 0% / 0.25);
+  --shadow-xs: 0 2px 0 0 hsl(0 0% 0% / 0.30);
+  --shadow-sm: 0 2px 0 0 hsl(0 0% 0% / 0.35), 0 1px 2px -1px hsl(0 0% 0% / 0.40);
+  --shadow: 0 2px 0 0 hsl(0 0% 0% / 0.40), 0 1px 2px -1px hsl(0 0% 0% / 0.45);
+  --shadow-md: 0 2px 0 0 hsl(0 0% 0% / 0.45), 0 2px 4px -1px hsl(0 0% 0% / 0.50);
+  --shadow-lg: 0 2px 0 0 hsl(0 0% 0% / 0.55), 0 4px 6px -1px hsl(0 0% 0% / 0.60);
+  --shadow-xl: 0 2px 0 0 hsl(0 0% 0% / 0.60), 0 8px 10px -1px hsl(0 0% 0% / 0.65);
+  --shadow-2xl: 0 2px 0 0 hsl(0 0% 0% / 0.70);
+
+  /* Auto borders with intensity */
+  --sidebar-primary-border: hsl(var(--primary));
+  --sidebar-primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --sidebar-accent-border: hsl(var(--accent));
+  --sidebar-accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+
+  /* Hide ugly search cancel button in Chrome until we can style it properly */
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  /* Placeholder styling for contentEditable div */
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+
+  .no-default-hover-elevate {}
+
+  .no-default-active-elevate {}
+
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: 999;
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+}
+
+/* === NOVA REDESIGN THEME ============================================ */
+/* Enable by adding the `nova` class on <html>. This keeps existing dark/light
+   tokens intact but adds glow, gradient, and glass effects inspired by the
+   provided visuals without refactoring components. */
+
+.nova body {
+  /* Subtle deep space gradient backdrop with soft purple/blue lighting */
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgba(98, 91, 235, 0.25), transparent 65%),
+    radial-gradient(900px 500px at -10% 20%, rgba(59, 130, 246, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(244, 114, 182, 0.12), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+.nova .shadcn-card {
+  /* Glassy surface with inner glow and faint border gradient */
+  background: linear-gradient(
+      180deg,
+      hsl(var(--card) / 0.75) 0%,
+      hsl(var(--card) / 0.6) 100%
+    );
+  backdrop-filter: blur(10px) saturate(110%);
+  border-color: hsl(var(--border) / 0.4);
+  box-shadow:
+    0 1px 0 hsl(var(--border) / 0.35),
+    0 8px 20px hsl(var(--primary) / 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.nova .shadcn-card::before {
+  /* Top edge light sweep */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.nova .shadcn-card::after {
+  /* Corner glow accent */
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(closest-side, hsl(var(--primary) / 0.18), transparent 60%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.nova .hover-elevate:hover::after,
+.nova .active-elevate-2:active::after {
+  /* Make default elevate effects slightly stronger in nova */
+  background-color: hsl(var(--accent) / 0.12) !important;
+}
+
+.nova .btn-primary,
+.nova button.bg-primary,
+.nova .button-primary {
+  box-shadow: 0 0 0 1px hsl(var(--primary-border)), 0 12px 24px hsl(var(--primary) / 0.22);
+}
+
+.nova .glow-text {
+  text-shadow: 0 0 6px hsl(var(--primary) / 0.35);
+}
+
+/* Header glass bar */
+.nova header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.65), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === AQUA (TEAL) REDESIGN THEME ===================================== */
+.aqua body {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1200px 600px at 90% -10%, rgba(16, 185, 129, 0.24), transparent 65%),
+    radial-gradient(900px 500px at -10% 40%, rgba(6, 182, 212, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(125, 211, 252, 0.12), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+.aqua .shadcn-card {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.78) 0%, hsl(var(--card) / 0.62) 100%);
+  backdrop-filter: blur(10px) saturate(115%);
+  border-color: hsl(var(--border) / 0.4);
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.35), 0 8px 24px rgba(6, 182, 212, 0.17);
+  position: relative;
+  overflow: hidden;
+}
+
+.aqua .shadcn-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.10), transparent 75%);
+  pointer-events: none;
+}
+
+.aqua .shadcn-card::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(closest-side, rgba(16, 185, 129, 0.22), transparent 60%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.aqua header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.6), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === ATOMIC (DEEP TEAL) THEME ====================================== */
+.atomic body {
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(1100px 600px at 85% -10%, rgba(14, 165, 146, 0.22), transparent 65%),
+    radial-gradient(900px 520px at -10% 30%, rgba(12, 204, 168, 0.18), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(56, 189, 248, 0.10), transparent 70%);
+  background-blend-mode: screen, screen, normal;
+}
+
+/* Atomic color tokens – switch core brand to deep teal */
+.atomic {
+  --primary: 166 72% 45%; /* emerald */
+  --primary-foreground: 0 0% 98%;
+  --ring: 166 72% 45%;
+  --accent: 170 30% 22%;
+  --accent-foreground: 0 0% 92%;
+  --chart-1: 166 72% 50%;
+  --chart-2: 187 92% 45%;
+  --chart-3: 199 89% 48%;
+  --chart-4: 45 97% 55%;
+  --chart-5: 0 75% 55%;
+}
+
+.atomic .shadcn-card {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.70) 0%, hsl(var(--card) / 0.54) 100%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border-color: hsl(var(--border) / 0.40);
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.35), 0 12px 30px rgba(12, 204, 168, 0.16);
+  position: relative;
+  overflow: hidden;
+}
+
+.atomic .shadcn-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(600px 160px at 20% -10%, rgba(255,255,255,0.10), transparent 75%);
+  pointer-events: none;
+}
+
+.atomic .shadcn-card::after {
+  content: ""; position: absolute; right: -60px; bottom: -60px; width: 220px; height: 220px;
+  background: radial-gradient(closest-side, rgba(16, 185, 129, 0.22), transparent 60%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.atomic header.bg-background {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.6), hsl(var(--background) / 0.35));
+  backdrop-filter: blur(8px);
+}
+
+/* === MOTION UTILITIES ================================================ */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--ring) / 0.0); }
+  50% { box-shadow: 0 0 0 6px hsl(var(--ring) / 0.12); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.fx-glow {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.fx-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.fx-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.fx-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+/* Cards respond to importance */
+.importance-high { border-color: hsl(var(--ring)); box-shadow: 0 10px 28px hsl(var(--ring) / 0.20); }
+.importance-high .text-muted-foreground { color: hsl(var(--foreground) / 0.75); }
+.importance-medium { box-shadow: 0 6px 18px hsl(var(--ring) / 0.12); }
+.importance-low { opacity: 0.92; }
+
+/* Card hover interactions */
+.nova .shadcn-card:hover,
+.aqua .shadcn-card:hover {
+  transform: translateY(-1px);
+}
+
+/* Ripple effect for buttons */
+.fx-ripple { position: relative; overflow: hidden; }
+.fx-ripple::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0; height: 0;
+  background: radial-gradient(closest-side, hsl(var(--ring) / 0.28), transparent 70%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+.fx-ripple:active::after { width: 160px; height: 160px; opacity: 1; transition: width 300ms ease, height 300ms ease, opacity 600ms ease; }
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .fx-glow, .fx-float, .fx-shimmer { animation: none !important; }
+  .fx-ripple::after { transition: none !important; }
+}
+
+/* === ATOMIC STYLE UTILITIES ========================================= */
+.glass {
+  background: linear-gradient(180deg, hsl(var(--card) / 0.68) 0%, hsl(var(--card) / 0.50) 100%);
+  backdrop-filter: blur(12px) saturate(115%);
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+
+.border-glow {
+  box-shadow: 0 0 0 1px hsl(var(--ring) / 0.35), 0 10px 30px hsl(var(--ring) / 0.18);
+}
+
+.noise {
+  position: relative;
+}
+.noise::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="1" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.03"/></svg>');
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+.scanline::after {
+  content: ""; position: absolute; left: 0; top: -50%; width: 100%; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+  filter: blur(12px);
+  animation: scanDown 5s ease-in-out infinite;
+}
+@keyframes scanDown {
+  0% { top: -50%; }
+  50% { top: 120%; }
+  100% { top: 120%; }
+}
+
+.section-divider {
+  border-top: 1px solid hsl(var(--border) / 0.2);
+  box-shadow: 0 -1px 0 hsl(var(--border) / 0.35);
+}
