@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "regions": ["iad1"],
   "functions": {
-    "api/**": {
+    "NexusSuite/api/**": {
       "memory": 1024,
       "includeFiles": "dist/**"
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/[[...route]]" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "/NexusSuite/api/[[...route]]" },
+    { "source": "/assets/(.*)", "destination": "/NexusSuite/public/assets/$1" },
+    { "source": "/(.*)", "destination": "/NexusSuite/public/index.html" }
   ]
 }
