@@ -1,34 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": path.resolve(process.cwd(), "NexusSuite", "client", "src"),
+      "@shared": path.resolve(process.cwd(), "NexusSuite", "shared"),
+      "@assets": path.resolve(process.cwd(), "NexusSuite", "attached_assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: path.resolve(process.cwd(), "NexusSuite", "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "server/public"),
+    outDir: path.resolve(process.cwd(), "NexusSuite", "server", "public"),
     emptyOutDir: true,
   },
   server: {
@@ -38,7 +23,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:5012",
+        target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

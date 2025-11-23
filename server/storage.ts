@@ -785,16 +785,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTransaction(transactionData: InsertTransaction): Promise<Transaction> {
-    const [row] = await db.insert(transactions).values(transactionData).returning();
+    type TxDbInsert = typeof transactions.$inferInsert;
+    const normalized: TxDbInsert = {
+      ...transactionData,
+      date:
+        typeof transactionData.date === "string"
+          ? new Date(transactionData.date)
+          : transactionData.date,
+    } as TxDbInsert;
+    const [row] = await db.insert(transactions).values(normalized).returning();
+    if (!row) throw new Error("transaction_create_failed");
     return row;
   }
 
   async updateTransaction(id: string, tenantId: string, transactionData: Partial<InsertTransaction>): Promise<Transaction> {
+    type TxDbInsert = typeof transactions.$inferInsert;
+    const normalized: Partial<TxDbInsert> = {
+      ...transactionData,
+      date:
+        transactionData.date === undefined
+          ? undefined
+          : typeof transactionData.date === "string"
+            ? new Date(transactionData.date)
+            : transactionData.date as Date,
+      updatedAt: new Date(),
+    };
     const [row] = await db
       .update(transactions)
-      .set({ ...transactionData, updatedAt: new Date() })
+      .set(normalized)
       .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)))
       .returning();
+    if (!row) throw new Error("transaction_update_failed");
     return row;
   }
 
@@ -818,6 +839,7 @@ export class DatabaseStorage implements IStorage {
 
   async createWallet(walletData: InsertWallet): Promise<Wallet> {
     const [row] = await db.insert(wallets).values(walletData).returning();
+    if (!row) throw new Error("wallet_create_failed");
     return row;
   }
 
@@ -827,6 +849,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...walletData, updatedAt: new Date() })
       .where(and(eq(wallets.id, id), eq(wallets.tenantId, tenantId)))
       .returning();
+    if (!row) throw new Error("wallet_update_failed");
     return row;
   }
 
