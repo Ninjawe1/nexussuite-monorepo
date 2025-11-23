@@ -1,21 +1,17 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import {
-  insertCampaignSchema,
-  type InsertCampaign,
-  type Campaign,
-} from "@shared/schema";
-import { z } from "zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { insertCampaignSchema, type Campaign } from '@shared/schema';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -23,21 +19,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { formatDateSafe, toDateSafe } from "@/lib/date";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import { formatDateSafe, toDateSafe } from '@/lib/date';
 
 interface CampaignDialogProps {
   open: boolean;
@@ -46,19 +42,15 @@ interface CampaignDialogProps {
 }
 
 const platformOptions = [
-  { id: "twitter", label: "Twitter" },
-  { id: "instagram", label: "Instagram" },
-  { id: "youtube", label: "YouTube" },
-  { id: "twitch", label: "Twitch" },
-  { id: "tiktok", label: "TikTok" },
-  { id: "facebook", label: "Facebook" },
+  { id: 'twitter', label: 'Twitter' },
+  { id: 'instagram', label: 'Instagram' },
+  { id: 'youtube', label: 'YouTube' },
+  { id: 'twitch', label: 'Twitch' },
+  { id: 'tiktok', label: 'TikTok' },
+  { id: 'facebook', label: 'Facebook' },
 ];
 
-export function CampaignDialog({
-  open,
-  onOpenChange,
-  campaign,
-}: CampaignDialogProps) {
+export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,44 +59,44 @@ export function CampaignDialog({
     startDate: insertCampaignSchema.shape.startDate.or(
       z
         .string()
-        .refine((v) => !!toDateSafe(v), { message: "Invalid date" })
-        .transform((v) => toDateSafe(v)!),
+        .refine(v => !!toDateSafe(v), { message: 'Invalid date' })
+        .transform(v => toDateSafe(v)!)
     ),
     endDate: insertCampaignSchema.shape.endDate.or(
       z
         .string()
-        .refine((v) => !!toDateSafe(v), { message: "Invalid date" })
-        .transform((v) => toDateSafe(v)!),
+        .refine(v => !!toDateSafe(v), { message: 'Invalid date' })
+        .transform(v => toDateSafe(v)!)
     ),
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: campaign?.title || "",
-      description: campaign?.description || "",
+      title: campaign?.title || '',
+      description: campaign?.description || '',
       startDate: campaign?.startDate
-        ? formatDateSafe(campaign.startDate, "yyyy-MM-dd")
-        : new Date().toISOString().split("T")[0],
+        ? formatDateSafe(campaign.startDate, 'yyyy-MM-dd')
+        : new Date().toISOString().split('T')[0],
       endDate: campaign?.endDate
-        ? formatDateSafe(campaign.endDate, "yyyy-MM-dd")
-        : new Date().toISOString().split("T")[0],
+        ? formatDateSafe(campaign.endDate, 'yyyy-MM-dd')
+        : new Date().toISOString().split('T')[0],
       platforms: campaign?.platforms || [],
       reach: campaign?.reach || undefined,
       engagement: campaign?.engagement || undefined,
-      status: campaign?.status || "scheduled",
+      status: campaign?.status || 'scheduled',
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertCampaign) => {
-      return await apiRequest("/api/campaigns", "POST", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest('/api/campaigns', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
       toast({
-        title: "Success",
-        description: "Campaign created successfully",
+        title: 'Success',
+        description: 'Campaign created successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -112,32 +104,32 @@ export function CampaignDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to create campaign",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create campaign',
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: InsertCampaign) => {
-      return await apiRequest(`/api/campaigns/${campaign?.id}`, "PATCH", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest(`/api/campaigns/${campaign?.id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
       toast({
-        title: "Success",
-        description: "Campaign updated successfully",
+        title: 'Success',
+        description: 'Campaign updated successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -145,30 +137,30 @@ export function CampaignDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update campaign",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update campaign',
+        variant: 'destructive',
       });
     },
   });
 
-  const onSubmit = async (data: InsertCampaign) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
       if (campaign) {
-        await updateMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(data as any);
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(data as any);
       }
     } finally {
       setIsSubmitting(false);
@@ -179,13 +171,9 @@ export function CampaignDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]" data-testid="dialog-campaign">
         <DialogHeader>
-          <DialogTitle>
-            {campaign ? "Edit Campaign" : "Create Campaign"}
-          </DialogTitle>
+          <DialogTitle>{campaign ? 'Edit Campaign' : 'Create Campaign'}</DialogTitle>
           <DialogDescription>
-            {campaign
-              ? "Update the campaign details below"
-              : "Create a new marketing campaign"}
+            {campaign ? 'Update the campaign details below' : 'Create a new marketing campaign'}
           </DialogDescription>
         </DialogHeader>
 
@@ -237,7 +225,12 @@ export function CampaignDialog({
                     <FormControl>
                       <Input
                         type="date"
-                        {...field}
+                        value={
+                          typeof field.value === 'string'
+                            ? field.value
+                            : formatDateSafe(field.value, 'yyyy-MM-dd')
+                        }
+                        onChange={e => field.onChange(e.target.value)}
                         data-testid="input-campaign-startdate"
                       />
                     </FormControl>
@@ -255,7 +248,12 @@ export function CampaignDialog({
                     <FormControl>
                       <Input
                         type="date"
-                        {...field}
+                        value={
+                          typeof field.value === 'string'
+                            ? field.value
+                            : formatDateSafe(field.value, 'yyyy-MM-dd')
+                        }
+                        onChange={e => field.onChange(e.target.value)}
                         data-testid="input-campaign-enddate"
                       />
                     </FormControl>
@@ -272,34 +270,23 @@ export function CampaignDialog({
                 <FormItem>
                   <FormLabel>Platforms</FormLabel>
                   <div className="grid grid-cols-3 gap-3">
-                    {platformOptions.map((platform) => (
-                      <div
-                        key={platform.id}
-                        className="flex items-center gap-2"
-                      >
+                    {platformOptions.map(platform => (
+                      <div key={platform.id} className="flex items-center gap-2">
                         <Checkbox
                           id={platform.id}
                           checked={field.value?.includes(platform.id)}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             if (checked) {
-                              field.onChange([
-                                ...(field.value || []),
-                                platform.id,
-                              ]);
+                              field.onChange([...(field.value || []), platform.id]);
                             } else {
                               field.onChange(
-                                field.value?.filter(
-                                  (p: string) => p !== platform.id,
-                                ) || [],
+                                field.value?.filter((p: string) => p !== platform.id) || []
                               );
                             }
                           }}
                           data-testid={`checkbox-platform-${platform.id}`}
                         />
-                        <label
-                          htmlFor={platform.id}
-                          className="text-sm cursor-pointer"
-                        >
+                        <label htmlFor={platform.id} className="text-sm cursor-pointer">
                           {platform.label}
                         </label>
                       </div>
@@ -322,13 +309,9 @@ export function CampaignDialog({
                         type="number"
                         placeholder="125000"
                         {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              ? parseInt(e.target.value)
-                              : undefined,
-                          )
+                        value={field.value ?? ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                         }
                         data-testid="input-campaign-reach"
                       />
@@ -350,7 +333,7 @@ export function CampaignDialog({
                         step="0.1"
                         placeholder="8.5"
                         {...field}
-                        value={field.value ?? ""}
+                        value={field.value ?? ''}
                         data-testid="input-campaign-engagement"
                       />
                     </FormControl>
@@ -366,10 +349,7 @@ export function CampaignDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger data-testid="select-campaign-status">
                         <SelectValue placeholder="Select status" />
@@ -396,12 +376,8 @@ export function CampaignDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                data-testid="button-submit-campaign"
-              >
-                {isSubmitting ? "Saving..." : campaign ? "Update" : "Create"}
+              <Button type="submit" disabled={isSubmitting} data-testid="button-submit-campaign">
+                {isSubmitting ? 'Saving...' : campaign ? 'Update' : 'Create'}
               </Button>
             </div>
           </form>

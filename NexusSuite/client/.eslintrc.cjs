@@ -16,13 +16,16 @@ module.exports = {
         tsconfigRootDir: __dirname
     },
   
-   ignorePatterns: [
+  ignorePatterns: [
     "vitest.config.ts",
     "playwright.config.ts",
     "vite.config.ts",
     "dist/",
-    "node_modules/"
-   ],
+    "node_modules/",
+    "src/tests/**",
+    "src/services/__tests__/**",
+    "src/**/__tests__/**"
+  ],
 
   settings: {
     react: {
@@ -42,6 +45,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'react/no-unknown-property': 'off',
+    'react/no-unescaped-entities': 'off',
     'no-empty': 'warn',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],

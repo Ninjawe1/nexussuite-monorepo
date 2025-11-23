@@ -1,21 +1,16 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import {
-  insertPayrollSchema,
-  type InsertPayroll,
-  type Payroll,
-  type Wallet,
-} from "@shared/schema";
-import { z } from "zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { insertPayrollSchema, type InsertPayroll, type Payroll, type Wallet } from '@shared/schema';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -23,20 +18,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { apiRequest } from "@/lib/queryClient";
-import { formatDateSafe, toDateSafe } from "@/lib/date";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import { apiRequest } from '@/lib/queryClient';
+import { formatDateSafe, toDateSafe } from '@/lib/date';
 
 interface PayrollDialogProps {
   open: boolean;
@@ -44,11 +39,7 @@ interface PayrollDialogProps {
   payroll?: Payroll;
 }
 
-export function PayrollDialog({
-  open,
-  onOpenChange,
-  payroll,
-}: PayrollDialogProps) {
+export function PayrollDialog({ open, onOpenChange, payroll }: PayrollDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,40 +48,40 @@ export function PayrollDialog({
     date: insertPayrollSchema.shape.date.or(
       z
         .string()
-        .refine((v) => !!toDateSafe(v), { message: "Invalid date" })
-        .transform((v) => toDateSafe(v)!),
+        .refine(v => !!toDateSafe(v), { message: 'Invalid date' })
+        .transform(v => toDateSafe(v)!)
     ),
   });
 
   const { data: wallets = [] } = useQuery<Wallet[]>({
-    queryKey: ["/api/wallets"],
+    queryKey: ['/api/wallets'],
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      staffId: payroll?.staffId || "",
-      name: payroll?.name || "",
-      role: payroll?.role || "",
-      amount: payroll?.amount || "0",
-      type: payroll?.type || "monthly",
-      status: payroll?.status || "pending",
+      staffId: payroll?.staffId || '',
+      name: payroll?.name || '',
+      role: payroll?.role || '',
+      amount: payroll?.amount || '0',
+      type: payroll?.type || 'monthly',
+      status: payroll?.status || 'pending',
       date: payroll?.date
-        ? formatDateSafe(payroll.date, "yyyy-MM-dd")
-        : new Date().toISOString().split("T")[0],
-      walletId: payroll?.walletId || "",
+        ? formatDateSafe(payroll.date, 'yyyy-MM-dd')
+        : new Date().toISOString().split('T')[0],
+      walletId: payroll?.walletId || '',
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertPayroll) => {
-      return await apiRequest("/api/payroll", "POST", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest('/api/payroll', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payroll"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/payroll'] });
       toast({
-        title: "Success",
-        description: "Payroll entry added successfully",
+        title: 'Success',
+        description: 'Payroll entry added successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -98,32 +89,32 @@ export function PayrollDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to add payroll entry",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add payroll entry',
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: InsertPayroll) => {
-      return await apiRequest(`/api/payroll/${payroll?.id}`, "PATCH", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest(`/api/payroll/${payroll?.id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payroll"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/payroll'] });
       toast({
-        title: "Success",
-        description: "Payroll entry updated successfully",
+        title: 'Success',
+        description: 'Payroll entry updated successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -131,42 +122,39 @@ export function PayrollDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update payroll entry",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update payroll entry',
+        variant: 'destructive',
       });
     },
   });
 
-  const onSubmit = async (data: InsertPayroll) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      const payload: InsertPayroll = { ...data };
-      if (
-        (payload as any).walletId === "" ||
-        (payload as any).walletId === "none"
-      ) {
+      const payload: InsertPayroll = { ...data } as unknown as InsertPayroll;
+      if ((payload as any).walletId === '' || (payload as any).walletId === 'none') {
         delete (payload as any).walletId;
       }
-      console.log("[PayrollDialog] Submitting payload:", payload);
+      console.log('[PayrollDialog] Submitting payload:', payload);
       if (payroll) {
-        await updateMutation.mutateAsync(payload);
+        await updateMutation.mutateAsync(payload as any);
       } else {
-        await createMutation.mutateAsync(payload);
+        await createMutation.mutateAsync(payload as any);
       }
-      console.log("[PayrollDialog] Submission finished");
+      console.log('[PayrollDialog] Submission finished');
     } catch (err) {
-      console.error("[PayrollDialog] Submit error:", err);
+      console.error('[PayrollDialog] Submit error:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -176,13 +164,9 @@ export function PayrollDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]" data-testid="dialog-payroll">
         <DialogHeader>
-          <DialogTitle>
-            {payroll ? "Edit Payroll Entry" : "Add Payroll Entry"}
-          </DialogTitle>
+          <DialogTitle>{payroll ? 'Edit Payroll Entry' : 'Add Payroll Entry'}</DialogTitle>
           <DialogDescription>
-            {payroll
-              ? "Update the payroll details below"
-              : "Add a new payroll payment entry"}
+            {payroll ? 'Update the payroll details below' : 'Add a new payroll payment entry'}
           </DialogDescription>
         </DialogHeader>
 
@@ -195,10 +179,7 @@ export function PayrollDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Wallet (Optional)</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || ""}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
                     <FormControl>
                       <SelectTrigger data-testid="select-payroll-wallet">
                         <SelectValue placeholder="Select wallet" />
@@ -208,7 +189,7 @@ export function PayrollDialog({
                       <SelectItem key="none" value="none">
                         No wallet
                       </SelectItem>
-                      {wallets.map((w) => (
+                      {wallets.map(w => (
                         <SelectItem key={w.id} value={w.id}>
                           {w.name} ({w.currency.toUpperCase()})
                         </SelectItem>
@@ -226,11 +207,7 @@ export function PayrollDialog({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      {...field}
-                      data-testid="input-payroll-name"
-                    />
+                    <Input placeholder="John Doe" {...field} data-testid="input-payroll-name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -332,7 +309,12 @@ export function PayrollDialog({
                     <FormControl>
                       <Input
                         type="date"
-                        {...field}
+                        value={
+                          typeof field.value === 'string'
+                            ? field.value
+                            : formatDateSafe(field.value, 'yyyy-MM-dd')
+                        }
+                        onChange={e => field.onChange(e.target.value)}
                         data-testid="input-payroll-date"
                       />
                     </FormControl>
@@ -352,6 +334,7 @@ export function PayrollDialog({
                     <Input
                       placeholder="Link to staff member"
                       {...field}
+                      value={field.value ?? ''}
                       data-testid="input-payroll-staffid"
                     />
                   </FormControl>
@@ -370,12 +353,8 @@ export function PayrollDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                data-testid="button-submit-payroll"
-              >
-                {isSubmitting ? "Saving..." : payroll ? "Update" : "Add"}
+              <Button type="submit" disabled={isSubmitting} data-testid="button-submit-payroll">
+                {isSubmitting ? 'Saving...' : payroll ? 'Update' : 'Add'}
               </Button>
             </div>
           </form>

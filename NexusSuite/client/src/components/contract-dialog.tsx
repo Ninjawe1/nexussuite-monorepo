@@ -1,21 +1,17 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import {
-  insertContractSchema,
-  type InsertContract,
-  type Contract,
-} from "@shared/schema";
-import { z } from "zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { insertContractSchema, type Contract } from '@shared/schema';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -23,20 +19,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { toDateSafe } from "@/lib/date";
-import { ContractAttachments } from "./contract-attachments";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import { formatDateSafe, toDateSafe } from '@/lib/date';
+import { ContractAttachments } from './contract-attachments';
 
 interface ContractDialogProps {
   open: boolean;
@@ -44,11 +40,7 @@ interface ContractDialogProps {
   contract?: Contract;
 }
 
-export function ContractDialog({
-  open,
-  onOpenChange,
-  contract,
-}: ContractDialogProps) {
+export function ContractDialog({ open, onOpenChange, contract }: ContractDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,35 +49,35 @@ export function ContractDialog({
     expirationDate: insertContractSchema.shape.expirationDate.or(
       z
         .string()
-        .refine((v) => !!toDateSafe(v), { message: "Invalid date" })
-        .transform((v) => toDateSafe(v)!),
+        .refine(v => !!toDateSafe(v), { message: 'Invalid date' })
+        .transform(v => toDateSafe(v)!)
     ),
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fileName: contract?.fileName || "",
-      fileUrl: contract?.fileUrl || "",
-      type: contract?.type || "Player",
-      linkedPerson: contract?.linkedPerson || "",
+      fileName: contract?.fileName || '',
+      fileUrl: contract?.fileUrl || '',
+      type: contract?.type || 'Player',
+      linkedPerson: contract?.linkedPerson || '',
       expirationDate: (() => {
         const d = toDateSafe(contract?.expirationDate) ?? new Date();
-        return d.toISOString().split("T")[0];
+        return d.toISOString().split('T')[0];
       })(),
-      status: contract?.status || "active",
+      status: contract?.status || 'active',
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: InsertContract) => {
-      return await apiRequest("/api/contracts", "POST", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest('/api/contracts', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
       toast({
-        title: "Success",
-        description: "Contract added successfully",
+        title: 'Success',
+        description: 'Contract added successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -93,32 +85,32 @@ export function ContractDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to add contract",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add contract',
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: InsertContract) => {
-      return await apiRequest(`/api/contracts/${contract?.id}`, "PATCH", data);
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      return await apiRequest(`/api/contracts/${contract?.id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contracts'] });
       toast({
-        title: "Success",
-        description: "Contract updated successfully",
+        title: 'Success',
+        description: 'Contract updated successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -126,30 +118,30 @@ export function ContractDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update contract",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update contract',
+        variant: 'destructive',
       });
     },
   });
 
-  const onSubmit = async (data: InsertContract) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
       if (contract) {
-        await updateMutation.mutateAsync(data);
+        await updateMutation.mutateAsync(data as any);
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(data as any);
       }
     } finally {
       setIsSubmitting(false);
@@ -160,13 +152,11 @@ export function ContractDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>
-            {contract ? "Edit Contract" : "New Contract"}
-          </DialogTitle>
+          <DialogTitle>{contract ? 'Edit Contract' : 'New Contract'}</DialogTitle>
           <DialogDescription>
             {contract
-              ? "Update contract details and manage attachments."
-              : "Create a new contract."}
+              ? 'Update contract details and manage attachments.'
+              : 'Create a new contract.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -214,10 +204,7 @@ export function ContractDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-contract-type">
                           <SelectValue placeholder="Select type" />
@@ -263,7 +250,12 @@ export function ContractDialog({
                     <FormControl>
                       <Input
                         type="date"
-                        {...field}
+                        value={
+                          typeof field.value === 'string'
+                            ? field.value
+                            : formatDateSafe(field.value, 'yyyy-MM-dd')
+                        }
+                        onChange={e => field.onChange(e.target.value)}
                         data-testid="input-contract-expirationdate"
                       />
                     </FormControl>
@@ -278,10 +270,7 @@ export function ContractDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-contract-status">
                           <SelectValue placeholder="Select status" />
@@ -309,12 +298,8 @@ export function ContractDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                data-testid="button-submit-contract"
-              >
-                {isSubmitting ? "Saving..." : contract ? "Update" : "Add"}
+              <Button type="submit" disabled={isSubmitting} data-testid="button-submit-contract">
+                {isSubmitting ? 'Saving...' : contract ? 'Update' : 'Add'}
               </Button>
             </div>
           </form>
