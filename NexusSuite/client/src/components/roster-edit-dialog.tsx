@@ -3,6 +3,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Roster } from "@shared/schema";
+
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import {
   Form,
   FormField,
@@ -23,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
 import {
   Select,
   SelectContent,
@@ -31,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GAME_OPTIONS, normalizeGameTitle } from "@/constants/games";
+
 
 export interface RosterEditDialogProps {
   roster: Roster;
@@ -49,6 +53,7 @@ const schema = z.object({
     .or(z.literal("")),
   game: z.enum(GAME_OPTIONS),
   type: z.enum(["International competitive", "Local Competitive", "Academy"]),
+
   maxPlayers: z.coerce.number().min(1).max(12),
 });
 
@@ -74,6 +79,7 @@ export function RosterEditDialog({
           : "Valorant";
       })(),
       type: (roster?.type as FormValues["type"]) ?? "International competitive",
+
       maxPlayers: roster?.maxPlayers ?? 5,
     },
   });
@@ -92,6 +98,7 @@ export function RosterEditDialog({
         })(),
         type:
           (roster.type as FormValues["type"]) ?? "International competitive",
+
         maxPlayers: roster.maxPlayers ?? 5,
       });
     }
@@ -101,6 +108,7 @@ export function RosterEditDialog({
     await onSubmit({
       name: values.name,
       description: values.description || "",
+
       game: normalizeGameTitle(values.game),
       type: values.type,
       maxPlayers: values.maxPlayers,
@@ -123,6 +131,7 @@ export function RosterEditDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
+
             <FormField
               control={form.control}
               name="name"
@@ -164,6 +173,7 @@ export function RosterEditDialog({
                       </SelectTrigger>
                       <SelectContent>
                         {GAME_OPTIONS.map((g) => (
+
                           <SelectItem key={g} value={g}>
                             {g}
                           </SelectItem>
@@ -208,6 +218,7 @@ export function RosterEditDialog({
                         aria-label="Academy"
                         className="px-4 py-2"
                       >
+
                         Academy
                       </ToggleGroupItem>
                     </ToggleGroup>
@@ -237,6 +248,7 @@ export function RosterEditDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
+
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

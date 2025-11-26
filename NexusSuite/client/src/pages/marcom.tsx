@@ -3,6 +3,7 @@ import { CampaignDialog } from "@/components/campaign-dialog";
 import { SocialAccountOAuthDialog } from "@/components/social-account-dialog-oauth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Plus,
   Eye,
@@ -34,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
 
+
 const platformIcons: Record<string, any> = {
   instagram: SiInstagram,
   twitter: SiX,
@@ -49,6 +51,7 @@ export default function Marcom() {
   const [selectedCampaign, setSelectedCampaign] = useState<
     CampaignType | undefined
   >();
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
@@ -101,6 +104,7 @@ export default function Marcom() {
 
   const { data: socialAnalytics, isLoading: analyticsLoading } = useQuery<any>({
     queryKey: ["/api/social/analytics"],
+
   });
 
   const deleteCampaignMutation = useMutation({
@@ -112,6 +116,7 @@ export default function Marcom() {
       toast({
         title: "Success",
         description: "Campaign deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -123,6 +128,7 @@ export default function Marcom() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -130,6 +136,7 @@ export default function Marcom() {
         title: "Error",
         description: error.message || "Failed to delete campaign",
         variant: "destructive",
+
       });
     },
   });
@@ -144,6 +151,7 @@ export default function Marcom() {
       toast({
         title: "Success",
         description: "Social account disconnected",
+
       });
     },
     onError: (error: Error) => {
@@ -155,6 +163,7 @@ export default function Marcom() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -162,6 +171,7 @@ export default function Marcom() {
         title: "Error",
         description: error.message || "Failed to disconnect account",
         variant: "destructive",
+
       });
     },
   });
@@ -175,6 +185,7 @@ export default function Marcom() {
       toast({
         title: "Success",
         description: "Analytics synced successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -182,6 +193,7 @@ export default function Marcom() {
         title: "Error",
         description: error.message || "Failed to sync analytics",
         variant: "destructive",
+
       });
     },
   });
@@ -195,6 +207,7 @@ export default function Marcom() {
           .filter((c) => c.engagement)
           .reduce((sum, c) => sum + (Number(c.engagement) || 0), 0) /
         campaigns.filter((c) => c.engagement).length
+
       : 0;
 
   const handleEditCampaign = (campaign: CampaignType) => {
@@ -209,6 +222,7 @@ export default function Marcom() {
 
   const handleDeleteCampaign = async (id: string) => {
     if (confirm("Are you sure you want to delete this campaign?")) {
+
       await deleteCampaignMutation.mutateAsync(id);
     }
   };
@@ -219,6 +233,7 @@ export default function Marcom() {
 
   const handleDisconnectAccount = async (id: string) => {
     if (confirm("Are you sure you want to disconnect this account?")) {
+
       await deleteAccountMutation.mutateAsync(id);
     }
   };
@@ -235,6 +250,7 @@ export default function Marcom() {
             className="text-3xl font-heading font-bold mb-1"
             data-testid="text-marcom-title"
           >
+
             Marketing & Communications
           </h1>
           <p className="text-muted-foreground">
@@ -262,6 +278,7 @@ export default function Marcom() {
               onClick={handleConnectAccount}
               data-testid="button-connect-account"
             >
+
               <LinkIcon className="w-4 h-4 mr-2" />
               Connect Account
             </Button>
@@ -270,6 +287,7 @@ export default function Marcom() {
           {accountsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
+
                 <Skeleton key={i} className="h-32" />
               ))}
             </div>
@@ -278,11 +296,13 @@ export default function Marcom() {
               <CardContent className="py-12 text-center text-muted-foreground">
                 No social accounts connected. Connect your first account to
                 start tracking analytics.
+
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {socialAccounts.map((account) => {
+
                 const Icon = platformIcons[account.platform] || LinkIcon;
                 return (
                   <Card key={account.id}>
@@ -293,6 +313,7 @@ export default function Marcom() {
                           <CardTitle className="text-base">
                             {account.accountName}
                           </CardTitle>
+
                           <p className="text-xs text-muted-foreground capitalize">
                             {account.platform}
                           </p>
@@ -330,6 +351,7 @@ export default function Marcom() {
                         <p className="text-xs text-muted-foreground">
                           Last synced:{" "}
                           {formatDateSafe(account.lastSyncedAt, "MMM dd, yyyy")}
+
                         </p>
                       )}
                     </CardContent>
@@ -364,6 +386,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Across all platforms
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -390,6 +413,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Total impressions
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -416,6 +440,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Total interactions
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -439,6 +464,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Across platforms
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -505,6 +531,7 @@ export default function Marcom() {
                 </div>
               </div>
             )}
+
         </TabsContent>
 
         <TabsContent value="campaigns" className="space-y-6">
@@ -516,6 +543,7 @@ export default function Marcom() {
               onClick={handleAddCampaign}
               data-testid="button-add-campaign"
             >
+
               <Plus className="w-4 h-4 mr-2" />
               New Campaign
             </Button>
@@ -543,6 +571,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Across all campaigns
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -566,6 +595,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Engagement rate
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -589,6 +619,7 @@ export default function Marcom() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Currently running
                     </p>
+
                   </>
                 )}
               </CardContent>
@@ -598,6 +629,7 @@ export default function Marcom() {
           {campaignsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4].map((i) => (
+
                 <Skeleton key={i} className="h-64" />
               ))}
             </div>
@@ -608,6 +640,7 @@ export default function Marcom() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns.map((campaign) => (
+
                 <div key={campaign.id} className="relative group">
                   <CampaignCard
                     {...campaign}
@@ -621,6 +654,7 @@ export default function Marcom() {
                         ? Number(campaign.engagement)
                         : undefined
                     }
+
                   />
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                     <Button
@@ -657,6 +691,7 @@ export default function Marcom() {
         open={socialDialogOpen}
         onOpenChange={setSocialDialogOpen}
       />
+
     </div>
   );
 }

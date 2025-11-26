@@ -16,6 +16,10 @@
 node_modules/
 dist/
 coverage/
+<<<<<<< HEAD
+=======
+NexusSuite/public/assets/
+>>>>>>> e6da67b (feat(repo): initial clean upload)
 
 # Local tooling
 .vercel/

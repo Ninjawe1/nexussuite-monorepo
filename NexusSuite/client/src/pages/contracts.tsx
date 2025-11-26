@@ -2,6 +2,7 @@ import { ContractRow } from "@/components/contract-row";
 import { ContractDialog } from "@/components/contract-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Upload,
   FileText,
@@ -20,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Contract as ContractType } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,11 +34,13 @@ export default function Contracts() {
   const [selectedContract, setSelectedContract] = useState<
     ContractType | undefined
   >();
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: contracts = [], isLoading } = useQuery<ContractType[]>({
     queryKey: ["/api/contracts"],
+
   });
 
   const deleteMutation = useMutation({
@@ -48,6 +52,7 @@ export default function Contracts() {
       toast({
         title: "Success",
         description: "Contract deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -59,6 +64,7 @@ export default function Contracts() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -66,6 +72,7 @@ export default function Contracts() {
         title: "Error",
         description: error.message || "Failed to delete contract",
         variant: "destructive",
+
       });
     },
   });
@@ -79,6 +86,7 @@ export default function Contracts() {
 
   // Currently valid = not expired (includes those expiring soon)
   const activeContracts = contracts.filter((c) => {
+
     const days = getDaysUntil(c);
     return days !== null && days > 0; // future date
   }).length;
@@ -95,6 +103,7 @@ export default function Contracts() {
     const days = getDaysUntil(c);
     const isPast = days !== null && days <= 0;
     return isPast || c.status === "expired";
+
   }).length;
 
   const handleEdit = (contract: ContractType) => {
@@ -109,6 +118,7 @@ export default function Contracts() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this contract?")) {
+
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -126,6 +136,7 @@ export default function Contracts() {
           <p className="text-muted-foreground">
             Manage player, staff, and sponsor contracts
           </p>
+
         </div>
         <Button onClick={handleAdd} data-testid="button-upload-contract">
           <Upload className="w-4 h-4 mr-2" />
@@ -155,6 +166,7 @@ export default function Contracts() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Currently valid
                 </p>
+
               </>
             )}
           </CardContent>
@@ -178,6 +190,7 @@ export default function Contracts() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Within 30 days
                 </p>
+
               </>
             )}
           </CardContent>
@@ -188,6 +201,7 @@ export default function Contracts() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Expired
             </CardTitle>
+
             <FileText className="h-4 w-4 text-chart-5" />
           </CardHeader>
           <CardContent>
@@ -201,6 +215,7 @@ export default function Contracts() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Needs renewal
                 </p>
+
               </>
             )}
           </CardContent>
@@ -215,6 +230,7 @@ export default function Contracts() {
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
+
                 <Skeleton key={i} className="h-16 w-full" />
               ))}
             </div>
@@ -230,6 +246,7 @@ export default function Contracts() {
                     {...contract}
                     expirationDate={contract.expirationDate}
                   />
+
                 </div>
                 {/* actions menu */}
                 <DropdownMenu>
@@ -272,6 +289,7 @@ export default function Contracts() {
         onOpenChange={setDialogOpen}
         contract={selectedContract}
       />
+
     </div>
   );
 }

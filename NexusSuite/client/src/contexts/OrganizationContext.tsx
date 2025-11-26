@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+
 export interface Organization {
   id: string;
   name: string;
@@ -61,6 +62,7 @@ interface OrganizationContextType {
     organizationId: string,
     updates: Partial<Organization>,
   ) => Promise<void>;
+
   deleteOrganization: (organizationId: string) => Promise<void>;
   canAccessOrganization: (organizationId: string) => boolean;
   // Members management
@@ -78,12 +80,14 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(
   undefined,
 );
 
+
 export const useOrganization = () => {
   const context = useContext(OrganizationContext);
   if (!context) {
     throw new Error(
       "useOrganization must be used within an OrganizationProvider",
     );
+
   }
   return context;
 };
@@ -95,6 +99,7 @@ interface OrganizationProviderProps {
 export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
   children,
 }) => {
+
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -103,6 +108,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     useState<Organization | null>(null);
   const [currentMembership, setCurrentMembership] =
     useState<OrganizationMembership | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -112,6 +118,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
   const fetchOrganizations = useCallback(async (): Promise<Organization[]> => {
     try {
       const response = await apiRequest("/api/auth/user", "GET");
+
       const data = await response.json();
 
       // Prefer explicit organizations array if provided
@@ -121,6 +128,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           id: org.organizationId || org.id,
           name: org.organization?.name || org.name || "Unknown Organization",
           slug: (org.organization?.slug || org.slug || org.organizationId || org.id || "").toString(),
+
           createdAt: org.createdAt || new Date().toISOString(),
           updatedAt: org.updatedAt || new Date().toISOString(),
           metadata: org.organization?.metadata || org.metadata || {},
@@ -134,6 +142,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           data?.tenant?.name ||
           data?.clubName ||
           (data?.firstName ? `${data.firstName}'s Club` : data?.email || "My Club");
+
 
         return [
           {
@@ -149,7 +158,6 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
 
       // No organizations available
       return [];
-
     } 
     catch (error) {
       // Gracefully handle missing endpoints on public landing page
@@ -158,6 +166,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     }
   }, []);
   
+
   /**
    * Refresh organizations list
    */
@@ -174,6 +183,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         currentOrganization &&
         !orgs.find((org) => org.id === currentOrganization.id)
       ) {
+
         // Current org no longer exists or user lost access
         setCurrentOrganization(null);
         setCurrentMembership(null);
@@ -188,6 +198,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         title: "Failed to refresh organizations",
         description: "Unable to load your organizations",
         variant: "destructive",
+
       });
     } finally {
       setIsLoading(false);
@@ -206,6 +217,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       const source = orgList && orgList.length ? orgList : organizations;
       let org = source.find((o) => o.id === organizationId) || null;
 
+
       // If not found, attempt a fresh fetch once before failing
       if (!org) {
         try {
@@ -214,6 +226,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           org = fresh.find((o) => o.id === organizationId) || null;
         } catch (err) {
           console.warn("Failed to refresh organizations during selection:", err);
+
         }
       }
 
@@ -225,6 +238,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           title: "Organization not found",
           description: "Please select a valid organization.",
           variant: "destructive",
+
         });
         setIsSwitching(false);
         return;
@@ -237,6 +251,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         const data = await response.json();
         const role = data?.role || data?.user?.role || "owner";
         const userId = String(data?.id || data?.user?.id || "user");
+
 
         setCurrentMembership({
           id: `${userId}-${organizationId}`,
@@ -251,12 +266,14 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         setCurrentMembership(null);
       } finally {
         localStorage.setItem("selectedOrganizationId", organizationId);
+
         setIsSwitching(false);
       }
     },
     [isAuthenticated, organizations, fetchOrganizations, toast]
   );
  
+
 
   /**
    * Create a new organization
@@ -272,6 +289,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           slug,
         })
 
+
         const newOrg = await response.json();
 
         // Refresh organizations list
@@ -282,6 +300,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
 
         toast({
           title: "Organization created",
+
           description: `${name} has been created successfully`,
         });
 
@@ -295,11 +314,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           title: "Creation failed",
           description: message,
           variant: "destructive",
+
         });
         throw error;
       }
     },
     [isAuthenticated, refreshOrganizations, selectOrganization, toast],
+
   );
 
   /**
@@ -311,6 +332,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         // Server treats organization as current tenant; call unified endpoint
         await apiRequest(`/api/tenant`, "PATCH", {
           "Content-Type": "application/json",
+
           ...updates,
         });
 
@@ -330,11 +352,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           title: "Update failed",
           description: message,
           variant: "destructive",
+
         });
         throw error;
       }
     },
     [refreshOrganizations, toast],
+
   );
 
   /**
@@ -345,6 +369,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       try {
         // Server treats organization as current tenant; call unified endpoint
         await apiRequest(`/api/tenant`, "DELETE");
+
 
         // Refresh organizations list
         await refreshOrganizations();
@@ -362,11 +387,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           title: "Deletion failed",
           description: message,
           variant: "destructive",
+
         });
         throw error;
       }
     },
     [refreshOrganizations, toast],
+
   );
 
   /**
@@ -375,11 +402,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
   const listMembers = useCallback(async (): Promise<OrgMember[]> => {
     try {
       const response = await apiRequest("/api/tenant/members", "GET");
+
       const members = await response.json();
       return (members || []).map((m: any) => ({
         id: String(m.id || m.userId),
         userId: String(m.userId),
         role: String(m.role || ""),
+
         email: m.user?.email || m.email,
         name: m.user?.name || m.name,
         joinedAt: m.joinedAt,
@@ -393,6 +422,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         title: "Unable to load members",
         description: message,
         variant: "destructive",
+
       });
       return [];
     }
@@ -406,6 +436,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to load invitations";
       toast({ title: "Unable to load invitations", description: message, variant: "destructive" });
+
       return [];
     }
   }, [toast]);
@@ -432,6 +463,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     }
   }, [toast]);
 
+
   /**
    * Invite/add a member by email with a role (owner/admin only; owner role requires owner)
    */
@@ -452,6 +484,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       throw error;
     }
   }, [toast]);
+
 
   /**
    * Update an existing member's role (owner-only when assigning owner)
@@ -485,6 +518,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     }
   }, [toast]);
 
+
   /**
    * Remove a member (cannot remove owner)
    */
@@ -500,6 +534,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     }
   }, [toast]);
 
+
   /**
    * Check if user can access an organization
    */
@@ -508,6 +543,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       return organizations.some((org) => org.id === organizationId);
     },
     [organizations],
+
   );
 
   /**
@@ -533,6 +569,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         const validSavedOrg =
           savedOrgId && orgs.find((org) => org.id === savedOrgId);
 
+
         if (validSavedOrg) {
           await selectOrganization(savedOrgId, orgs);
         } else if (orgs.length > 0) {
@@ -546,6 +583,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         }
       } catch (error) {
         console.error("Failed to initialize organizations:", error);
+
       } finally {
         setIsLoading(false);
       }
@@ -583,6 +621,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       {children}
     </OrganizationContext.Provider>
   );
+
 };
 
 export default OrganizationContext;

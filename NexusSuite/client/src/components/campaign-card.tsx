@@ -15,6 +15,7 @@ import {
 import { Eye, Heart } from "lucide-react";
 import { formatDateSafe } from "@/lib/date";
 
+
 interface CampaignCardProps {
   id: string;
   title: string;
@@ -25,6 +26,7 @@ interface CampaignCardProps {
   reach?: number;
   engagement?: number;
   status: "active" | "completed" | "scheduled";
+
 }
 
 export function CampaignCard({
@@ -54,6 +56,7 @@ export function CampaignCard({
 
   const startText = formatDateSafe(startDate, "MMM dd");
   const endText = formatDateSafe(endDate, "MMM dd, yyyy");
+
   return (
     <Card
       className="hover-elevate active-elevate-2 cursor-pointer"
@@ -65,6 +68,7 @@ export function CampaignCard({
             className="font-semibold text-base line-clamp-1"
             data-testid={`text-title-${id}`}
           >
+
             {title}
           </h3>
           <Badge className={`${statusColors[status]} text-xs shrink-0`}>
@@ -82,6 +86,7 @@ export function CampaignCard({
             return (
               <Icon key={platform} className="w-4 h-4 text-muted-foreground" />
             );
+
           })}
         </div>
         {(reach !== undefined || engagement !== undefined) && (
@@ -93,6 +98,7 @@ export function CampaignCard({
                   <p className="text-sm font-mono font-semibold">
                     {reach.toLocaleString()}
                   </p>
+
                   <p className="text-xs text-muted-foreground">Reach</p>
                 </div>
               </div>
@@ -104,6 +110,7 @@ export function CampaignCard({
                   <p className="text-sm font-mono font-semibold">
                     {engagement}%
                   </p>
+
                   <p className="text-xs text-muted-foreground">Engagement</p>
                 </div>
               </div>
@@ -115,6 +122,7 @@ export function CampaignCard({
         {startText && endText
           ? `${startText} - ${endText}`
           : startText || endText}
+
       </CardFooter>
     </Card>
   );

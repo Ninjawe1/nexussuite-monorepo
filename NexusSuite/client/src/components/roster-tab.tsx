@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
+
 // Mock player data - replace with actual player data from your context
 interface Player {
   id: string;
@@ -22,6 +23,7 @@ interface Player {
   game: string;
   avatar?: string;
   status: "active" | "inactive";
+
 }
 
 interface RosterTabProps {
@@ -35,6 +37,7 @@ export function RosterTab({
   currentUserId,
   allPlayers,
 }: RosterTabProps) {
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -69,6 +72,7 @@ export function RosterTab({
         title: "Error",
         description: "Failed to create roster. Please try again.",
         variant: "destructive",
+
       });
       throw error;
     }
@@ -86,11 +90,13 @@ export function RosterTab({
         !selectedRoster?.game ||
         selectedRoster?.game === "" ||
         selectedRoster?.game === "Unknown Game";
+
       if (needsGame) {
         const gameToSet = payload.game?.trim();
         if (!gameToSet) {
           throw new Error(
             "Roster is missing required 'game'. Please set the roster's game before assigning players.",
+
           );
         }
         await updateRoster(payload.rosterId, { game: gameToSet } as any);
@@ -100,6 +106,7 @@ export function RosterTab({
         );
       }
       const players: PlayerAssignment[] = payload.playerIds.map((id) => ({
+
         playerId: id,
         role: payload.role,
         game: needsGame ? payload.game : (selectedRoster?.game ?? payload.game),
@@ -118,6 +125,7 @@ export function RosterTab({
             ? error.message
             : "Failed to assign players. Please try again.",
         variant: "destructive",
+
       });
       throw error;
     }
@@ -136,6 +144,7 @@ export function RosterTab({
         title: "Error",
         description: "Failed to remove player. Please try again.",
         variant: "destructive",
+
       });
     }
   };
@@ -204,6 +213,7 @@ export function RosterTab({
                   (total, roster) => total + (roster.playerCount || 0),
                   0,
                 )}
+
               </p>
             </div>
             <Users className="h-8 w-8 text-muted-foreground" />
@@ -216,6 +226,7 @@ export function RosterTab({
               <p className="text-2xl font-bold">
                 {rosters.filter((r) => r.isActive).length}
               </p>
+
             </div>
             <Users className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -229,6 +240,7 @@ export function RosterTab({
           <AlertDescription>
             No rosters found. Create your first roster to get started with team
             management.
+
           </AlertDescription>
         </Alert>
       ) : (
@@ -236,6 +248,7 @@ export function RosterTab({
           rosters={rosters}
           onRosterSelect={handleRosterSelect}
           onRosterEdit={(roster) => {
+
             setSelectedRoster(roster);
             setIsEditDialogOpen(true);
           }}
@@ -261,6 +274,7 @@ export function RosterTab({
         roster={selectedRoster}
         open={isDetailsDialogOpen}
         onOpenChange={(open) => {
+
           // Clear selection on close to avoid stale queries
           if (!open) setSelectedRoster(null);
           setIsDetailsDialogOpen(open);
@@ -285,6 +299,7 @@ export function RosterTab({
                 title: "Failed to update roster",
                 description: "Please try again later.",
                 variant: "destructive",
+
               });
             }
           }}
@@ -297,6 +312,7 @@ export function RosterTab({
         <PlayerAssignmentDialog
           open={isAssignDialogOpen}
           onOpenChange={(open) => {
+
             if (!open) setSelectedRoster(null);
             setIsAssignDialogOpen(open);
           }}
@@ -306,6 +322,7 @@ export function RosterTab({
           maxPlayers={selectedRoster.maxPlayers}
           // Use context.rosterPlayers so current count/slots reflect latest server state
           currentPlayers={rosterPlayers.map((p) => ({
+
             playerId: p.playerId,
             role: p.role,
           }))}

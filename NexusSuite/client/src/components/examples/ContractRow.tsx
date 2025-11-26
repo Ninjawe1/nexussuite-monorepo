@@ -1,5 +1,6 @@
 import { ContractRow } from "../contract-row";
 
+
 export default function ContractRowExample() {
   return (
     <div className="flex flex-col gap-3 p-6 bg-background">
@@ -9,6 +10,7 @@ export default function ContractRowExample() {
         type="Player"
         linkedPerson="Alex Rivera"
         expirationDate={new Date("2025-12-31")}
+
         status="active"
       />
       <ContractRow
@@ -17,6 +19,7 @@ export default function ContractRowExample() {
         type="Staff"
         linkedPerson="Sarah Johnson"
         expirationDate={new Date("2024-11-15")}
+
         status="expiring"
       />
       <ContractRow
@@ -25,6 +28,7 @@ export default function ContractRowExample() {
         type="Sponsor"
         linkedPerson="TechGear Inc."
         expirationDate={new Date("2024-09-30")}
+
         status="expired"
       />
     </div>

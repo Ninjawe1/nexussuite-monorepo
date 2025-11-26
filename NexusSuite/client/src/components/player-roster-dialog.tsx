@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
+
 
 interface PlayerRosterDialogProps {
   open: boolean;
@@ -40,6 +42,7 @@ export function PlayerRosterDialog({
     playerId: player.id,
     game: "valorant",
     role: "Player",
+
   });
 
   const createMutation = useMutation({
@@ -49,6 +52,7 @@ export function PlayerRosterDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/rosters"] });
       toast({ title: "Success", description: "Roster assigned" });
+
       onOpenChange(false);
     },
     onError: (error: any) => {
@@ -56,6 +60,7 @@ export function PlayerRosterDialog({
         title: "Error",
         description: error.message || "Failed to assign roster",
         variant: "destructive",
+
       });
     },
   });
@@ -73,6 +78,7 @@ export function PlayerRosterDialog({
         title: "Error",
         description: error.message || "Failed to remove roster",
         variant: "destructive",
+
       });
     },
   });
@@ -97,6 +103,7 @@ export function PlayerRosterDialog({
                 value={form.game}
                 onValueChange={(v) => setForm({ ...form, game: v })}
               >
+
                 <SelectTrigger>
                   <SelectValue placeholder="Select game" />
                 </SelectTrigger>
@@ -116,6 +123,7 @@ export function PlayerRosterDialog({
                 placeholder="e.g., IGL, Entry, Support"
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
+
               />
             </div>
           </div>
@@ -126,6 +134,7 @@ export function PlayerRosterDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
+
               Cancel
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
@@ -145,6 +154,7 @@ export function PlayerRosterDialog({
                   key={r.id}
                   className="flex items-center justify-between p-2 rounded-lg border"
                 >
+
                   <span className="text-sm">
                     {r.game} • {r.role}
                   </span>

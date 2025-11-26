@@ -1,0 +1,6 @@
+# Exclude legacy server folders and archives only
+server/**
+NexusSuite/server/**
+NexusSuite/server/archive/**
+
+# Keep everything else (including api/**) for deployment

@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -28,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -36,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDateSafe, toDateSafe } from "@/lib/date";
+
 
 interface TournamentDialogProps {
   open: boolean;
@@ -57,6 +61,7 @@ export function TournamentDialog({
   onOpenChange,
   tournament,
 }: TournamentDialogProps) {
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEdit = !!tournament;
@@ -75,6 +80,7 @@ export function TournamentDialog({
           endDate: tournament.endDate
             ? formatDateSafe(tournament.endDate, "yyyy-MM-dd")
             : "",
+
           maxTeams: tournament.maxTeams || undefined,
           status: tournament.status,
         }
@@ -87,6 +93,7 @@ export function TournamentDialog({
           endDate: "",
           maxTeams: undefined,
           status: "upcoming",
+
         },
   });
 
@@ -106,6 +113,7 @@ export function TournamentDialog({
       toast({
         title: "Success",
         description: `Tournament ${isEdit ? "updated" : "created"} successfully`,
+
       });
       onOpenChange(false);
       form.reset();
@@ -119,6 +127,7 @@ export function TournamentDialog({
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -128,6 +137,7 @@ export function TournamentDialog({
           error.message ||
           `Failed to ${isEdit ? "update" : "create"} tournament`,
         variant: "destructive",
+
       });
     },
   });
@@ -139,6 +149,7 @@ export function TournamentDialog({
         title: "Invalid date",
         description: "Please enter a valid start date (YYYY-MM-DD).",
         variant: "destructive",
+
       });
       return;
     }
@@ -148,6 +159,7 @@ export function TournamentDialog({
         title: "Invalid date",
         description: "Please enter a valid end date (YYYY-MM-DD).",
         variant: "destructive",
+
       });
       return;
     }
@@ -170,6 +182,7 @@ export function TournamentDialog({
             {isEdit
               ? "Update tournament details"
               : "Add a new tournament to your organization"}
+
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -203,6 +216,7 @@ export function TournamentDialog({
                       placeholder="Tournament details..."
                       {...field}
                       value={field.value || ""}
+
                       data-testid="input-tournament-description"
                     />
                   </FormControl>
@@ -222,6 +236,7 @@ export function TournamentDialog({
                       onValueChange={field.onChange}
                       defaultValue={field.value || undefined}
                     >
+
                       <FormControl>
                         <SelectTrigger data-testid="select-tournament-format">
                           <SelectValue placeholder="Select format" />
@@ -234,6 +249,7 @@ export function TournamentDialog({
                         <SelectItem value="double-elimination">
                           Double Elimination
                         </SelectItem>
+
                         <SelectItem value="round-robin">Round Robin</SelectItem>
                         <SelectItem value="league">League</SelectItem>
                         <SelectItem value="swiss">Swiss</SelectItem>
@@ -277,6 +293,7 @@ export function TournamentDialog({
                         {...field}
                         data-testid="input-tournament-start-date"
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -295,6 +312,7 @@ export function TournamentDialog({
                         {...field}
                         data-testid="input-tournament-end-date"
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -322,6 +340,7 @@ export function TournamentDialog({
                           )
                         }
                         value={field.value || ""}
+
                         data-testid="input-tournament-max-teams"
                       />
                     </FormControl>
@@ -340,6 +359,7 @@ export function TournamentDialog({
                       onValueChange={field.onChange}
                       defaultValue={field.value || undefined}
                     >
+
                       <FormControl>
                         <SelectTrigger data-testid="select-tournament-status">
                           <SelectValue placeholder="Select status" />
@@ -377,6 +397,7 @@ export function TournamentDialog({
                   : isEdit
                     ? "Update"
                     : "Create"}
+
               </Button>
             </div>
           </form>

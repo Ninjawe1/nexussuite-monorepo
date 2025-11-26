@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export function useAuth() {
   const { data, isLoading } = useQuery<any>({
     queryKey: ["/api/auth/user"],
+
     retry: false,
   });
 
@@ -23,6 +24,7 @@ export function useAuth() {
           "Logout API call failed, proceeding to clear client state",
           e,
         );
+
       } finally {
         try {
           // Clear react-query cache to remove user data immediately
@@ -30,6 +32,7 @@ export function useAuth() {
         } catch (_) {}
         // Navigate to landing/login page
         window.location.assign("/");
+
       }
     },
   };

@@ -3,6 +3,7 @@
 import { Bell, ChevronsUpDown, CreditCard, LogOut, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+
 
 export function NavUser({
   user,
@@ -43,6 +46,7 @@ export function NavUser({
         "[NavUser] navigation failed, falling back to window.location",
         e,
       );
+
       window.location.assign(path);
     }
   }
@@ -53,6 +57,7 @@ export function NavUser({
       await logout();
     } catch (e) {
       console.error("[NavUser] Logout failed", e);
+
     }
   }
 
@@ -85,6 +90,7 @@ export function NavUser({
             className="z-[9999] w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg border border-sidebar-border/60 max-h-[100vh] opacity-100"
             side={isMobile ? "bottom" : "right"}
             align={isMobile ? "end" : "start"}
+
             sideOffset={6}
             collisionPadding={8}
           >
@@ -108,6 +114,7 @@ export function NavUser({
                 onSelect={() => {
                   console.log("[NavUser] Profile clicked");
                   go("/profile");
+
                 }}
               >
                 <User />
@@ -122,6 +129,7 @@ export function NavUser({
                     console.log("[NavUser] Billing clicked");
                     // Navigate to organization-scoped Billing page
                     go("/dashboard/org/billing");
+
                   }}
                 >
                   <CreditCard />
@@ -133,6 +141,7 @@ export function NavUser({
                   console.log("[NavUser] Notifications clicked");
                   // Route to Settings as a placeholder for notifications management
                   go("/settings");
+
                 }}
               >
                 <Bell />
@@ -158,3 +167,4 @@ export function NavUser({
       : `${base[0] ?? "U"}`;
     return initials.toUpperCase();
   }
+

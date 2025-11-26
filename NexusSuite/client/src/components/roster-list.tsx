@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import {
   Users,
   Gamepad2,
@@ -19,6 +20,7 @@ import {
   Trash2,
   UserPlus,
 } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +31,7 @@ import {
 import { Roster } from "@/services/rosterService";
 import { normalizeGameTitle } from "@/constants/games";
 import { format } from "date-fns";
+
 
 interface RosterListProps {
   rosters: Roster[];
@@ -60,11 +63,13 @@ export function RosterList({
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+
     }
   };
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "Unknown";
+
     try {
       const date =
         timestamp instanceof Date
@@ -77,6 +82,7 @@ export function RosterList({
       return format(date, "MMM dd, yyyy");
     } catch {
       return "Unknown";
+
     }
   };
 
@@ -120,6 +126,7 @@ export function RosterList({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {rosters.map((roster) => (
+
         <Card
           key={roster.id}
           className="hover:shadow-lg transition-shadow cursor-pointer group"
@@ -131,11 +138,13 @@ export function RosterList({
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
                     {(roster.name || "").trim().charAt(0).toUpperCase() || "?"}
+
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-lg font-semibold truncate">
                     {roster.name?.trim() || "Untitled roster"}
+
                   </CardTitle>
                   <CardDescription className="text-sm">
                     {formatDate(roster.createdAt)}
@@ -149,6 +158,7 @@ export function RosterList({
                     size="icon"
                     className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
+
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
@@ -156,6 +166,7 @@ export function RosterList({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     onClick={(e) => {
+
                       e.stopPropagation();
                       onAssignPlayers(roster);
                     }}
@@ -165,6 +176,7 @@ export function RosterList({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(e) => {
+
                       e.stopPropagation();
                       onRosterEdit(roster);
                     }}
@@ -176,6 +188,7 @@ export function RosterList({
                   <DropdownMenuItem
                     className="text-red-600"
                     onClick={(e) => {
+
                       e.stopPropagation();
                       onRosterDelete(roster);
                     }}
@@ -193,6 +206,7 @@ export function RosterList({
               <p className="text-sm text-muted-foreground line-clamp-2">
                 {roster.description}
               </p>
+
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -203,6 +217,7 @@ export function RosterList({
               <Badge variant="outline" className="text-xs">
                 <Gamepad2 className="h-3 w-3 mr-1" />
                 {normalizeGameTitle(roster.game) || "Unknown Game"}
+
               </Badge>
             </div>
 
@@ -218,6 +233,7 @@ export function RosterList({
                 <span className="text-muted-foreground">
                   {formatDate(roster.updatedAt)}
                 </span>
+
               </div>
             </div>
 
@@ -236,6 +252,7 @@ export function RosterList({
                       </Avatar>
                     ),
                   )}
+
                   {(roster.playerCount ?? 0) > 5 && (
                     <Avatar className="h-6 w-6 border-2 border-background">
                       <AvatarFallback className="text-xs bg-gray-500 text-white">

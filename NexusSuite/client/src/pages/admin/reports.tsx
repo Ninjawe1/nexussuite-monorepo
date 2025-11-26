@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ export default function AdminReportsPage() {
   const generate = (format: "pdf" | "csv") => {
     toast({
       title: "Report",
+
       description: `Generated ${period} report as ${format.toUpperCase()} (demo)`,
     });
   };
@@ -34,6 +36,7 @@ export default function AdminReportsPage() {
         <p className="text-muted-foreground">
           Revenue, signups, uptime, feature usage
         </p>
+
       </div>
 
       <Card>
@@ -54,6 +57,7 @@ export default function AdminReportsPage() {
             </Select>
             <Button onClick={() => generate("pdf")}>Export PDF</Button>
             <Button variant="outline" onClick={() => generate("csv")}>
+
               Export CSV
             </Button>
           </div>

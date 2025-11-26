@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin } from "lucide-react";
 import { formatDateSafe } from "@/lib/date";
 
+
 interface MatchCardProps {
   id: string;
   teamA: string;
@@ -14,6 +15,7 @@ interface MatchCardProps {
   game: string;
   venue?: string | null;
   status: "upcoming" | "live" | "completed";
+
 }
 
 export function MatchCard({
@@ -32,6 +34,7 @@ export function MatchCard({
     upcoming: "bg-chart-4 text-primary-foreground",
     live: "bg-chart-5 text-primary-foreground",
     completed: "bg-secondary text-secondary-foreground",
+
   };
 
   const winner =
@@ -44,6 +47,7 @@ export function MatchCard({
       : null;
   const dateFormatted = formatDateSafe(date, "MMM dd, HH:mm");
   const rawDateText = typeof date === "string" ? date : "";
+
   const dateText = dateFormatted || rawDateText;
 
   return (
@@ -57,6 +61,7 @@ export function MatchCard({
             <h3 className="font-semibold text-sm">
               {tournament || "Standalone Match"}
             </h3>
+
             <p className="text-xs text-muted-foreground">{game}</p>
           </div>
           <Badge className={`${statusColors[status]} text-xs`}>
@@ -84,6 +89,7 @@ export function MatchCard({
                 <span className={winner === "B" ? "text-chart-2" : ""}>
                   {scoreB}
                 </span>
+
               </div>
             ) : (
               <span className="text-muted-foreground">vs</span>
@@ -95,6 +101,7 @@ export function MatchCard({
             >
               {teamB}
             </p>
+
           </div>
         </div>
 

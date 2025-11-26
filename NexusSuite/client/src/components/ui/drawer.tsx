@@ -5,6 +5,7 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { tweakcn } from "@/lib/tweakcn";
 
+
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
@@ -15,6 +16,7 @@ const Drawer = ({
   />
 );
 Drawer.displayName = "Drawer";
+
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
@@ -29,6 +31,7 @@ const DrawerOverlay = React.forwardRef<
   <DrawerPrimitive.Overlay
     ref={ref}
     className={tweakcn("fixed inset-0 z-50 bg-black/80", className)}
+
     {...props}
   />
 ));
@@ -45,6 +48,7 @@ const DrawerContent = React.forwardRef<
       className={tweakcn(
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
         className,
+
       )}
       {...props}
     >
@@ -77,6 +81,7 @@ const DrawerFooter = ({
 );
 DrawerFooter.displayName = "DrawerFooter";
 
+
 const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
@@ -87,6 +92,7 @@ const DrawerTitle = React.forwardRef<
       "text-lg font-semibold leading-none tracking-tight",
       className,
     )}
+
     {...props}
   />
 ));
@@ -99,6 +105,7 @@ const DrawerDescription = React.forwardRef<
   <DrawerPrimitive.Description
     ref={ref}
     className={tweakcn("text-sm text-muted-foreground", className)}
+
     {...props}
   />
 ));

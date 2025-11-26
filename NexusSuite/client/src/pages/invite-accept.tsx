@@ -29,6 +29,7 @@ export default function InviteAccept() {
       const res = await fetch(`/api/organizations/invite/${token}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || "Failed to fetch invitation");
+
       return json?.data;
     },
     enabled: !!token,
@@ -52,6 +53,7 @@ export default function InviteAccept() {
     },
     onError: (error: any) => {
       toast({ variant: "destructive", title: "Signup failed", description: error.message || "Error" });
+
     },
   });
 
@@ -79,11 +81,13 @@ export default function InviteAccept() {
             </div>
             <CardDescription>
               {error?.message || "This invitation link is invalid or has expired."}
+
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button
               onClick={() => setLocation("/dashboard")}
+
               className="w-full"
               data-testid="button-goto-login"
             >
@@ -106,6 +110,7 @@ export default function InviteAccept() {
                 <img src={invite.organizationLogo} alt="Org Logo" className="w-8 h-8 rounded" />
               )}
               <span>Join {invite.organizationName || "Organization"}</span>
+
             </CardTitle>
           </div>
           <CardDescription>
@@ -128,6 +133,7 @@ export default function InviteAccept() {
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" value={(invite.email || "").split("@")[0]} disabled />
+
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -143,6 +149,7 @@ export default function InviteAccept() {
               </div>
               <Button className="w-full" onClick={() => signup.mutate()} disabled={signup.isPending || !password || password !== confirmPassword}>
                 {signup.isPending ? "Creating..." : "Create account & join"}
+
               </Button>
             </div>
           </div>

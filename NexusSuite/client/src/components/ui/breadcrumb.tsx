@@ -47,10 +47,12 @@ const BreadcrumbLink = React.forwardRef<
 >(({ asChild, className, ...props }, ref) => {
   const Comp = asChild ? Slot : "a";
 
+
   return (
     <Comp
       ref={ref}
       className={cn("transition-colors hover:text-foreground", className)}
+
       {...props}
     />
   );
@@ -81,6 +83,7 @@ const BreadcrumbSeparator = ({
     role="presentation"
     aria-hidden="true"
     className={cn("[&>svg]:w-3.5 [&>svg]:h-3.5", className)}
+
     {...props}
   >
     {children ?? <ChevronRight />}
@@ -96,6 +99,7 @@ const BreadcrumbEllipsis = ({
     role="presentation"
     aria-hidden="true"
     className={cn("flex h-9 w-9 items-center justify-center", className)}
+
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
@@ -103,6 +107,7 @@ const BreadcrumbEllipsis = ({
   </span>
 );
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis";
+
 
 export {
   Breadcrumb,

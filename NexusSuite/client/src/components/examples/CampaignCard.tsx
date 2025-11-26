@@ -1,5 +1,6 @@
 import { CampaignCard } from "../campaign-card";
 
+
 export default function CampaignCardExample() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 bg-background">
@@ -10,6 +11,7 @@ export default function CampaignCardExample() {
         startDate={new Date("2024-10-01")}
         endDate={new Date("2024-10-15")}
         platforms={["twitter", "instagram", "youtube"]}
+
         reach={125000}
         engagement={8.5}
         status="active"
@@ -21,6 +23,7 @@ export default function CampaignCardExample() {
         startDate={new Date("2024-10-20")}
         endDate={new Date("2024-10-22")}
         platforms={["twitter", "twitch"]}
+
         status="scheduled"
       />
       <CampaignCard
@@ -30,6 +33,7 @@ export default function CampaignCardExample() {
         startDate={new Date("2024-09-15")}
         endDate={new Date("2024-09-30")}
         platforms={["youtube", "tiktok", "instagram"]}
+
         reach={89000}
         engagement={12.3}
         status="completed"

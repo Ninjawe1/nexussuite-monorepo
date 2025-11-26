@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import {
   insertTournamentRoundSchema,
   type InsertTournamentRound,
@@ -10,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+
 import {
   Dialog,
   DialogContent,
@@ -17,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -27,6 +30,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -35,6 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDateSafe, toDateSafe } from "@/lib/date";
+
 
 interface RoundDialogProps {
   open: boolean;
@@ -57,6 +62,7 @@ export function RoundDialog({
   tournamentId,
   round,
 }: RoundDialogProps) {
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEdit = !!round;
@@ -79,6 +85,7 @@ export function RoundDialog({
           format: "",
           startDate: "",
           status: "upcoming",
+
         },
   });
 
@@ -86,6 +93,7 @@ export function RoundDialog({
     mutationFn: async (data: InsertTournamentRound) => {
       if (isEdit) {
         return await apiRequest(`/api/rounds/${round.id}`, "PATCH", {
+
           ...data,
           tournamentId,
         });
@@ -103,6 +111,7 @@ export function RoundDialog({
       toast({
         title: "Success",
         description: `Round ${isEdit ? "updated" : "created"} successfully`,
+
       });
       onOpenChange(false);
       form.reset();
@@ -116,6 +125,7 @@ export function RoundDialog({
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -124,6 +134,7 @@ export function RoundDialog({
         description:
           error.message || `Failed to ${isEdit ? "update" : "create"} round`,
         variant: "destructive",
+
       });
     },
   });
@@ -135,6 +146,7 @@ export function RoundDialog({
         title: "Invalid date",
         description: "Please enter a valid start date (YYYY-MM-DD).",
         variant: "destructive",
+
       });
       return;
     }
@@ -154,6 +166,7 @@ export function RoundDialog({
             {isEdit
               ? "Update round details"
               : "Add a new round or stage to this tournament"}
+
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -170,6 +183,7 @@ export function RoundDialog({
                       {...field}
                       data-testid="input-round-name"
                     />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -191,6 +205,7 @@ export function RoundDialog({
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value))
                         }
+
                         data-testid="input-round-number"
                       />
                     </FormControl>
@@ -210,6 +225,7 @@ export function RoundDialog({
                         placeholder="Best of 3"
                         {...field}
                         value={field.value || ""}
+
                         data-testid="input-round-format"
                       />
                     </FormControl>
@@ -232,6 +248,7 @@ export function RoundDialog({
                         {...field}
                         data-testid="input-round-start-date"
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -248,6 +265,7 @@ export function RoundDialog({
                       onValueChange={field.onChange}
                       defaultValue={field.value || undefined}
                     >
+
                       <FormControl>
                         <SelectTrigger data-testid="select-round-status">
                           <SelectValue placeholder="Select status" />
@@ -284,6 +302,7 @@ export function RoundDialog({
                   : isEdit
                     ? "Update"
                     : "Create"}
+
               </Button>
             </div>
           </form>

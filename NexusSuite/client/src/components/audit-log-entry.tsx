@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { toDateSafe, formatDateSafe } from "@/lib/date";
 
+
 interface AuditLogEntryProps {
   id: string;
   user: string;
@@ -12,6 +13,7 @@ interface AuditLogEntryProps {
   oldValue?: string;
   newValue?: string;
   actionType: "create" | "update" | "delete";
+
 }
 
 export function AuditLogEntry({
@@ -34,6 +36,7 @@ export function AuditLogEntry({
     .split(" ")
     .map((n) => n[0])
     .join("")
+
     .toUpperCase();
 
   return (
@@ -65,6 +68,7 @@ export function AuditLogEntry({
               const relative = d
                 ? formatDistanceToNow(d, { addSuffix: true })
                 : "Unknown time";
+
               return `${absolute} • ${relative}`;
             })()}
           </span>

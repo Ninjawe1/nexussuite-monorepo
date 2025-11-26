@@ -3,6 +3,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Staff, Roster } from "@shared/schema";
+
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import {
   Form,
   FormField,
@@ -20,6 +22,7 @@ import {
   FormMessage,
   FormControl,
 } from "@/components/ui/form";
+
 import {
   Select,
   SelectTrigger,
@@ -28,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TEAM_ROLES, type TeamRole } from "@/constants/teamRoles";
+
 
 export interface AssignToRosterDialogProps {
   open: boolean;
@@ -50,6 +54,7 @@ const schema = z.object({
       "Substitute",
     ] as [TeamRole, TeamRole, TeamRole, TeamRole, TeamRole, TeamRole])
     .default("Player"),
+
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -65,11 +70,13 @@ export function AssignToRosterDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { rosterId: "", role: "Player" },
+
   });
 
   useEffect(() => {
     if (open) {
       form.reset({ rosterId: "", role: "" });
+
     }
   }, [open]);
 
@@ -88,6 +95,7 @@ export function AssignToRosterDialog({
             {player
               ? `Assign ${player.name} to a roster`
               : "Select a player to assign to a roster"}
+
           </DialogDescription>
         </DialogHeader>
 
@@ -96,6 +104,7 @@ export function AssignToRosterDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
+
             <FormField
               control={form.control}
               name="rosterId"
@@ -108,6 +117,7 @@ export function AssignToRosterDialog({
                       onValueChange={field.onChange}
                       disabled={isLoading}
                     >
+
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a roster" />
                       </SelectTrigger>
@@ -121,6 +131,7 @@ export function AssignToRosterDialog({
                                 {typeof r.playerCount === "number"
                                   ? `(${r.playerCount}/${r.maxPlayers ?? "?"})`
                                   : ""}
+
                               </SelectItem>
                             ))
                         ) : (
@@ -147,6 +158,7 @@ export function AssignToRosterDialog({
                     onValueChange={field.onChange}
                     disabled={isLoading}
                   >
+
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a role" />
@@ -154,6 +166,7 @@ export function AssignToRosterDialog({
                     </FormControl>
                     <SelectContent>
                       {TEAM_ROLES.map((r) => (
+
                         <SelectItem key={r.value} value={r.value}>
                           {r.label}
                         </SelectItem>
@@ -171,6 +184,7 @@ export function AssignToRosterDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
+
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading || !player}>

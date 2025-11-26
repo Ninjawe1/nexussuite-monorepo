@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 
+
 interface StatCardProps {
   title: string;
   value: string | number;
@@ -28,6 +29,7 @@ export function StatCard({
           {change && (
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full border ${change.startsWith("+") ? "border-green-600/30 text-green-500" : "border-red-600/30 text-red-500"}`}
+
               aria-label="trend-change"
             >
               {change}
@@ -46,6 +48,7 @@ export function StatCard({
         {subtitle && (
           <p className="text-xs text-muted-foreground">{subtitle}</p>
         )}
+
       </CardContent>
     </Card>
   );

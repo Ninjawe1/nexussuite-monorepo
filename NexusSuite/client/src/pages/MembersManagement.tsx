@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function MembersManagement() {
   const { listMembers, listInvites, resendInvite, cancelInvite, updateMemberRole, updateMemberStatus, removeMember, currentMembership } = useOrganization();
+
   const { toast } = useToast();
   const [members, setMembers] = useState<OrgMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +23,7 @@ export default function MembersManagement() {
 
   const requesterRole = (currentMembership?.role || "").toLowerCase();
   const canManage = requesterRole === "owner" || requesterRole === "admin";
+
 
   const loadMembers = async () => {
     try {
@@ -68,6 +70,7 @@ export default function MembersManagement() {
           <div className="space-y-1">
             <CardTitle className="text-2xl">Organization Members</CardTitle>
             <p className="text-sm text-muted-foreground">Manage team members, roles, and invitations.</p>
+
           </div>
           {canManage && (
             <Button onClick={() => setInviteOpen(true)} size="sm" className="gap-2">
@@ -110,6 +113,7 @@ export default function MembersManagement() {
                             />
                           ) : (
                             <Badge variant="secondary" className="capitalize">{String(m.role || "admin")}</Badge>
+
                           )}
                         </TableCell>
                         <TableCell className="py-3">{joined}</TableCell>
@@ -122,6 +126,7 @@ export default function MembersManagement() {
                               disabled={isOwner}
                             >
                               {m.isActive ? "Deactivate" : "Activate"}
+
                             </Button>
                             <Button
                               variant="destructive"
@@ -174,6 +179,7 @@ export default function MembersManagement() {
                     <TableCell className="py-3 flex gap-2">
                       <Button size="sm" variant="secondary" onClick={async () => { await resendInvite(i.id); await loadMembers(); }} disabled={String(i.status).toLowerCase() !== "pending"}>Resend</Button>
                       <Button size="sm" variant="destructive" onClick={async () => { await cancelInvite(i.id); await loadMembers(); }} disabled={String(i.status).toLowerCase() !== "pending"}>Cancel</Button>
+
                     </TableCell>
                   </TableRow>
                 ))}
@@ -191,6 +197,7 @@ export default function MembersManagement() {
 
       {/* Remove confirmation */}
       <AlertDialog open={!!confirmId} onOpenChange={(open) => !open && setConfirmId(null)}>
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove member</AlertDialogTitle>
@@ -201,9 +208,11 @@ export default function MembersManagement() {
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setConfirmId(null)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleRemove} variant="destructive">Remove</AlertDialogAction>
+
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
 }
+

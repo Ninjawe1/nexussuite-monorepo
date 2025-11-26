@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardLineChart, DashboardBarChart } from "@/components/ui/chart";
+
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ export default function Analytics() {
     { id: "league", name: "League of Legends", game: "LoL" },
     { id: "pubg", name: "PUBG Mobile", game: "PUBG" },
     { id: "csgo", name: "Counter-Strike", game: "CS:GO" },
+
   ];
 
   const analyticsData = {
@@ -36,6 +38,7 @@ export default function Analytics() {
         { name: "Alex Rivera", kd: 1.42, avg: 245 },
         { name: "Sarah Kim", kd: 1.28, avg: 218 },
         { name: "Mike Torres", kd: 1.15, avg: 197 },
+
       ],
     },
   };
@@ -67,6 +70,7 @@ export default function Analytics() {
     error: analyticsError,
   } = useQuery({
     queryKey: ["/api/analytics", selectedRoster],
+
     queryFn: async () => {
       // Pass roster identifier if supported by backend for filtering
       const res = await apiRequest(`/api/analytics?roster=${selectedRoster}`);
@@ -86,6 +90,7 @@ export default function Analytics() {
           : "Analytics endpoint unavailable; using mock analytics data.";
         toast({ title: "Analytics fallback", description: msg });
         console.warn("Analytics fallback:", err?.message);
+
       }
     }
   }, [analyticsError, toast]);
@@ -117,6 +122,7 @@ export default function Analytics() {
           <p className="text-muted-foreground">
             Track performance metrics across all rosters
           </p>
+
         </div>
         <Select value={selectedRoster} onValueChange={setSelectedRoster}>
           <SelectTrigger className="w-64" data-testid="select-roster">
@@ -124,6 +130,7 @@ export default function Analytics() {
           </SelectTrigger>
           <SelectContent>
             {rosters.map((roster) => (
+
               <SelectItem key={roster.id} value={roster.id}>
                 {roster.name}
               </SelectItem>
@@ -145,6 +152,7 @@ export default function Analytics() {
               className="text-3xl font-bold font-mono text-chart-2"
               data-testid="stat-win-rate"
             >
+
               {data.winRate}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -164,6 +172,7 @@ export default function Analytics() {
             <div className="text-3xl font-bold font-mono">
               {data.totalMatches}
             </div>
+
             <p className="text-xs text-muted-foreground mt-1">This season</p>
           </CardContent>
         </Card>
@@ -179,6 +188,7 @@ export default function Analytics() {
             <div className="text-3xl font-bold font-mono text-chart-3">
               {data.avgPlacement}
             </div>
+
             <p className="text-xs text-muted-foreground mt-1">In tournaments</p>
           </CardContent>
         </Card>
@@ -194,6 +204,7 @@ export default function Analytics() {
             <div className="text-3xl font-bold font-mono">
               {data.topPlayers.length}
             </div>
+
             <p className="text-xs text-muted-foreground mt-1">Active players</p>
           </CardContent>
         </Card>
@@ -205,12 +216,14 @@ export default function Analytics() {
             <CardTitle className="text-lg font-heading">
               Performance Trend
             </CardTitle>
+
           </CardHeader>
           <CardContent>
             <DashboardLineChart
               data={(liveAnalytics?.trend as any[]) || performanceTrend}
               xKey="month"
               series={[{ key: "winRate", label: "Win Rate (%)" }]}
+
               height={256}
             />
           </CardContent>
@@ -221,6 +234,7 @@ export default function Analytics() {
             <CardTitle className="text-lg font-heading">
               Match Results by Month
             </CardTitle>
+
           </CardHeader>
           <CardContent>
             <DashboardBarChart
@@ -229,6 +243,7 @@ export default function Analytics() {
               series={[
                 { key: "wins", label: "Wins" },
                 { key: "losses", label: "Losses" },
+
               ]}
               height={256}
             />

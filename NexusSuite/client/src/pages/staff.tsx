@@ -3,6 +3,7 @@ import { StaffDialog } from "@/components/staff-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Staff() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffType | undefined>();
   const { toast } = useToast();
@@ -32,6 +34,7 @@ export default function Staff() {
 
   const { data: tenant } = useQuery<Tenant>({
     queryKey: ["/api/tenant"],
+
   });
 
   // Calculate staff limit based on subscription plan
@@ -41,6 +44,7 @@ export default function Staff() {
     enterprise: Infinity,
   };
   const currentPlan = tenant?.subscriptionPlan || "starter";
+
   const staffLimit = planLimits[currentPlan] ?? 10;
   const staffCount = staffMembers.length;
 
@@ -53,6 +57,7 @@ export default function Staff() {
       toast({
         title: "Success",
         description: "Staff member deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -64,6 +69,7 @@ export default function Staff() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -71,6 +77,7 @@ export default function Staff() {
         title: "Error",
         description: error.message || "Failed to delete staff member",
         variant: "destructive",
+
       });
     },
   });
@@ -86,6 +93,7 @@ export default function Staff() {
       toast({
         title: "Success",
         description: "Staff status updated successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -97,6 +105,7 @@ export default function Staff() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -104,17 +113,20 @@ export default function Staff() {
         title: "Error",
         description: error.message || "Failed to update staff status",
         variant: "destructive",
+
       });
     },
   });
 
   const filteredStaff = staffMembers.filter((staff) => {
+
     const matchesSearch =
       staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       staff.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole =
       roleFilter === "all" ||
       staff.role.toLowerCase() === roleFilter.toLowerCase();
+
     return matchesSearch && matchesRole;
   });
 
@@ -148,6 +160,7 @@ export default function Staff() {
             </h1>
             <Badge variant="outline" data-testid="badge-staff-limit">
               {staffCount} / {staffLimit === Infinity ? "∞" : staffLimit} staff
+
             </Badge>
           </div>
           <p className="text-muted-foreground">
@@ -168,6 +181,7 @@ export default function Staff() {
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+
             data-testid="input-search-staff"
           />
         </div>
@@ -176,6 +190,7 @@ export default function Staff() {
             className="w-full sm:w-48"
             data-testid="select-role-filter"
           >
+
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
@@ -200,6 +215,7 @@ export default function Staff() {
       ) : filteredStaff.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredStaff.map((staff) => (
+
             <StaffCard
               key={staff.id}
               {...staff}
@@ -227,6 +243,7 @@ export default function Staff() {
               className="mt-4"
               data-testid="button-add-first-staff"
             >
+
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Staff Member
             </Button>
@@ -239,6 +256,7 @@ export default function Staff() {
         onOpenChange={handleDialogClose}
         staff={selectedStaff}
       />
+
     </div>
   );
 }

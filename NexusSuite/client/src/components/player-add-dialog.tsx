@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -21,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -33,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { toDateSafe } from "@/lib/date";
 
+
 interface PlayerAddDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -42,6 +46,7 @@ const schema = z.object({
   // Player
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email required"),
+
   phone: z.string().optional(),
   avatar: z.string().optional(),
   // Contract toggle and fields
@@ -49,12 +54,14 @@ const schema = z.object({
   fileName: z.string().min(1, "Contract file name is required").optional(),
   fileUrl: z.string().min(1, "Contract URL is required").optional(),
   contractStatus: z.enum(["active", "expiring", "expired"]).default("active"),
+
   expirationDate: z.string().optional(), // yyyy-mm-dd
   // Payroll toggle and fields
   includePayroll: z.boolean().default(true),
   amount: z.string().optional(), // decimal string
   payrollType: z.enum(["monthly", "weekly", "one-time"]).default("monthly"),
   payrollStatus: z.enum(["paid", "pending"]).default("pending"),
+
   payrollDate: z.string().optional(), // yyyy-mm-dd
 });
 
@@ -80,6 +87,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
       payrollType: "monthly",
       payrollStatus: "pending",
       payrollDate: new Date().toISOString().split("T")[0],
+
     },
   });
 
@@ -114,16 +122,19 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
             variant: "destructive",
           });
           throw new Error("Invalid contract expiration date");
+
         }
         const contractPayload = {
           fileName: values.fileName,
           fileUrl: values.fileUrl,
           type: "Player",
+
           linkedPerson: staff.name, // now valid
           expirationDate: exp,
           status: values.contractStatus,
         };
         await apiRequest("/api/contracts", "POST", contractPayload);
+
       }
 
       // 3) Optionally create payroll
@@ -136,17 +147,20 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
             variant: "destructive",
           });
           throw new Error("Invalid payroll date");
+
         }
         const payrollPayload = {
           staffId: staff.id, // now valid
           name: staff.name,
           role: "player",
+
           amount: values.amount,
           type: values.payrollType,
           status: values.payrollStatus,
           date: payDate,
         };
         await apiRequest("/api/payroll", "POST", payrollPayload);
+
       }
 
       return staff;
@@ -160,6 +174,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
       toast({
         title: "Player added",
         description: "Player, contract, and payroll saved successfully",
+
       });
       onOpenChange(false);
       form.reset();
@@ -173,6 +188,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -180,6 +196,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
         title: "Error",
         description: error.message || "Failed to add player",
         variant: "destructive",
+
       });
     },
   });
@@ -213,6 +230,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
               <h3 className="text-sm font-semibold text-muted-foreground">
                 Player Info
               </h3>
+
               <FormField
                 control={form.control}
                 name="name"
@@ -238,6 +256,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                         placeholder="john@example.com"
                         {...field}
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -286,6 +305,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
+
                       </FormControl>
                       <FormLabel className="m-0">Add Contract Info</FormLabel>
                     </FormItem>
@@ -294,6 +314,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
               </div>
 
               {form.watch("includeContract") && (
+
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -320,6 +341,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                               placeholder="https://storage/contract.pdf"
                               {...field}
                             />
+
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -351,6 +373,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
@@ -361,6 +384,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                               <SelectItem value="expiring">
                                 Expiring Soon
                               </SelectItem>
+
                               <SelectItem value="expired">Expired</SelectItem>
                             </SelectContent>
                           </Select>
@@ -386,6 +410,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />
+
                       </FormControl>
                       <FormLabel className="m-0">Add Payroll</FormLabel>
                     </FormItem>
@@ -394,6 +419,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
               </div>
 
               {form.watch("includePayroll") && (
+
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
@@ -409,6 +435,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                               placeholder="5000.00"
                               {...field}
                             />
+
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -424,6 +451,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select type" />
@@ -452,6 +480,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
@@ -495,6 +524,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : "Add Player"}
+
               </Button>
             </div>
           </form>

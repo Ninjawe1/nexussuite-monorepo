@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -45,6 +46,7 @@ const plans = [
     name: "Custom",
     price: 0,
     features: ["Negotiated"],
+
     limits: { users: 9999, projects: 9999 },
   },
 ];
@@ -73,6 +75,7 @@ const demoInvoices = [
     currency: "USD",
     status: "paid",
     date: "2024-11-01",
+
   },
 ];
 
@@ -93,6 +96,7 @@ export default function AdminBillingPage() {
   const applyCoupon = () => {
     toast({
       title: "Coupon",
+
       description: `Applied code ${couponCode} (demo)`,
     });
   };
@@ -100,6 +104,7 @@ export default function AdminBillingPage() {
   const updatePlan = () => {
     toast({
       title: "Plan updated",
+
       description: `Changed default plan to ${selectedPlan} (demo)`,
     });
   };
@@ -111,6 +116,7 @@ export default function AdminBillingPage() {
         <p className="text-muted-foreground">
           Manage plans, invoices, and revenue performance
         </p>
+
       </div>
 
       <Card>
@@ -127,12 +133,14 @@ export default function AdminBillingPage() {
                 key={p.id}
                 className="border border-border rounded-lg p-4 space-y-2"
               >
+
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{p.name}</h3>
                   <span className="text-sm">${p.price}/mo</span>
                 </div>
                 <ul className="text-sm list-disc pl-5">
                   {p.features.map((f) => (
+
                     <li key={f}>{f}</li>
                   ))}
                 </ul>
@@ -150,6 +158,7 @@ export default function AdminBillingPage() {
               </SelectTrigger>
               <SelectContent>
                 {plans.map((p) => (
+
                   <SelectItem key={p.id} value={p.id}>
                     {p.name}
                   </SelectItem>
@@ -162,6 +171,7 @@ export default function AdminBillingPage() {
                 placeholder="Discount code"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
+
               />
               <Button variant="outline" onClick={applyCoupon}>
                 Apply
@@ -190,6 +200,7 @@ export default function AdminBillingPage() {
               </thead>
               <tbody>
                 {demoInvoices.map((inv) => (
+
                   <tr key={inv.id} className="border-t border-border">
                     <td className="p-2">{inv.id}</td>
                     <td className="p-2">{inv.customer}</td>
@@ -225,6 +236,7 @@ export default function AdminBillingPage() {
               label="Trial Conversion"
               value={`${demoRevenue.trialConversion}%`}
             />
+
           </div>
         </CardContent>
       </Card>

@@ -104,6 +104,8 @@ export const storage = {
 
   async getTenant(id: string) { return getByIdGeneric<any>("tenants", id); },
   async createTenant(tenant: any) { return createDocGeneric<any>("tenants", tenant); },
+  async updateTenantAdmin(id: string, patch: any) { return updateDocGeneric<any>("tenants", id, patch); },
+  async deleteTenant(id: string) { const s = getSupabase(); await s!.from("tenants").delete().eq("id", id); },
 
   async getMatchesByTenant(tenantId: string) { return listByTenantGeneric<any>("matches", tenantId, "date"); },
   async createMatch(match: any) { return createDocGeneric<any>("matches", match); },

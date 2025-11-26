@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+
 import {
   insertMatchSchema,
   type InsertMatch,
@@ -11,6 +12,7 @@ import {
   type TournamentRound,
 } from "@shared/schema";
 import { z } from "zod";
+
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -26,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import {
   Select,
   SelectContent,
@@ -39,6 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { toDateSafe } from "@/lib/date";
+
 
 interface MatchDialogProps {
   open: boolean;
@@ -56,11 +61,13 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
 
   const { data: tournaments = [] } = useQuery<Tournament[]>({
     queryKey: ["/api/tournaments"],
+
     enabled: open,
   });
 
   const { data: rounds = [] } = useQuery<TournamentRound[]>({
     queryKey: ["/api/tournaments", selectedTournamentId, "rounds"],
+
     enabled: open && !!selectedTournamentId,
   });
 
@@ -68,6 +75,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     date: insertMatchSchema.shape.date.or(
       z.string().transform((val) => new Date(val)),
     ),
+
   });
 
   const form = useForm({
@@ -77,6 +85,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       roundId: match?.roundId || undefined,
       teamA: match?.teamA || "",
       teamB: match?.teamB || "",
+
       scoreA: match?.scoreA || undefined,
       scoreB: match?.scoreB || undefined,
       date: match?.date
@@ -88,6 +97,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       venue: match?.venue || "",
       status: match?.status || "upcoming",
       notes: match?.notes || "",
+
     },
   });
 
@@ -100,6 +110,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           roundId: match.roundId || undefined,
           teamA: match.teamA || "",
           teamB: match.teamB || "",
+
           scoreA: match.scoreA || undefined,
           scoreB: match.scoreB || undefined,
           date: match.date
@@ -111,6 +122,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           venue: match.venue || "",
           status: match.status || "upcoming",
           notes: match.notes || "",
+
         });
       } else {
         setSelectedTournamentId(undefined);
@@ -127,6 +139,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           venue: "",
           status: "upcoming",
           notes: "",
+
         });
       }
     }
@@ -141,6 +154,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       toast({
         title: "Success",
         description: "Match added successfully",
+
       });
       onOpenChange(false);
       form.reset();
@@ -154,6 +168,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -161,6 +176,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         title: "Error",
         description: error.message || "Failed to add match",
         variant: "destructive",
+
       });
     },
   });
@@ -174,6 +190,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       toast({
         title: "Success",
         description: "Match updated successfully",
+
       });
       onOpenChange(false);
       form.reset();
@@ -187,6 +204,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -194,6 +212,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         title: "Error",
         description: error.message || "Failed to update match",
         variant: "destructive",
+
       });
     },
   });
@@ -208,6 +227,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
           title: "Invalid date",
           description: "Please enter a valid match date (YYYY-MM-DD or ISO).",
           variant: "destructive",
+
         });
         return;
       }
@@ -235,6 +255,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
             {match
               ? "Update the match details below"
               : "Schedule a new match or tournament"}
+
           </DialogDescription>
         </DialogHeader>
 
@@ -256,6 +277,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         form.setValue("roundId", undefined);
                       }}
                       value={field.value || "none"}
+
                     >
                       <FormControl>
                         <SelectTrigger data-testid="select-match-tournament">
@@ -267,6 +289,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                           None (Standalone Match)
                         </SelectItem>
                         {tournaments.map((tournament) => (
+
                           <SelectItem key={tournament.id} value={tournament.id}>
                             {tournament.name}
                           </SelectItem>
@@ -289,6 +312,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         field.onChange(value === "none" ? undefined : value)
                       }
                       value={field.value || "none"}
+
                       disabled={!selectedTournamentId}
                     >
                       <FormControl>
@@ -298,6 +322,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                               selectedTournamentId
                                 ? "Select round"
                                 : "Select tournament first"
+
                             }
                           />
                         </SelectTrigger>
@@ -305,6 +330,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         {rounds.map((round) => (
+
                           <SelectItem key={round.id} value={round.id}>
                             {round.name}
                           </SelectItem>
@@ -374,6 +400,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                               ? parseInt(e.target.value)
                               : undefined,
                           )
+
                         }
                         data-testid="input-match-scoreA"
                       />
@@ -401,6 +428,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                               ? parseInt(e.target.value)
                               : undefined,
                           )
+
                         }
                         data-testid="input-match-scoreB"
                       />
@@ -462,6 +490,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         {...field}
                         data-testid="input-match-date"
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -478,6 +507,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
+
                       <FormControl>
                         <SelectTrigger data-testid="select-match-status">
                           <SelectValue placeholder="Select status" />
@@ -547,6 +577,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                 data-testid="button-submit-match"
               >
                 {isSubmitting ? "Saving..." : match ? "Update" : "Add"}
+
               </Button>
             </div>
           </form>

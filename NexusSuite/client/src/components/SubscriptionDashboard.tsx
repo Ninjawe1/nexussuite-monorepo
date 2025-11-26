@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useOrganization } from "@/contexts/OrganizationContext";
+
 import {
   subscriptionService,
   Subscription,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Calendar,
   TrendingUp,
@@ -55,6 +58,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateSafe } from "@/lib/date";
 import { authClient } from "@/lib/authClient";
 
+
 interface SubscriptionDashboardProps {
   className?: string;
 }
@@ -62,6 +66,7 @@ interface SubscriptionDashboardProps {
 export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
   className = "",
 }) => {
+
   const { currentOrganization } = useOrganization();
   const { toast } = useToast();
 
@@ -77,6 +82,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null,
   );
+
   const [fallbackProductId, setFallbackProductId] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -98,6 +104,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       if (usageOrNull) setUsage(usageOrNull);
 
       const productIdFromSub = (sub as any)?.metadata?.productId || (sub as any)?.plan?.metadata?.productId;
+
       let plansList: any[] = [];
       try {
         plansList = await subscriptionService.getPlans(productIdFromSub || undefined);
@@ -111,6 +118,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
     } catch (err) {
       console.error("Failed to load subscription data", err);
       toast({ title: "Failed to load billing", description: "Unable to load subscription data" , variant: "destructive"});
+
     } finally {
       setIsLoading(false);
     }
@@ -132,6 +140,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
           undefined,
           productId ? String(productId) : undefined,
           priceId ? undefined : "product1",
+
         );
         const url = (session as any)?.url;
         if (url) {
@@ -150,6 +159,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         title: "Plan change failed",
         description: "Unable to change your subscription plan",
         variant: "destructive",
+
       });
     } finally {
       setIsUpdating(false);
@@ -173,6 +183,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         toast({ title: "Plan updated", description: `Successfully switched to ${selectedPlan.name} plan` });
       } else {
         toast({ title: "Checkout disabled", description: "Please contact support to purchase this plan" });
+
         return;
       }
 
@@ -186,6 +197,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         title: "Plan change failed",
         description: "Unable to change your subscription plan",
         variant: "destructive",
+
       });
     } finally {
       setIsUpdating(false);
@@ -211,6 +223,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         title: "Subscription canceled",
         description:
           "Your subscription will end at the end of the current billing period",
+
       });
 
       await loadSubscriptionData();
@@ -221,6 +234,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         title: "Cancellation failed",
         description: "Unable to cancel your subscription",
         variant: "destructive",
+
       });
     } finally {
       setIsUpdating(false);
@@ -241,6 +255,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       toast({
         title: "Subscription reactivated",
         description: "Your subscription has been successfully reactivated",
+
       });
 
       await loadSubscriptionData();
@@ -251,6 +266,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         title: "Reactivation failed",
         description: "Unable to reactivate your subscription",
         variant: "destructive",
+
       });
     } finally {
       setIsUpdating(false);
@@ -272,6 +288,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         return "outline";
       default:
         return "secondary";
+
     }
   };
 
@@ -287,6 +304,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       case "past_due":
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
       case "canceled":
+
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
       default:
         return <Clock className="h-4 w-4 text-gray-500" />;
@@ -304,6 +322,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         toast({ title: "Checkout complete", description: "Your purchase was processed. Updating subscription…" });
       } else if (canceled === "true") {
         toast({ title: "Checkout canceled", description: "No changes were made to your subscription." });
+
       }
     } catch {}
     loadSubscriptionData();
@@ -315,6 +334,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         const pid = (sub as any)?.metadata?.productId || (sub as any)?.plan?.metadata?.productId;
         if (!pid) {
           const resolved = await subscriptionService.resolveProductId("product1");
+
           if (resolved) {
             setFallbackProductId(resolved);
             const starterPlans = await subscriptionService.getPlans(resolved);
@@ -330,6 +350,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         const checkoutId = params.get("checkout_id");
         const success = params.get("success");
         if (checkoutId || success === "true") {
+
           setIsRefreshing(true);
           let lastSub: any = null;
           for (let i = 0; i < 5; i++) {
@@ -344,6 +365,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               if (needsForceStarter && (isLive || checkoutId || success === "true")) {
                 try {
                   const updated = await subscriptionService.updateSubscription(currentOrganization.id, "starter", "none");
+
                   setSubscription(updated as any);
                 } catch {}
               }
@@ -353,6 +375,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
           }
           try {
             const productIdFromSub = (lastSub as any)?.metadata?.productId || (lastSub as any)?.plan?.metadata?.productId;
+
             if (productIdFromSub) {
               const plansList = await subscriptionService.getPlans(productIdFromSub);
               if (Array.isArray(plansList) && plansList.length) setPlans(plansList);
@@ -383,6 +406,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       let price = 0;
       if (Array.isArray(plans) && plans.length) {
         const starter = (plans as any[]).find((p: any) => String(p?.id || "").toLowerCase() === "starter" || String(p?.name || "").toLowerCase().includes("starter"));
+
         if (starter) price = Number(starter?.price || 250);
       }
       if (!price) price = 250;
@@ -396,6 +420,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         features: [],
         limits: {},
         metadata: (sub?.plan?.metadata || {}),
+
       } as any;
     }
     const pId: string | undefined = sub?.priceId as string | undefined;
@@ -404,6 +429,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         const top = String(p?.priceId || "").trim();
         const meta = String(p?.metadata?.priceId || "").trim();
         const idEq = String(p?.id || "").trim();
+
         const target = String(pId).trim();
         return top === target || meta === target || idEq === target;
       });
@@ -415,6 +441,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       sub?.planId ||
       sub?.plan?.id ||
       ""
+
     ).trim();
     if (keyRaw) {
       const key = keyRaw.toLowerCase();
@@ -444,6 +471,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         features: [],
         limits: {},
         metadata: (sub?.plan?.metadata || {}),
+
       } as any;
     }
     return null as any;
@@ -467,6 +495,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
     if (!(base instanceof Date) || isNaN(base.getTime())) return "N/A";
     const next = new Date(base);
     if (interval === "year") {
+
       next.setFullYear(next.getFullYear() + 1);
     } else {
       next.setMonth(next.getMonth() + 1);
@@ -475,6 +504,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
       return formatDateSafe(next.toISOString(), "MMM dd, yyyy", "N/A");
     }
     return "N/A";
+
   })();
 
   return (
@@ -491,6 +521,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               <CardDescription>
                 Manage your organization's subscription and billing
               </CardDescription>
+
             </div>
 
             {subscription && (
@@ -508,6 +539,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                 if (!currentOrganization?.id) return;
                 const url = await subscriptionService.getPortalUrl(currentOrganization.id);
                 if (url) window.open(url, "_blank");
+
               }}
             >
               Open Billing Portal
@@ -538,6 +570,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {currentPlan?.description || "No description available"}
+
                       </p>
                     </div>
                     <div className="text-right">
@@ -545,6 +578,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                         ${currentPlan?.price || 0}
                         <span className="text-sm font-normal text-muted-foreground">
                           /{currentPlan?.interval || "month"}
+
                         </span>
                       </div>
                     </div>
@@ -560,6 +594,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                 ) : (
                   <span>
                     {isSubscriptionCanceled ? "Ended" : "Renews"} on {displayRenewalDate}
+
                   </span>
                 )}
               </div>
@@ -602,6 +637,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               <Button onClick={() => setIsPlanDialogOpen(true)}>
                 Choose a Plan
               </Button>
+
             </div>
           )}
         </CardContent>
@@ -618,6 +654,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
             <CardDescription>
               Monitor your organization's resource usage
             </CardDescription>
+
           </CardHeader>
 
           <CardContent>
@@ -638,6 +675,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                   value={usage.percentageUsed.apiCalls}
                   className="h-2"
                 />
+
                 <div className="text-xs text-muted-foreground">
                   {usage.percentageUsed.apiCalls.toFixed(1)}% used
                 </div>
@@ -659,6 +697,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                   value={usage.percentageUsed.storage}
                   className="h-2"
                 />
+
                 <div className="text-xs text-muted-foreground">
                   {usage.percentageUsed.storage.toFixed(1)}% used
                 </div>
@@ -700,12 +739,14 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               <div className="col-span-full text-center py-6">
                 <Package className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground mb-3">No Polar plans available. Open the billing portal to manage products or try again.</p>
+
                 <Button
                   variant="outline"
                   onClick={async () => {
                     if (!currentOrganization?.id) return;
                     const url = await subscriptionService.getPortalUrl(currentOrganization.id);
                     if (url) window.open(url, "_blank");
+
                   }}
                 >
                   Open Billing Portal
@@ -720,6 +761,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                       <CardContent>
                         <div className="text-3xl font-bold mb-4">$250<span className="text-sm font-normal text-muted-foreground">/month</span></div>
                         <Button className="w-full" onClick={() => confirmPlanChangeImmediate({ id: "starter", name: "Starter", description: "", price: 0, currency: "USD", interval: "month", features: [], limits: {}, metadata: { productId: fallbackProductId } }) as any}>
+
                           Select
                         </Button>
                       </CardContent>
@@ -743,10 +785,12 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               const stableKey =
                 plan.id || (plan as any).priceId || (plan as any).productId || `${plan.name}-${plan.interval}-${plan.price}`;
 
+
               return (
                 <Card
                   key={stableKey}
                   className={`relative ${isCurrentPlan ? "ring-2 ring-primary" : ""}`}
+
                 >
                   <CardHeader>
                     <CardTitle>{plan.name}</CardTitle>
@@ -755,6 +799,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                       {((plan as any)?.metadata?.productId || (plan as any)?.productId) && (
                         <span className="block mt-1 text-xs font-mono text-muted-foreground">
                           Product: {String(((plan as any).metadata?.productId || (plan as any).productId))}
+
                         </span>
                       )}
                     </CardDescription>
@@ -774,6 +819,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                           key={index}
                           className="flex items-center gap-2 text-sm"
                         >
+
                           <CheckCircle className="h-4 w-4 text-green-500" />
                           {feature}
                         </li>
@@ -785,6 +831,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                         <span>API Calls:</span>
                         <span>
                           {typeof limits.apiCalls === "number"
+
                             ? limits.apiCalls.toLocaleString()
                             : limits.apiCalls}
                         </span>
@@ -793,6 +840,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                         <span>Storage:</span>
                         <span>
                           {typeof limits.storage === "number"
+
                             ? `${(limits.storage / 1024).toFixed(1)} GB`
                             : limits.storage}
                         </span>
@@ -803,6 +851,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                           {typeof limits.users === "number"
                             ? String(limits.users)
                             : limits.users}
+
                         </span>
                       </div>
                     </div>
@@ -814,6 +863,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                       disabled={isCurrentPlan}
                     >
                       {isCurrentPlan ? "Current Plan" : "Select"}
+
                     </Button>
                   </CardContent>
                 </Card>
@@ -829,6 +879,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         open={isCancelDialogOpen}
         onOpenChange={setIsCancelDialogOpen}
       >
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
@@ -840,6 +891,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                 "MMM dd, yyyy",
                 "N/A",
               )}
+
               ).
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -847,6 +899,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
             <AlertDialogCancel disabled={isUpdating}>
               Keep Subscription
             </AlertDialogCancel>
+
             <AlertDialogAction
               onClick={handleCancelSubscription}
               disabled={isUpdating}
@@ -859,6 +912,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                 </>
               ) : (
                 "Cancel Subscription"
+
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -870,12 +924,14 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
         open={isReactivateDialogOpen}
         onOpenChange={setIsReactivateDialogOpen}
       >
+
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Reactivate Subscription</AlertDialogTitle>
             <AlertDialogDescription>
               Reactivate your subscription to regain full access to all
               features. Your billing will resume from the next cycle.
+
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -884,6 +940,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
               onClick={handleReactivateSubscription}
               disabled={isUpdating}
             >
+
               {isUpdating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -891,6 +948,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
                 </>
               ) : (
                 "Reactivate Subscription"
+
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

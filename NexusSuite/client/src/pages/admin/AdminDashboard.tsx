@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+
 import {
   adminService,
   UserAnalytics,
@@ -25,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 
+
 import {
   Table,
   TableBody,
@@ -33,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
   Pagination,
   PaginationContent,
@@ -42,6 +45,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+
 import {
   Users,
   Building2,
@@ -57,6 +61,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+
 
 interface AdminDashboardProps {
   className?: string;
@@ -74,6 +79,7 @@ interface SystemMetrics {
   };
   systemHealth: {
     status: "healthy" | "degraded" | "down";
+
     uptime: number;
     responseTime: number;
     lastCheck: string;
@@ -83,6 +89,7 @@ interface SystemMetrics {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   className = "",
 }) => {
+
   const { user, isSystemAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -94,6 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [organizations, setOrganizations] = useState<OrganizationAnalytics[]>(
     [],
   );
+
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
 
@@ -105,6 +113,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [orgSearch, setOrgSearch] = useState("");
   const [logSearch, setLogSearch] = useState("");
   const [ticketSearch, setTicketSearch] = useState("");
+
 
   // Pagination states
   const [userPage, setUserPage] = useState(1);
@@ -132,6 +141,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Failed to load system metrics",
         description: "Unable to retrieve system statistics",
         variant: "destructive",
+
       });
     }
   };
@@ -154,6 +164,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Failed to load users",
         description: "Unable to retrieve user data",
         variant: "destructive",
+
       });
     }
   };
@@ -176,6 +187,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Failed to load organizations",
         description: "Unable to retrieve organization data",
         variant: "destructive",
+
       });
     }
   };
@@ -198,6 +210,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Failed to load audit logs",
         description: "Unable to retrieve audit logs",
         variant: "destructive",
+
       });
     }
   };
@@ -220,6 +233,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Failed to load support tickets",
         description: "Unable to retrieve support tickets",
         variant: "destructive",
+
       });
     }
   };
@@ -241,6 +255,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     toast({
       title: "Data refreshed",
       description: "All admin data has been updated",
+
     });
   };
 
@@ -265,6 +280,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return "success";
       default:
         return "secondary";
+
     }
   };
 
@@ -282,6 +298,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return "outline";
       default:
         return "secondary";
+
     }
   };
 
@@ -314,6 +331,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     currentPage: number,
     totalPages: number,
     onPageChange: (page: number) => void,
+
   ) => {
     if (totalPages <= 1) return null;
 
@@ -324,6 +342,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <PaginationPrevious
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+
             />
           </PaginationItem>
 
@@ -336,6 +355,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => onPageChange(page)}
                   isActive={page === currentPage}
                 >
+
                   {page}
                 </PaginationLink>
               </PaginationItem>
@@ -352,6 +372,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 onPageChange(Math.min(totalPages, currentPage + 1))
               }
               className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+
             />
           </PaginationItem>
         </PaginationContent>
@@ -366,6 +387,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         title: "Access denied",
         description: "Admin access required",
         variant: "destructive",
+
       });
       return;
     }
@@ -416,6 +438,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <RefreshCw
                   className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
                 />
+
                 Refresh
               </Button>
               <Button variant="outline" size="sm">
@@ -436,6 +459,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <CardTitle className="text-sm font-medium">
                   Total Users
                 </CardTitle>
+
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -451,6 +475,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <CardTitle className="text-sm font-medium">
                   Organizations
                 </CardTitle>
+
                 <Building2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -466,6 +491,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <CardTitle className="text-sm font-medium">
                   Active Subscriptions
                 </CardTitle>
+
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -476,6 +502,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {(
                     (systemMetrics.activeSubscriptions /
                       systemMetrics.totalOrganizations) *
+
                     100
                   ).toFixed(1)}
                   % conversion rate
@@ -488,6 +515,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <CardTitle className="text-sm font-medium">
                   Monthly Revenue
                 </CardTitle>
+
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -519,6 +547,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <CardDescription>
                       View and manage all platform users
                     </CardDescription>
+
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="relative">
@@ -527,6 +556,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         placeholder="Search users..."
                         value={userSearch}
                         onChange={(e) => setUserSearch(e.target.value)}
+
                         className="pl-8 w-64"
                       />
                     </div>
@@ -551,6 +581,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <TableCell className="font-medium">
                           {user.name}
                         </TableCell>
+
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
@@ -567,6 +598,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           {user.lastLoginAt
                             ? format(new Date(user.lastLoginAt), "MMM dd, yyyy")
                             : "Never"}
+
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -584,6 +616,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     Math.ceil(userTotal / itemsPerPage),
                     setUserPage,
                   )}
+
                 </div>
               </CardContent>
             </Card>
@@ -599,6 +632,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <CardDescription>
                       View and manage all organizations
                     </CardDescription>
+
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -606,6 +640,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       placeholder="Search organizations..."
                       value={orgSearch}
                       onChange={(e) => setOrgSearch(e.target.value)}
+
                       className="pl-8 w-64"
                     />
                   </div>
@@ -630,6 +665,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <TableCell className="font-medium">
                           {org.name}
                         </TableCell>
+
                         <TableCell>{org.owner.email}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
@@ -642,6 +678,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             <Badge variant="outline">
                               {org.subscription.plan}
                             </Badge>
+
                           ) : (
                             <Badge variant="secondary">Free</Badge>
                           )}
@@ -654,6 +691,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <TableCell>
                           {format(new Date(org.createdAt), "MMM dd, yyyy")}
                         </TableCell>    
+
                         <TableCell>
                           <Button variant="ghost" size="sm">
                             <MoreVertical className="h-4 w-4" />
@@ -670,6 +708,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     Math.ceil(orgTotal / itemsPerPage),
                     setOrgPage,
                   )}
+
                 </div>
               </CardContent>
             </Card>
@@ -685,6 +724,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <CardDescription>
                       System activity and security events
                     </CardDescription>
+
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -692,6 +732,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       placeholder="Search logs..."
                       value={logSearch}
                       onChange={(e) => setLogSearch(e.target.value)}
+
                       className="pl-8 w-64"
                     />
                   </div>
@@ -717,6 +758,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                             new Date(log.createdAt),
                             "MMM dd, yyyy HH:mm",
                           )}
+
                         </TableCell>
                         <TableCell>{log.userEmail}</TableCell>
                         <TableCell>
@@ -727,6 +769,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <TableCell className="font-mono text-xs">
                           {log.ipAddress}
                         </TableCell>
+
                       </TableRow>
                     ))}
                   </TableBody>
@@ -738,6 +781,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     Math.ceil(logTotal / itemsPerPage),
                     setLogPage,
                   )}
+
                 </div>
               </CardContent>
             </Card>
@@ -753,6 +797,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <CardDescription>
                       User support requests and issues
                     </CardDescription>
+
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -760,6 +805,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       placeholder="Search tickets..."
                       value={ticketSearch}
                       onChange={(e) => setTicketSearch(e.target.value)}
+
                       className="pl-8 w-64"
                     />
                   </div>
@@ -790,6 +836,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </TableCell>
                         <TableCell>{ticket.userEmail}</TableCell>
                         <TableCell>{ticket.organizationName || "-"}</TableCell>
+
                         <TableCell>
                           <Badge variant={getStatusBadgeVariant(ticket.status) as any}>
                             {ticket.status}
@@ -805,6 +852,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <TableCell>
                           {format(new Date(ticket.createdAt), "MMM dd, yyyy")}
                         </TableCell>
+
                         <TableCell>
                           <Button variant="ghost" size="sm">
                             <MessageSquare className="h-4 w-4" />
@@ -820,6 +868,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     ticketPage,
                     Math.ceil(ticketTotal / itemsPerPage),
                     setTicketPage,
+
                   )}
                 </div>
               </CardContent>

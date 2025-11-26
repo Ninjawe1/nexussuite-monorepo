@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 
 import { tweakcn } from "@/lib/tweakcn";
 
+
 const Accordion = AccordionPrimitive.Root;
 
 const AccordionItem = React.forwardRef<
@@ -18,6 +19,7 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = "AccordionItem";
 
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
@@ -28,6 +30,7 @@ const AccordionTrigger = React.forwardRef<
       className={tweakcn(
         "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
         className,
+
       )}
       {...props}
     >
@@ -48,6 +51,7 @@ const AccordionContent = React.forwardRef<
     {...props}
   >
     <div className={tweakcn("pb-4 pt-0", className)}>{children}</div>
+
   </AccordionPrimitive.Content>
 ));
 

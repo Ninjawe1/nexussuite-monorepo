@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+
 interface OAuthStatus {
   configured: boolean;
   name: string;
@@ -60,12 +61,14 @@ export function SocialAccountOAuthDialog({
     null,
   );
 
+
   const {
     data: oauthStatus = {},
     isLoading,
     error,
   } = useQuery<Record<string, OAuthStatus>>({
     queryKey: ["/api/oauth/status"],
+
     enabled: open,
   });
 
@@ -75,11 +78,13 @@ export function SocialAccountOAuthDialog({
 
       const response = await fetch(`/api/oauth/init/${platform}`, {
         credentials: "include",
+
       });
 
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to initiate OAuth");
+
       }
 
       const { authUrl } = await response.json();
@@ -92,6 +97,7 @@ export function SocialAccountOAuthDialog({
         title: "Connection failed",
         description: error.message || "Failed to connect social account",
         variant: "destructive",
+
       });
     }
   };
@@ -99,6 +105,7 @@ export function SocialAccountOAuthDialog({
   const anyConfigured = Object.values(oauthStatus).some(
     (status) => status.configured,
   );
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,6 +115,7 @@ export function SocialAccountOAuthDialog({
           <DialogDescription>
             Connect your social media accounts using OAuth to track analytics
             and engagement.
+
           </DialogDescription>
         </DialogHeader>
 
@@ -123,6 +131,7 @@ export function SocialAccountOAuthDialog({
             <AlertDescription>
               Failed to load OAuth platforms. Please try again.
             </AlertDescription>
+
           </Alert>
         )}
 
@@ -135,6 +144,7 @@ export function SocialAccountOAuthDialog({
                 To enable social media connections, you need to register
                 developer apps on each platform and configure the API
                 credentials as environment variables.
+
               </p>
               <p className="mt-2 text-sm font-mono text-xs">
                 Example: INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET
@@ -191,11 +201,13 @@ export function SocialAccountOAuthDialog({
                         <p className="text-xs text-muted-foreground mb-3 font-mono">
                           Needs: {platform.toUpperCase()}_CLIENT_ID,{" "}
                           {platform.toUpperCase()}_CLIENT_SECRET
+
                         </p>
                       )}
                       <Button
                         size="sm"
                         variant={status.configured ? "default" : "outline"}
+
                         disabled={!status.configured || isConnecting}
                         onClick={() => handleConnect(platform)}
                         className="w-full"
@@ -203,6 +215,7 @@ export function SocialAccountOAuthDialog({
                       >
                         {isConnecting ? (
                           "Connecting..."
+
                         ) : (
                           <>
                             <LinkIcon className="h-3 w-3 mr-2" />
@@ -224,6 +237,7 @@ export function SocialAccountOAuthDialog({
             <strong>Setup Required:</strong> Each platform requires you to
             register a developer application and obtain OAuth credentials.
             Contact your administrator to configure these integrations.
+
           </AlertDescription>
         </Alert>
       </DialogContent>

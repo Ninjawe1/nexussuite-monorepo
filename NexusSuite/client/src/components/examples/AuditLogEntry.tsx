@@ -1,5 +1,6 @@
 import { AuditLogEntry } from "../audit-log-entry";
 
+
 export default function AuditLogEntryExample() {
   return (
     <div className="flex flex-col gap-3 p-6 bg-background">

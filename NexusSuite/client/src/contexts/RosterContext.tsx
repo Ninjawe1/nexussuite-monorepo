@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   rosterService,
   Roster,
@@ -8,6 +9,7 @@ import {
   PlayerAssignment,
 } from "@/services/rosterService";
 import { useToast } from "@/hooks/use-toast";
+
 
 interface RosterContextType {
   // State
@@ -24,6 +26,7 @@ interface RosterContextType {
     rosterId: string,
     players: PlayerAssignment[],
   ) => Promise<void>;
+
   removePlayerFromRoster: (rosterId: string, playerId: string) => Promise<void>;
 
   // Queries
@@ -46,6 +49,7 @@ export function RosterProvider({
   children,
   organizationId,
 }: RosterProviderProps) {
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [selectedRoster, setSelectedRoster] = useState<Roster | null>(null);
@@ -59,6 +63,7 @@ export function RosterProvider({
     refetch: refetchRosters,
   } = useQuery({
     queryKey: ["rosters", organizationId],
+
     queryFn: () => rosterService.getRosters(organizationId),
     enabled: !!organizationId,
   });
@@ -72,6 +77,7 @@ export function RosterProvider({
     queryKey: ["rosterPlayers", selectedRoster?.id],
     queryFn: () =>
       selectedRoster ? rosterService.getRosterPlayers(selectedRoster.id) : [],
+
     enabled: !!selectedRoster?.id,
   });
 
@@ -91,6 +97,7 @@ export function RosterProvider({
         title: "Error",
         description: `Failed to create roster: ${error.message}`,
         variant: "destructive",
+
       });
     },
   });
@@ -149,6 +156,7 @@ export function RosterProvider({
             } as Roster;
           });
         },
+
       );
       return { previous };
     },
@@ -161,6 +169,7 @@ export function RosterProvider({
       toast({
         title: "Success",
         description: "Roster updated successfully",
+
       });
     },
     onError: (error, _variables, context) => {
@@ -172,6 +181,7 @@ export function RosterProvider({
         title: "Error",
         description: `Failed to update roster: ${error.message}`,
         variant: "destructive",
+
       });
     },
   });
@@ -181,6 +191,7 @@ export function RosterProvider({
     mutationFn: (rosterId: string) => rosterService.deleteRoster(rosterId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rosters", organizationId] });
+
       if (selectedRoster?.id) {
         setSelectedRoster(null);
       }
@@ -194,6 +205,7 @@ export function RosterProvider({
         title: "Error",
         description: `Failed to delete roster: ${error.message}`,
         variant: "destructive",
+
       });
     },
   });
@@ -207,6 +219,7 @@ export function RosterProvider({
       rosterId: string;
       players: PlayerAssignment[];
     }) => rosterService.assignPlayersToRoster(rosterId, players),
+
     onSuccess: (_data, variables) => {
       // Optimistically update playerCount for the affected roster so tiles reflect changes immediately
       try {
@@ -228,6 +241,7 @@ export function RosterProvider({
                 return { ...r, playerCount: nextCount } as Roster;
               });
             },
+
           );
         }
       } catch {
@@ -249,6 +263,7 @@ export function RosterProvider({
         title: "Error",
         description: `Failed to assign players: ${error.message}`,
         variant: "destructive",
+
       });
     },
   });
@@ -262,6 +277,7 @@ export function RosterProvider({
       rosterId: string;
       playerId: string;
     }) => rosterService.removePlayerFromRoster(rosterId, playerId),
+
     onSuccess: (_data, variables) => {
       // Optimistically decrement playerCount for the affected roster
       try {
@@ -272,11 +288,13 @@ export function RosterProvider({
             (existing) => {
               if (!existing) return existing;
               return existing.map((r) => {
+
                 if (r.id !== rosterId) return r;
                 const nextCount = Math.max(0, (r.playerCount ?? 0) - 1);
                 return { ...r, playerCount: nextCount } as Roster;
               });
             },
+
           );
         }
       } catch {
@@ -296,6 +314,7 @@ export function RosterProvider({
         title: "Error",
         description: `Failed to remove player: ${error.message}`,
         variant: "destructive",
+
       });
     },
   });
@@ -313,6 +332,7 @@ export function RosterProvider({
     rosterId: string,
     data: Partial<Roster>,
   ) => {
+
     await updateRosterMutation.mutateAsync({ rosterId, data });
   };
 
@@ -324,6 +344,7 @@ export function RosterProvider({
     rosterId: string,
     players: PlayerAssignment[],
   ) => {
+
     setIsAssigningPlayers(true);
     try {
       await assignPlayersMutation.mutateAsync({ rosterId, players });
@@ -350,6 +371,7 @@ export function RosterProvider({
           r.id === selectedRoster.id ? { ...r, playerCount: count } : r,
         );
       },
+
     );
   }, [selectedRoster?.id, rosterPlayers.length]);
 
@@ -374,6 +396,7 @@ export function RosterProvider({
   return (
     <RosterContext.Provider value={value}>{children}</RosterContext.Provider>
   );
+
 }
 
 export const useRosterContext = useRoster;
@@ -381,6 +404,7 @@ export function useRoster() {
   const context = useContext(RosterContext);
   if (context === undefined) {
     throw new Error("useRoster must be used within a RosterProvider");
+
   }
   return context;
 }

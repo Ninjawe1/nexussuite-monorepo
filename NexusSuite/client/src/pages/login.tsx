@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+
   rememberMe: z.boolean().optional().default(false),
 });
 
@@ -45,6 +47,7 @@ export function Login() {
     defaultValues: {
       email: "",
       password: "",
+
       rememberMe: false,
     },
   });
@@ -65,6 +68,7 @@ export function Login() {
         setFormError("email", { message: errorMessage });
       } else if (errorMessage.toLowerCase().includes("password")) {
         setFormError("password", { message: errorMessage });
+
       }
     }
   };
@@ -79,6 +83,7 @@ export function Login() {
                 <span className="text-primary-foreground font-bold text-xl">
                   NS
                 </span>
+
               </div>
             </div>
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
@@ -101,6 +106,7 @@ export function Login() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...register("email")}
+
                     id="email"
                     type="email"
                     placeholder="you@example.com"
@@ -113,6 +119,7 @@ export function Login() {
                     {errors.email.message}
                   </p>
                 )}
+
               </div>
 
               <div className="space-y-2">
@@ -123,6 +130,7 @@ export function Login() {
                     {...register("password")}
                     id="password"
                     type={showPassword ? "text" : "password"}
+
                     placeholder="Enter your password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -143,6 +151,7 @@ export function Login() {
                   <p className="text-sm text-destructive">
                     {errors.password.message}
                   </p>
+
                 )}
               </div>
 
@@ -152,6 +161,7 @@ export function Login() {
                   id="rememberMe"
                   disabled={isLoading}
                 />
+
                 <Label htmlFor="rememberMe" className="text-sm font-normal">
                   Remember me for 30 days
                 </Label>
@@ -167,6 +177,7 @@ export function Login() {
                   </>
                 ) : (
                   "Sign In"
+
                 )}
               </Button>
 
@@ -177,6 +188,7 @@ export function Login() {
                   variant="link"
                   size="sm"
                   onClick={() => setLocation("/forgot-password")}
+
                   className="text-sm"
                   disabled={isLoading}
                 >
@@ -189,6 +201,7 @@ export function Login() {
                     variant="link"
                     size="sm"
                     onClick={() => setLocation("/register")}
+
                     className="text-sm p-0 h-auto"
                     disabled={isLoading}
                   >

@@ -20,6 +20,7 @@ import {
   Globe,
 } from "lucide-react";
 
+
 // Helper to convert file to base64 data URL
 async function toDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -58,6 +59,7 @@ interface ProfileData {
 export default function ProfilePage() {
   const { user } = useAuth();
   const [tab, setTab] = useState("overview");
+
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [saving, setSaving] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
@@ -66,6 +68,7 @@ export default function ProfilePage() {
   const initials = useMemo(() => {
     const f = user?.firstName?.[0] ?? user?.email?.[0] ?? "U";
     const l = user?.lastName?.[0] ?? "";
+
     return `${f}${l}`.toUpperCase();
   }, [user]);
 
@@ -94,6 +97,7 @@ export default function ProfilePage() {
           avatarBase64: data?.avatarBase64 || undefined,
           stats: data?.stats || { matches: 0, teams: 0, followers: 0, xp: 0 },
           achievements: data?.achievements || ["MVP"],
+
           social: data?.social || {},
           notifications: data?.notifications || { email: true, app: true },
           twoFAEnabled: !!data?.twoFAEnabled,
@@ -114,6 +118,7 @@ export default function ProfilePage() {
           joinedAt: user?.createdAt || new Date().toISOString(),
           stats: { matches: 0, teams: 0, followers: 0, xp: 0 },
           achievements: ["MVP"],
+
           social: {},
           notifications: { email: true, app: true },
           twoFAEnabled: false,
@@ -130,16 +135,19 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const res = await apiRequest("/api/profile", "POST", {
+
         ...profile,
         ...updates,
       });
       const data = await res.json();
       setProfile((prev) => ({
+
         ...(prev as ProfileData),
         ...(data || updates),
       }));
     } catch (e) {
       alert("Failed to save profile");
+
     } finally {
       setSaving(false);
     }
@@ -181,6 +189,7 @@ export default function ProfilePage() {
     ? new Date(profile.joinedAt).toLocaleDateString()
     : "";
 
+
   return (
     <div className="p-6 space-y-6">
       {/* Profile Header */}
@@ -207,6 +216,7 @@ export default function ProfilePage() {
               className="hidden"
               onChange={handleBannerUpload}
             />
+
           </label>
         </div>
         <CardContent className="relative">
@@ -258,6 +268,7 @@ export default function ProfilePage() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   {profile.bio}
                 </p>
+
               ) : null}
             </div>
           </div>
@@ -290,6 +301,7 @@ export default function ProfilePage() {
               <CardContent className="text-2xl font-bold">
                 {profile.stats?.teams ?? 0}
               </CardContent>
+
             </Card>
             <Card>
               <CardHeader className="pb-2">
@@ -306,6 +318,7 @@ export default function ProfilePage() {
               <CardContent className="text-2xl font-bold">
                 {profile.stats?.xp ?? 0}
               </CardContent>
+
             </Card>
           </div>
 
@@ -317,6 +330,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {(profile.achievements ?? []).map((b) => (
+
                 <Badge key={b} variant="outline" className="bg-background/40">
                   {b}
                 </Badge>
@@ -336,6 +350,7 @@ export default function ProfilePage() {
                   Recent tournament participation, uploads, and posts will
                   appear here.
                 </li>
+
                 <li className="opacity-70">
                   (Hook to your existing activity feeds when available)
                 </li>
@@ -354,6 +369,7 @@ export default function ProfilePage() {
               <p className="text-sm text-muted-foreground">
                 Teams, projects, or tournaments associated with this user will
                 be listed here.
+
               </p>
             </CardContent>
           </Card>
@@ -372,6 +388,7 @@ export default function ProfilePage() {
                   <Input
                     value={profile.fullName}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         fullName: e.target.value,
@@ -384,6 +401,7 @@ export default function ProfilePage() {
                   <Input
                     value={profile.username}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         username: e.target.value,
@@ -397,6 +415,7 @@ export default function ProfilePage() {
                 <Textarea
                   value={profile.bio || ""}
                   onChange={(e) =>
+
                     setProfile({
                       ...(profile as ProfileData),
                       bio: e.target.value,
@@ -411,6 +430,7 @@ export default function ProfilePage() {
                   disabled={saving}
                 >
                   {saving ? "Saving..." : "Save Changes"}
+
                 </Button>
               </div>
             </CardContent>
@@ -428,6 +448,7 @@ export default function ProfilePage() {
                     placeholder="https://twitch.tv/username"
                     value={profile.social?.twitch || ""}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -444,6 +465,7 @@ export default function ProfilePage() {
                     placeholder="https://youtube.com/@username"
                     value={profile.social?.youtube || ""}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -460,6 +482,7 @@ export default function ProfilePage() {
                     placeholder="https://discord.gg/invite-or-username"
                     value={profile.social?.discord || ""}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -476,6 +499,7 @@ export default function ProfilePage() {
                     placeholder="https://x.com/username"
                     value={profile.social?.twitter || ""}
                     onChange={(e) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -497,6 +521,7 @@ export default function ProfilePage() {
                 <Button variant="outline">
                   <ShieldCheck className="w-4 h-4 mr-2" /> Verify Linked
                   Accounts
+
                 </Button>
               </div>
             </CardContent>
@@ -517,6 +542,7 @@ export default function ProfilePage() {
                 <Switch
                   checked={!!profile.twoFAEnabled}
                   onCheckedChange={(v) =>
+
                     setProfile({
                       ...(profile as ProfileData),
                       twoFAEnabled: !!v,
@@ -539,6 +565,7 @@ export default function ProfilePage() {
                   <Switch
                     checked={!!profile.notifications?.email}
                     onCheckedChange={(v) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         notifications: {
@@ -554,6 +581,7 @@ export default function ProfilePage() {
                   <Switch
                     checked={!!profile.notifications?.app}
                     onCheckedChange={(v) =>
+
                       setProfile({
                         ...(profile as ProfileData),
                         notifications: {

@@ -47,6 +47,7 @@ const systemPerformance = [
   { metric: "API Uptime (7d)", value: "99.97%" },
   { metric: "Avg Response", value: "180ms" },
   { metric: "Errors", value: "0.12%" },
+
 ];
 
 export default function AdminAnalyticsPage() {
@@ -57,6 +58,7 @@ export default function AdminAnalyticsPage() {
         <p className="text-muted-foreground">
           Growth, engagement, and performance at a glance
         </p>
+
       </div>
 
       <Card>
@@ -67,6 +69,7 @@ export default function AdminAnalyticsPage() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {growth.map((g) => (
+
               <div key={g.date} className="border border-border rounded-lg p-4">
                 <div className="text-xs text-muted-foreground">{g.date}</div>
                 <div className="text-xl font-semibold">{g.signups}</div>
@@ -89,6 +92,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     {u.sessions} sessions
                   </span>
+
                 </li>
               ))}
             </ul>
@@ -109,6 +113,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     {f.count}
                   </span>
+
                 </li>
               ))}
             </ul>
@@ -129,6 +134,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     ${r.amount}
                   </span>
+
                 </li>
               ))}
             </ul>
@@ -146,6 +152,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     {e.value}
                   </span>
+
                 </li>
               ))}
             </ul>
@@ -169,6 +176,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     {s.count}
                   </span>
+
                 </li>
               ))}
             </ul>
@@ -189,6 +197,7 @@ export default function AdminAnalyticsPage() {
                   <span className="text-sm text-muted-foreground">
                     {sp.value}
                   </span>
+
                 </li>
               ))}
             </ul>

@@ -13,337 +13,377 @@ import {
   Zap,
   ArrowRight,
   Sparkles,
+  Gamepad2,
+  MonitorPlay,
+  Target,
+  Swords,
 } from "lucide-react";
 
 export default function Landing() {
-  // Make the public landing feel like the Atomic template by default
-  // without affecting the authenticated app shell. Users can still
-  // override via ?theme=... flags handled in App.tsx.
+  // Enforce dark/atomic theme for the landing page
   useEffect(() => {
     try {
       localStorage.setItem("design:theme", "atomic");
-      document.documentElement.classList.remove("nova", "aqua", "atomic");
-      document.documentElement.classList.add("atomic");
+      document.documentElement.classList.remove("nova", "aqua");
+      document.documentElement.classList.add("atomic", "dark");
     } catch (_) {}
   }, []);
 
   const features = [
     {
       icon: Users,
-      title: "Staff Management",
+      title: "Roster Management",
       description:
-        "Manage your esports team roster with role-based permissions and instant updates",
-    },
-    {
-      icon: DollarSign,
-      title: "Payroll System",
-      description:
-        "Track salaries, bonuses, and payments with automated calculations and export features",
+        "Manage players, coaches, and staff with role-based permissions and real-time updates.",
     },
     {
       icon: Calendar,
-      title: "Match Scheduling",
+      title: "Scrims & Matches",
       description:
-        "Organize tournaments and matches with calendar and list views, live score updates",
+        "Coordinate practice blocks, tournament schedules, and travel logistics in one view.",
+    },
+    {
+      icon: DollarSign,
+      title: "Automated Payroll",
+      description:
+        "Handle player salaries, prize pool distribution, and bonuses with precision.",
     },
     {
       icon: BarChart3,
-      title: "Analytics Dashboard",
+      title: "Performance Analytics",
       description:
-        "Real-time insights into team performance, revenue, and campaign effectiveness",
+        "Track scrim results, individual stats, and social engagement metrics.",
     },
     {
       icon: FileText,
-      title: "Contract Management",
+      title: "Smart Contracts",
       description:
-        "Store and manage player, staff, and sponsor contracts with expiration tracking",
+        "Digitally sign and store player contracts, sponsorship deals, and NDAs.",
     },
     {
-      icon: Shield,
-      title: "Audit Logging",
+      icon: MonitorPlay,
+      title: "Content Pipeline",
       description:
-        "Complete audit trail of all changes with before/after values for compliance",
+        "Streamline asset requests for thumbnails, overlays, and social graphics.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+      {/* Background Grid Effect */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
+      </div>
+
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-30 section-divider bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 fx-glow flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" />
+            <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Gamepad2 className="w-5 h-5 text-primary" />
             </div>
-            <span className="font-heading text-xl">Nexus Suite</span>
+            <span className="font-heading text-xl font-bold tracking-tight">
+              Nexus<span className="text-primary">Suite</span>
+            </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="sm"
+              className="hidden md:flex hover:bg-primary/10 hover:text-primary"
               onClick={() => (window.location.href = "/login")}
             >
               Login
             </Button>
             <Button
               size="sm"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 fx-glow"
               onClick={() => (window.location.href = "/register")}
             >
-              Sign up
+              Get Started <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         </div>
       </nav>
 
-      {/* Atomic-style Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/14 via-transparent to-primary/8" />
-        <div className="container relative mx-auto px-4 py-24">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
+      {/* Hero Section */}
+      <section className="relative z-10 pt-20 pb-32 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col gap-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">
-                  Design work, the efficient way
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit">
+                <Zap className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-medium text-primary uppercase tracking-wider">
+                  The OS for Esports
                 </span>
               </div>
-              <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight">
-                Elevate the way you source design
+              
+              <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tighter leading-none">
+                Power Your <br />
+                <span className="text-primary">
+                  Esports Empire
+                </span>
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-xl">
-                High-quality, scalable design delivered without the overhead.
-                Tailored to your vision, integrated with your workflow.
+              
+              <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
+                The all-in-one platform to manage rosters, streamline operations, 
+                and scale your organization. Built for champions.
               </p>
+              
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                   size="lg"
-                  className="text-lg px-8 fx-ripple"
-                  data-testid="button-login"
-                  onClick={() => (window.location.href = "/login")}
+                  className="text-lg px-8 h-12 bg-primary hover:bg-primary/90 fx-glow"
+                  onClick={() => (window.location.href = "/register")}
                 >
                   <Trophy className="w-5 h-5 mr-2" />
-                  Get Started
+                  Start Winning
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8">
-                  Learn More
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-lg px-8 h-12 border-primary/20 hover:bg-primary/5"
+                >
+                  View Demo
                 </Button>
               </div>
+
+              <div className="flex items-center gap-6 text-sm text-muted-foreground pt-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span>Enterprise Security</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span>AI-Powered</span>
+                </div>
+              </div>
             </div>
-            {/* Atomic glass panel with quick stats */}
-            <div className="glass border-glow rounded-2xl p-6 scanline noise shadcn-card">
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="p-4 importance-high">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      Performance
-                    </span>
+
+            {/* Hero Visual / Dashboard Preview */}
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-2xl blur opacity-20 animate-pulse"></div>
+              <div className="relative glass rounded-2xl border border-white/10 p-2 shadow-2xl">
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-2xl pointer-events-none"></div>
+                
+                {/* Fake UI Header */}
+                <div className="h-8 bg-black/40 rounded-t-xl flex items-center px-4 gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                </div>
+
+                {/* Grid Layout inside the card */}
+                <div className="grid grid-cols-2 gap-4 p-4">
+                  {/* Card 1 */}
+                  <div className="col-span-2 bg-black/40 rounded-xl p-4 border border-white/5">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase">Total Revenue</p>
+                        <h3 className="text-2xl font-mono font-bold">$1,240,500</h3>
+                      </div>
+                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                        +12.5%
+                      </Badge>
+                    </div>
+                    <div className="h-16 flex items-end gap-1">
+                      {[40, 60, 45, 70, 65, 80, 75].map((h, i) => (
+                        <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors rounded-sm"></div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-2xl font-mono mt-3">+18.4% MoM</div>
-                </Card>
-                <Card className="p-4 importance-medium">
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      Revenue
-                    </span>
+
+                  {/* Card 2 */}
+                  <div className="bg-black/40 rounded-xl p-4 border border-white/5 flex flex-col justify-between">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Swords className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-medium">Next Match</span>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">VS Cloud9</div>
+                      <div className="text-lg font-mono font-bold">18:00 CET</div>
+                    </div>
                   </div>
-                  <div className="text-2xl font-mono mt-3">$124,500</div>
-                </Card>
-                <Card className="p-4 importance-medium">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      Projects
-                    </span>
+
+                  {/* Card 3 */}
+                  <div className="bg-black/40 rounded-xl p-4 border border-white/5 flex flex-col justify-between">
+                     <div className="flex items-center gap-3 mb-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      <span className="text-sm font-medium">Active Roster</span>
+                    </div>
+                    <div className="flex -space-x-2">
+                      {[1,2,3].map((i) => (
+                        <div key={i} className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-900 flex items-center justify-center text-xs">
+                          P{i}
+                        </div>
+                      ))}
+                      <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-900 flex items-center justify-center text-xs">
+                        +2
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-2xl font-mono mt-3">26 Active</div>
-                </Card>
-                <Card className="p-4 importance-low">
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-primary" />
-                    <span className="text-sm text-muted-foreground">
-                      Quality
-                    </span>
-                  </div>
-                  <div className="text-2xl font-mono mt-3">Top-tier</div>
-                </Card>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing / Subscription Plans */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            Choose a plan that fits your team
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Simple, transparent pricing. Upgrade or downgrade anytime.
+      {/* Partners / Trusted By */}
+      <section className="py-10 border-y border-white/5 bg-black/20">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-muted-foreground mb-6 uppercase tracking-widest">
+            Trusted by Elite Organizations
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Starter */}
-          <Card className="p-6 glass border-glow shadcn-card flex flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Starter</h3>
-              <Badge variant="secondary">Best for individuals</Badge>
-            </div>
-            <div className="mb-6">
-              <div className="text-3xl font-bold">$0</div>
-              <div className="text-sm text-muted-foreground">Free forever</div>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground mb-8">
-              <li>• 1 Project</li>
-              <li>• Basic Analytics</li>
-              <li>• Community Support</li>
-            </ul>
-            <Button
-              variant="outline"
-              className="mt-auto"
-              onClick={() => (window.location.href = "/register")}
-            >
-              Get started
-            </Button>
-          </Card>
-
-          {/* Pro */}
-          <Card className="p-6 glass border-glow shadcn-card flex flex-col ring-1 ring-primary/30">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Pro</h3>
-              <Badge className="bg-primary text-primary-foreground">Popular</Badge>
-            </div>
-            <div className="mb-6">
-              <div className="text-3xl font-bold">$29</div>
-              <div className="text-sm text-muted-foreground">per month</div>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground mb-8">
-              <li>• Unlimited Projects</li>
-              <li>• Advanced Analytics & Reporting</li>
-              <li>• Role-based Access Control</li>
-              <li>• Priority Support</li>
-            </ul>
-            <Button
-              className="mt-auto"
-              onClick={() => (window.location.href = "/register")}
-            >
-              Choose Pro
-            </Button>
-          </Card>
-
-          {/* Enterprise */}
-          <Card className="p-6 glass border-glow shadcn-card flex flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Enterprise</h3>
-              <Badge variant="outline">Custom</Badge>
-            </div>
-            <div className="mb-6">
-              <div className="text-3xl font-bold">$99+</div>
-              <div className="text-sm text-muted-foreground">per month</div>
-            </div>
-            <ul className="space-y-2 text-sm text-muted-foreground mb-8">
-              <li>• All Pro features</li>
-              <li>• SSO & Advanced Security</li>
-              <li>• Dedicated Account Manager</li>
-              <li>• Priority SLA & Onboarding</li>
-            </ul>
-            <Button
-              variant="outline"
-              className="mt-auto"
-              onClick={() => (window.location.href = "/register")}
-            >
-              Contact sales
-            </Button>
-          </Card>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+             {/* Placeholders for logos */}
+             <div className="text-xl font-bold font-heading">FNATIC</div>
+             <div className="text-xl font-bold font-heading">G2 ESPORTS</div>
+             <div className="text-xl font-bold font-heading">LIQUID</div>
+             <div className="text-xl font-bold font-heading">100 THIEVES</div>
+             <div className="text-xl font-bold font-heading">CLOUD9</div>
+          </div>
         </div>
       </section>
 
-      {/* Value Props / Features (Atomic style) */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            We resolve problems associated with creative procedures
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Cost effective solution. Tailor–made design. Scalable as you grow.
-            Workflow integration.
-          </p>
+      {/* Features Grid */}
+      <section className="py-24 relative z-10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold font-heading mb-6">
+              Everything You Need to <br />
+              <span className="text-primary">Dominate the Scene</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Stop using spreadsheets. NexusSuite provides a professional operating system tailored for the unique needs of esports organizations.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, i) => (
+              <Card
+                key={i}
+                className="group p-6 glass border-white/5 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 font-heading group-hover:text-primary transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            "Cost effective solution",
-            "Tailor–made design",
-            "Scalable as you grow",
-            "Workflow integration",
-          ].map((title, i) => (
-            <Card
-              key={i}
-              className="p-6 glass border-glow shadcn-card hover-elevate fx-shimmer transition-all"
-            >
-              <h3 className="text-lg font-semibold mb-2">{title}</h3>
-              <p className="text-muted-foreground">
-                Get high-quality design work at a fraction of the cost.
+      </section>
+
+      {/* Stats / Proof */}
+      <section className="py-24 bg-primary/5 border-y border-primary/10 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="p-6">
+              <div className="text-5xl font-bold font-mono mb-2 text-primary">
+                $250M+
+              </div>
+              <p className="text-muted-foreground uppercase tracking-wider text-sm">
+                Prize Money Tracked
               </p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Process section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Top–notch designs, delivered at your doorstep
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            {
-              t: "Tell us your vision",
-              d: "Choose a plan and share your design project details with us: we’re here to listen.",
-            },
-            {
-              t: "Receive the magic",
-              d: "Sit back and relax: our expert designers will turn your vision into reality.",
-            },
-            {
-              t: "Get ongoing support",
-              d: "Your subscription ensures you have continuous access to our design team.",
-            },
-          ].map((s, i) => (
-            <Card key={i} className="p-6 glass border-glow shadcn-card">
-              <h3 className="text-xl font-semibold mb-2">{s.t}</h3>
-              <p className="text-muted-foreground">{s.d}</p>
-            </Card>
-          ))}
+            </div>
+            <div className="p-6 border-x border-primary/10">
+              <div className="text-5xl font-bold font-mono mb-2 text-primary">
+                5,000+
+              </div>
+              <p className="text-muted-foreground uppercase tracking-wider text-sm">
+                Active Players
+              </p>
+            </div>
+            <div className="p-6">
+              <div className="text-5xl font-bold font-mono mb-2 text-primary">
+                99.9%
+              </div>
+              <p className="text-muted-foreground uppercase tracking-wider text-sm">
+                Uptime Reliability
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <Card className="p-12 text-center glass border-glow shadcn-card">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Elevate the way you source design
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Get ready to start producing stunning, efficient design work without
-            the hassles of hiring.
-          </p>
-          <Button
-            size="lg"
-            className="text-lg px-8"
-            data-testid="button-get-started-bottom"
-            onClick={() => (window.location.href = "/login")}
-          >
-            <Trophy className="w-5 h-5 mr-2" />
-            Start Now
-          </Button>
-        </Card>
+      <section className="py-32 relative">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto glass border border-primary/20 rounded-3xl p-12 md:p-20 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+            
+            <h2 className="text-4xl md:text-6xl font-bold font-heading mb-6 tracking-tight">
+              Ready to Level Up?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-10">
+              Join the world's best organizations running on NexusSuite.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button
+                size="lg"
+                className="text-lg px-10 h-14 bg-primary hover:bg-primary/90 fx-glow"
+                onClick={() => (window.location.href = "/register")}
+              >
+                Get Started Now
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-10 h-14"
+              >
+                Contact Sales
+              </Button>
+            </div>
+          </div>
+        </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-white/10 bg-black/40">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <Gamepad2 className="w-6 h-6 text-primary" />
+                <span className="font-heading text-xl font-bold">NexusSuite</span>
+              </div>
+              <p className="text-muted-foreground max-w-sm">
+                The premier operating system for esports organizations, creative agencies, and gaming communities.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4 text-white">Platform</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="hover:text-primary cursor-pointer">Features</li>
+                <li className="hover:text-primary cursor-pointer">Pricing</li>
+                <li className="hover:text-primary cursor-pointer">Enterprise</li>
+                <li className="hover:text-primary cursor-pointer">Changelog</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4 text-white">Company</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="hover:text-primary cursor-pointer">About Us</li>
+                <li className="hover:text-primary cursor-pointer">Careers</li>
+                <li className="hover:text-primary cursor-pointer">Legal</li>
+                <li className="hover:text-primary cursor-pointer">Contact</li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center text-sm text-muted-foreground pt-8 border-t border-white/5">
+            © {new Date().getFullYear()} NexusSuite. All rights reserved. GG WP.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

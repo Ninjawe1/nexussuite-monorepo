@@ -1,6 +1,7 @@
 import { StatCard } from "../stat-card";
 import { DollarSign, Users, Trophy, Megaphone } from "lucide-react";
 
+
 export default function StatCardExample() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-background">
@@ -24,6 +25,7 @@ export default function StatCardExample() {
         trend={5.2}
         trendLabel="this season"
       />
+
       <StatCard
         title="Active Campaigns"
         value="12"

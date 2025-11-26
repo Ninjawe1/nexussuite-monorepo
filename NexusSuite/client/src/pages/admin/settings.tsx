@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function AdminSettingsPage() {
   const { toast } = useToast();
   const [maintenance, setMaintenance] = useState(false);
@@ -20,6 +21,7 @@ export default function AdminSettingsPage() {
 
   const save = () => toast({ title: "Settings", description: "Saved (demo)" });
 
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -27,6 +29,7 @@ export default function AdminSettingsPage() {
         <p className="text-muted-foreground">
           Toggle features and manage integrations
         </p>
+
       </div>
 
       <Card>
@@ -44,6 +47,7 @@ export default function AdminSettingsPage() {
               value={maintenanceMsg}
               onChange={(e) => setMaintenanceMsg(e.target.value)}
             />
+
           </div>
         </CardContent>
       </Card>
@@ -63,6 +67,7 @@ export default function AdminSettingsPage() {
               value={apiKeyGoogle}
               onChange={(e) => setApiKeyGoogle(e.target.value)}
             />
+
             <Button onClick={save}>Save</Button>
           </div>
         </CardContent>

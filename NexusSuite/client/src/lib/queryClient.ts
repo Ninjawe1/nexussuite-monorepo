@@ -1,5 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -30,6 +31,7 @@ function ensureJsonResponse(res: Response) {
     const ctDisplay = contentType || "unknown";
     throw new Error(
       `Expected JSON but received ${ctDisplay} (status ${status}). This usually happens when an unknown /api route returns an HTML page.`,
+
     );
   }
 }
@@ -39,6 +41,7 @@ export async function apiRequest(
   method: string,
   data?: unknown | undefined,
   options?: { headers?: Record<string, string> },
+
 ): Promise<Response> {
   const res = await fetch(url, {
     method,
@@ -50,6 +53,7 @@ export async function apiRequest(
     credentials: "include",
     // Prevent cached responses for API calls; important for auth/session endpoints
     cache: "no-store",
+
   });
 
   await throwIfResNotOk(res);
@@ -71,6 +75,7 @@ export const getQueryFn: <T>(options: {
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+
       return null;
     }
 
@@ -83,6 +88,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
+
       refetchInterval: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,

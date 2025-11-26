@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,16 +19,19 @@ import { useOrganization } from "@/contexts/OrganizationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
+
 export default function OrgSettings() {
   const { currentOrganization, updateOrganization, deleteOrganization } = useOrganization();
   const { toast } = useToast();
   const [name, setName] = useState("");
+
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
     setName(currentOrganization?.name || "");
+
   }, [currentOrganization]);
 
   if (!currentOrganization) {
@@ -52,6 +56,7 @@ export default function OrgSettings() {
       await updateOrganization(currentOrganization.id, { name: name.trim() });
     } catch (error: any) {
       console.error("OrgSettings save error:", {
+
         orgId: currentOrganization.id,
         payload: { name: name.trim() },
         error,
@@ -63,6 +68,7 @@ export default function OrgSettings() {
             ? error.message
             : "Unable to save organization settings",
         variant: "destructive",
+
       });
     } finally {
       setSaving(false);
@@ -77,6 +83,7 @@ export default function OrgSettings() {
       setLocation("/dashboard");
     } catch (error: any) {
       console.error("OrgSettings delete error:", {
+
         orgId: currentOrganization.id,
         error,
       });
@@ -87,6 +94,7 @@ export default function OrgSettings() {
             ? error.message
             : "Unable to delete organization",
         variant: "destructive",
+
       });
     } finally {
       setDeleting(false);
@@ -106,6 +114,7 @@ export default function OrgSettings() {
               id="org-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+
               placeholder="Your organization name"
               disabled={saving}
             />
@@ -115,11 +124,13 @@ export default function OrgSettings() {
             <label htmlFor="org-id" className="text-sm font-medium">Organization ID</label>
             <Input id="org-id" value={currentOrganization.id} readOnly />
             <p className="text-xs text-muted-foreground">This ID is read-only for Org Owners. Changes can only be performed by Super Admins in the site-wide admin interface.</p>
+
           </div>
 
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={saving || !name.trim()}>
               {saving ? "Saving…" : "Save Changes"}
+
             </Button>
           </div>
 
@@ -129,6 +140,7 @@ export default function OrgSettings() {
             <div>
               <h3 className="text-lg font-semibold">Delete Organization</h3>
               <p className="text-sm text-muted-foreground">Deleting an organization is permanent. This action cannot be undone.</p>
+
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -139,12 +151,14 @@ export default function OrgSettings() {
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This will permanently delete your organization and all related data. This action cannot be undone.
+
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete} disabled={deleting}>
                     {deleting ? "Deleting…" : "Delete"}
+
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -155,3 +169,4 @@ export default function OrgSettings() {
     </div>
   );
 }
+

@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import {
   Form,
   FormControl,
@@ -34,6 +36,7 @@ import type { SocialAccount } from "@shared/schema";
 const socialAccountSchema = z.object({
   platform: z.string().min(1, "Platform is required"),
   accountName: z.string().min(1, "Account name is required"),
+
   accountId: z.string().optional(),
   apiKey: z.string().optional(),
   apiSecret: z.string().optional(),
@@ -52,6 +55,7 @@ export function SocialAccountDialog({
   onOpenChange,
   account,
 }: SocialAccountDialogProps) {
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -63,6 +67,7 @@ export function SocialAccountDialog({
       accountId: account?.accountId || "",
       apiKey: "",
       apiSecret: "",
+
     },
   });
 
@@ -77,6 +82,7 @@ export function SocialAccountDialog({
         delete payload.apiSecret;
       }
       if (!payload.accountId || payload.accountId.trim() === "") {
+
         delete payload.accountId;
       }
 
@@ -98,6 +104,7 @@ export function SocialAccountDialog({
         description: account
           ? "Social account updated"
           : "Social account connected",
+
       });
       onOpenChange(false);
       form.reset();
@@ -111,6 +118,7 @@ export function SocialAccountDialog({
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -118,6 +126,7 @@ export function SocialAccountDialog({
         title: "Error",
         description: error.message || "Failed to connect social account",
         variant: "destructive",
+
       });
     },
   });
@@ -137,6 +146,7 @@ export function SocialAccountDialog({
             {account
               ? "Update your social media account settings"
               : "Connect a social media account to track analytics"}
+
           </DialogDescription>
         </DialogHeader>
 
@@ -152,6 +162,7 @@ export function SocialAccountDialog({
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
+
                     <FormControl>
                       <SelectTrigger data-testid="select-platform">
                         <SelectValue placeholder="Select platform" />
@@ -183,6 +194,7 @@ export function SocialAccountDialog({
                       placeholder="@yourhandle"
                       data-testid="input-account-name"
                     />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -226,6 +238,7 @@ export function SocialAccountDialog({
                   : account
                     ? "Update"
                     : "Connect"}
+
               </Button>
             </div>
           </form>

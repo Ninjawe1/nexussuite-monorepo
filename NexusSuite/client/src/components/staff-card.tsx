@@ -3,12 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Mail, Phone } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 
 interface StaffCardProps {
   id: string;
@@ -19,6 +21,7 @@ interface StaffCardProps {
   avatar?: string;
   permissions: string[];
   status: "active" | "suspended";
+
   onEdit?: () => void;
   onDelete?: () => void;
   onToggleStatus?: () => void;
@@ -48,6 +51,7 @@ export function StaffCard({
     Manager: "bg-chart-2 text-primary-foreground",
     Staff: "bg-secondary text-secondary-foreground",
     Player: "bg-accent text-accent-foreground",
+
   };
 
   return (
@@ -71,6 +75,7 @@ export function StaffCard({
               <Badge
                 className={`${roleColors[role] || roleColors["Staff"]} text-xs mt-1`}
               >
+
                 {role}
               </Badge>
               <div className="flex flex-col gap-1 mt-2">
@@ -94,6 +99,7 @@ export function StaffCard({
                 size="icon"
                 data-testid={`button-menu-${id}`}
               >
+
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -106,6 +112,7 @@ export function StaffCard({
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onToggleStatus}>
                 {status === "active" ? "Suspend Account" : "Activate Account"}
+
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 Delete
@@ -122,6 +129,7 @@ export function StaffCard({
             className={status === "active" ? "text-chart-2" : "text-chart-5"}
           >
             {status === "active" ? "Active" : "Suspended"}
+
           </span>
         </div>
       </CardFooter>

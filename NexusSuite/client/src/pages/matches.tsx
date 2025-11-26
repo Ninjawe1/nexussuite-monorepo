@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Match as MatchType } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ import {
 
 export default function Matches() {
   const [view, setView] = useState<"list" | "calendar">("list");
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchType | undefined>();
   const { toast } = useToast();
@@ -33,6 +35,7 @@ export default function Matches() {
 
   const { data: matches = [], isLoading } = useQuery<MatchType[]>({
     queryKey: ["/api/matches"],
+
   });
 
   const deleteMutation = useMutation({
@@ -44,6 +47,7 @@ export default function Matches() {
       toast({
         title: "Success",
         description: "Match deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -55,6 +59,7 @@ export default function Matches() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -62,6 +67,7 @@ export default function Matches() {
         title: "Error",
         description: error.message || "Failed to delete match",
         variant: "destructive",
+
       });
     },
   });
@@ -78,6 +84,7 @@ export default function Matches() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this match?")) {
+
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -90,6 +97,7 @@ export default function Matches() {
             className="text-3xl font-heading font-bold mb-1"
             data-testid="text-matches-title"
           >
+
             Matches & Tournaments
           </h1>
           <p className="text-muted-foreground">
@@ -106,6 +114,7 @@ export default function Matches() {
         value={view}
         onValueChange={(v) => setView(v as "list" | "calendar")}
       >
+
         <TabsList>
           <TabsTrigger value="list" data-testid="tab-list-view">
             <List className="w-4 h-4 mr-2" />
@@ -121,6 +130,7 @@ export default function Matches() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
+
                 <Skeleton key={i} className="h-48" />
               ))}
             </div>
@@ -131,6 +141,7 @@ export default function Matches() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {matches.map((match) => (
+
                 <div key={match.id} className="relative group">
                   <MatchCard
                     {...match}
@@ -138,6 +149,7 @@ export default function Matches() {
                     scoreA={match.scoreA ?? undefined}
                     scoreB={match.scoreB ?? undefined}
                     status={match.status as "upcoming" | "live" | "completed"}
+
                   />
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
@@ -186,6 +198,7 @@ export default function Matches() {
               <Button
                 variant="outline"
                 onClick={() => setView("list")}
+
                 data-testid="button-switch-to-list"
               >
                 Switch to List View
@@ -200,6 +213,7 @@ export default function Matches() {
         onOpenChange={setDialogOpen}
         match={selectedMatch}
       />
+
     </div>
   );
 }

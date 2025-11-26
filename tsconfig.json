@@ -48,7 +48,10 @@
     "**/*.spec.ts",
     "server/archive",
     "server/archive/**",
-    "server/NexusSuite_server/**"
+    "server/NexusSuite_server/**",
+    "server/routes.ts",
+    "server/storage.ts",
+    "server/storage-firestore.ts"
   ],
   "ts-node": {
     "esm": true,

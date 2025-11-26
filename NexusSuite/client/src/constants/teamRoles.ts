@@ -6,6 +6,7 @@ export type TeamRole =
   | "Manager"
   | "Substitute";
 
+
 export interface RoleOption {
   value: TeamRole;
   label: string;
@@ -19,6 +20,7 @@ export const TEAM_ROLES: RoleOption[] = [
   { value: "Analyst", label: "Analyst" },
   { value: "Manager", label: "Manager" },
   { value: "Substitute", label: "Substitute" },
+
 ];
 
 // Helper to ensure consistent badge text
@@ -28,6 +30,7 @@ export function formatRoleBadge(role: string | undefined): string {
     (r) =>
       r.value.toLowerCase() === role.toLowerCase() ||
       r.label.toLowerCase() === role.toLowerCase(),
+
   );
   return match ? match.label : role;
 }

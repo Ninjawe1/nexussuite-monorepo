@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -68,6 +69,7 @@ const demoUsers: User[] = [
     lastPasswordChange: new Date(),
     createdAt: new Date("2024-06-01"),
     updatedAt: new Date("2024-10-20"),
+
   },
 ];
 
@@ -84,6 +86,7 @@ const demoTenants: Tenant[] = [
     subscriptionStatus: "active",
     stripeCustomerId: "",
     stripeSubscriptionId: "",
+
     trialEndsAt: null as any,
     subscriptionEndsAt: null as any,
     suspendedAt: null as any,
@@ -104,6 +107,7 @@ const demoTenants: Tenant[] = [
     subscriptionStatus: "trial",
     stripeCustomerId: "",
     stripeSubscriptionId: "",
+
     trialEndsAt: null as any,
     subscriptionEndsAt: null as any,
     suspendedAt: null as any,
@@ -130,6 +134,7 @@ export default function AdminUsersPage() {
   const [activityFilter, setActivityFilter] = useState<string>("all");
   const [dateJoined, setDateJoined] = useState<string>("");
 
+
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [tags, setTags] = useState<Record<string, string[]>>({});
 
@@ -139,6 +144,7 @@ export default function AdminUsersPage() {
     : tenants.length
       ? tenants
       : demoTenants;
+
 
   const updateUserMutation = useMutation({
     mutationFn: async ({
@@ -159,6 +165,7 @@ export default function AdminUsersPage() {
         title: "Demo",
         description: "In demo mode this action is simulated",
         variant: "default",
+
       });
     },
   });
@@ -200,6 +207,7 @@ export default function AdminUsersPage() {
   const forceLogout = (userId: string) => {
     toast({
       title: "Force logout",
+
       description: `User ${userId} will be logged out (demo)`,
     });
   };
@@ -207,11 +215,13 @@ export default function AdminUsersPage() {
     updateUserMutation.mutate({
       id: userId,
       data: { isTemporaryPassword: true, password: "Temp12345!" },
+
     });
   };
   const changeTier = (tenantId: string, plan: string) => {
     toast({
       title: "Change subscription",
+
       description: `Set tenant ${tenantId} plan to ${plan} (demo)`,
     });
   };
@@ -223,6 +233,7 @@ export default function AdminUsersPage() {
         <p className="text-muted-foreground">
           Search, filter, and manage all users
         </p>
+
       </div>
 
       <Card>
@@ -231,6 +242,7 @@ export default function AdminUsersPage() {
           <CardDescription>
             Find users by plan, activity, or date joined
           </CardDescription>
+
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -240,6 +252,7 @@ export default function AdminUsersPage() {
                 placeholder="Search name or email"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
+
               />
             </div>
             <Select value={planFilter} onValueChange={setPlanFilter}>
@@ -270,6 +283,7 @@ export default function AdminUsersPage() {
                 value={dateJoined}
                 onChange={(e) => setDateJoined(e.target.value)}
               />
+
             </div>
           </div>
         </CardContent>
@@ -289,6 +303,7 @@ export default function AdminUsersPage() {
             <div className="space-y-3">
               {filtered.map((u) => {
                 const tenant = tenantsData.find((t) => t.id === u.tenantId);
+
                 return (
                   <div
                     key={u.id}
@@ -312,6 +327,7 @@ export default function AdminUsersPage() {
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         Joined {formatDateSafe(u.createdAt, "PPP")}
+
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <Input
@@ -319,6 +335,7 @@ export default function AdminUsersPage() {
                           value={notes[u.id] || ""}
                           onChange={(e) =>
                             setNotes((prev) => ({
+
                               ...prev,
                               [u.id]: e.target.value,
                             }))
@@ -333,6 +350,7 @@ export default function AdminUsersPage() {
                               [u.id]: e.target.value
                                 .split(",")
                                 .map((s) => s.trim())
+
                                 .filter(Boolean),
                             }))
                           }
@@ -358,6 +376,7 @@ export default function AdminUsersPage() {
                         <Select
                           onValueChange={(val) => changeTier(tenant.id, val)}
                         >
+
                           <SelectTrigger className="w-32">
                             <SelectValue placeholder="Tier" />
                           </SelectTrigger>
@@ -367,6 +386,7 @@ export default function AdminUsersPage() {
                             <SelectItem value="enterprise">
                               Enterprise
                             </SelectItem>
+
                           </SelectContent>
                         </Select>
                       )}

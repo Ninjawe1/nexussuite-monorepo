@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, UserPlus, Copy, Trash2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { User, Invite } from "@shared/schema";
+
 import {
   Select,
   SelectContent,
@@ -33,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { formatDateSafe } from "@/lib/date";
 
+
 export default function Team() {
   const { toast } = useToast();
   const [createUserOpen, setCreateUserOpen] = useState(false);
@@ -41,6 +44,7 @@ export default function Team() {
   // Fetch team users
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/team/users"],
+
   });
 
   // Fetch pending invites
@@ -61,6 +65,7 @@ export default function Team() {
   });
   const { data: tenant } = useQuery<Tenant>({
     queryKey: ["/api/tenant"],
+
   });
 
   return (
@@ -73,6 +78,7 @@ export default function Team() {
           <p className="text-muted-foreground">
             Manage team members and invitations
           </p>
+
         </div>
         <div className="flex gap-2">
           <Dialog open={inviteUserOpen} onOpenChange={setInviteUserOpen}>
@@ -124,11 +130,13 @@ export default function Team() {
               <CardContent className="py-8 text-center text-muted-foreground">
                 No team members yet. Create a user or send an invite to get
                 started.
+
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4">
               {users.map((user) => (
+
                 <UserCard key={user.id} user={user} />
               ))}
             </div>
@@ -149,6 +157,7 @@ export default function Team() {
           ) : (
             <div className="grid gap-4">
               {invites.map((invite) => (
+
                 <InviteCard key={invite.id} invite={invite} />
               ))}
             </div>
@@ -170,6 +179,7 @@ function UserCard({ user }: { user: User }) {
           <CardDescription data-testid={`user-email-${user.id}`}>
             {user.email}
           </CardDescription>
+
         </div>
         <Badge data-testid={`user-role-${user.id}`}>{user.role}</Badge>
       </CardHeader>
@@ -189,6 +199,7 @@ function InviteCard({ invite }: { invite: Invite }) {
       toast({
         title: "Success",
         description: "Invite deleted successfully",
+
       });
     },
     onError: (error: any) => {
@@ -196,6 +207,7 @@ function InviteCard({ invite }: { invite: Invite }) {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to delete invite",
+
       });
     },
   });
@@ -206,6 +218,7 @@ function InviteCard({ invite }: { invite: Invite }) {
     toast({
       title: "Copied!",
       description: "Invite link copied to clipboard",
+
     });
   };
 
@@ -222,6 +235,7 @@ function InviteCard({ invite }: { invite: Invite }) {
           <CardDescription>
             Invited by {invite.inviterName} • Expires{" "}
             {formatDateSafe(invite.expiresAt, "MMM dd, yyyy")}
+
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -257,6 +271,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
     lastName: "",
     role: "staff",
     password: "",
+
   });
 
   const createMutation = useMutation({
@@ -268,6 +283,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
       toast({
         title: "Success",
         description: "User created successfully",
+
       });
       onSuccess();
     },
@@ -276,6 +292,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to create user",
+
       });
     },
   });
@@ -303,6 +320,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
+
             required
             data-testid="input-create-email"
           />
@@ -317,6 +335,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
               onChange={(e) =>
                 setFormData({ ...formData, firstName: e.target.value })
               }
+
               required
               data-testid="input-create-firstname"
             />
@@ -330,6 +349,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
               onChange={(e) =>
                 setFormData({ ...formData, lastName: e.target.value })
               }
+
               required
               data-testid="input-create-lastname"
             />
@@ -341,6 +361,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
           <Select
             value={formData.role}
             onValueChange={(value) => setFormData({ ...formData, role: value })}
+
           >
             <SelectTrigger data-testid="select-create-role">
               <SelectValue />
@@ -366,6 +387,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
+
             placeholder="Leave empty for default: Welcome123!"
             data-testid="input-create-password"
           />
@@ -381,6 +403,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
           data-testid="button-submit-create"
         >
           {createMutation.isPending ? "Creating..." : "Create User"}
+
         </Button>
       </form>
     </>
@@ -392,11 +415,13 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     email: "",
     role: "staff",
+
   });
 
   const inviteMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       return await apiRequest("/api/team/invites", "POST", {
+
         ...data,
         permissions: [],
       });
@@ -406,6 +431,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
       toast({
         title: "Success",
         description: "Invite sent successfully",
+
       });
       onSuccess();
     },
@@ -414,6 +440,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to send invite",
+
       });
     },
   });
@@ -430,6 +457,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
         <DialogDescription>
           Send an invitation link to a new team member. They'll create their own
           account.
+
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -442,6 +470,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
+
             required
             data-testid="input-invite-email"
           />
@@ -452,6 +481,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
           <Select
             value={formData.role}
             onValueChange={(value) => setFormData({ ...formData, role: value })}
+
           >
             <SelectTrigger data-testid="select-invite-role">
               <SelectValue />
@@ -475,6 +505,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
           data-testid="button-submit-invite"
         >
           {inviteMutation.isPending ? "Sending..." : "Send Invite"}
+
         </Button>
       </form>
     </>

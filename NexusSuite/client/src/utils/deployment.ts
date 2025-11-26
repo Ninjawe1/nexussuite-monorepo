@@ -7,6 +7,7 @@ export const DEPLOYMENT_CONFIG = {
   // API Configuration
   apiUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
 
+
   // Authentication
   betterAuthSecret: import.meta.env.VITE_BETTER_AUTH_SECRET,
 
@@ -21,6 +22,7 @@ export const DEPLOYMENT_CONFIG = {
   // Features
   enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
   enableErrorReporting: import.meta.env.VITE_ENABLE_ERROR_REPORTING === "true",
+
 
   // Monitoring
   sentryDsn: import.meta.env.VITE_SENTRY_DSN,
@@ -37,6 +39,7 @@ export function validateEnvironment(): void {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}`,
     );
+
   }
 }
 
@@ -66,6 +69,7 @@ export const SECURITY_CONFIG = {
     scriptSrc: ["'self'", "'unsafe-inline'"],
     styleSrc: ["'self'", "'unsafe-inline'"],
     imgSrc: ["'self'", "data:", "https:"],
+
     connectSrc: ["'self'", DEPLOYMENT_CONFIG.apiUrl],
     fontSrc: ["'self'"],
     objectSrc: ["'none'"],
@@ -106,6 +110,7 @@ export const PERFORMANCE_CONFIG = {
 export function getApiUrl(path: string = ""): string {
   const baseUrl = DEPLOYMENT_CONFIG.apiUrl.replace(/\/$/, "");
   const cleanPath = path.replace(/^\//, "");
+
   return cleanPath ? `${baseUrl}/${cleanPath}` : baseUrl;
 }
 
@@ -122,6 +127,7 @@ export function getErrorReportingConfig() {
     enabled: DEPLOYMENT_CONFIG.enableErrorReporting,
     dsn: DEPLOYMENT_CONFIG.sentryDsn,
     environment: DEPLOYMENT_CONFIG.isProduction ? "production" : "development",
+
   };
 }
 

@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function AdminSecurityPage() {
   const { toast } = useToast();
   const [twoFA, setTwoFA] = useState(true);
@@ -28,6 +29,7 @@ export default function AdminSecurityPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         cache: "no-store",
+
         body: JSON.stringify({ deliveryMethod, target }),
       });
       if (!res.ok) {
@@ -37,6 +39,7 @@ export default function AdminSecurityPage() {
       toast({ title: "MFA", description: "Code sent" });
     } catch (e: any) {
       toast({ title: "MFA", description: e?.message || "Generate failed", variant: "destructive" });
+
     }
   };
 
@@ -47,6 +50,7 @@ export default function AdminSecurityPage() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         cache: "no-store",
+
         body: JSON.stringify({ code }),
       });
       if (!res.ok) {
@@ -56,6 +60,7 @@ export default function AdminSecurityPage() {
       toast({ title: "MFA", description: "Verified" });
     } catch (e: any) {
       toast({ title: "MFA", description: e?.message || "Verify failed", variant: "destructive" });
+
     }
   };
 
@@ -66,6 +71,7 @@ export default function AdminSecurityPage() {
         <p className="text-muted-foreground">
           2FA, login attempts, and audit trails
         </p>
+
       </div>
 
       <Card>
@@ -86,6 +92,7 @@ export default function AdminSecurityPage() {
               <div className="flex gap-2">
                 <Button variant={deliveryMethod === "email" ? "default" : "outline"} onClick={() => setDeliveryMethod("email")}>Email</Button>
                 <Button variant={deliveryMethod === "sms" ? "default" : "outline"} onClick={() => setDeliveryMethod("sms")}>SMS</Button>
+
               </div>
             </div>
             <div className="grid gap-2">
@@ -101,6 +108,7 @@ export default function AdminSecurityPage() {
             </div>
             <div className="flex gap-2">
               <Button onClick={verifyMfa} disabled={!code.trim()}>Verify</Button>
+
             </div>
           </div>
         </CardContent>
@@ -123,6 +131,7 @@ export default function AdminSecurityPage() {
                 </li>
               ),
             )}
+
           </ul>
         </CardContent>
       </Card>
@@ -138,6 +147,7 @@ export default function AdminSecurityPage() {
                 key={idx}
                 className="p-2 border border-border rounded-lg text-sm"
               >
+
                 {l}
               </li>
             ))}

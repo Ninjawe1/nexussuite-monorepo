@@ -1,6 +1,7 @@
 import { AuditLogEntry } from "@/components/audit-log-entry";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ export default function Audit() {
 
   const filteredLogs = auditLogs.filter((log) => {
     const matchesFilter = filter === "all" || log.actionType === filter;
+
     const matchesSearch =
       !searchQuery ||
       log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,6 +46,7 @@ export default function Audit() {
         <p className="text-muted-foreground">
           Complete history of all system actions and changes
         </p>
+
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -54,6 +57,7 @@ export default function Audit() {
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+
             data-testid="input-search-audit"
           />
         </div>
@@ -62,6 +66,7 @@ export default function Audit() {
             className="w-full sm:w-48"
             data-testid="select-action-filter"
           >
+
             <SelectValue placeholder="Filter by action" />
           </SelectTrigger>
           <SelectContent>
@@ -78,11 +83,13 @@ export default function Audit() {
           <CardTitle className="text-lg font-heading">
             Activity History
           </CardTitle>
+
         </CardHeader>
         <CardContent className="space-y-3">
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
+
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
@@ -94,6 +101,7 @@ export default function Audit() {
             </div>
           ) : (
             filteredLogs.map((log) => (
+
               <AuditLogEntry
                 key={log.id}
                 user={log.userName}
@@ -103,6 +111,7 @@ export default function Audit() {
                 oldValue={log.oldValue || undefined}
                 newValue={log.newValue || undefined}
                 actionType={log.actionType as "create" | "update" | "delete"}
+
               />
             ))
           )}

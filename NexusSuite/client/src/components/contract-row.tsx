@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { differenceInDays } from "date-fns";
 import { formatDateSafe, toDateSafe } from "@/lib/date";
 
+
 interface ContractRowProps {
   id: string;
   fileName: string;
@@ -11,6 +12,7 @@ interface ContractRowProps {
   linkedPerson: string;
   expirationDate: unknown;
   status: "active" | "expiring" | "expired";
+
 }
 
 export function ContractRow({
@@ -34,6 +36,7 @@ export function ContractRow({
       derivedStatus = "expiring";
     } else {
       derivedStatus = "active";
+
     }
   }
 
@@ -47,6 +50,7 @@ export function ContractRow({
     Player: "bg-primary text-primary-foreground",
     Staff: "bg-chart-3 text-primary-foreground",
     Sponsor: "bg-accent text-accent-foreground",
+
   };
 
   // Row highlight classes based on derived status
@@ -57,6 +61,7 @@ export function ContractRow({
       return "bg-yellow-50 border-yellow-200 hover:bg-yellow-100";
     }
     return "hover-elevate active-elevate-2";
+
   };
 
   return (
@@ -79,12 +84,14 @@ export function ContractRow({
             <Badge className={`${typeColors[type]} text-xs shrink-0`}>
               {type}
             </Badge>
+
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="truncate">{linkedPerson}</span>
             <span>•</span>
             <span className="shrink-0">
               Expires: {formatDateSafe(expirationDate, "MMM dd, yyyy")}
+
             </span>
             {daysUntilExpiration !== null &&
               daysUntilExpiration > 0 &&
@@ -94,6 +101,7 @@ export function ContractRow({
                   <span className="text-chart-4 shrink-0">
                     {daysUntilExpiration} days left
                   </span>
+
                 </>
               )}
           </div>
@@ -115,6 +123,7 @@ export function ContractRow({
           size="icon"
           data-testid={`button-download-${id}`}
         >
+
           <Download className="w-4 h-4" />
         </Button>
       </div>

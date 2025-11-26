@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -25,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Select,
   SelectContent,
@@ -32,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 
 export function WalletDialog() {
   const { toast } = useToast();
@@ -44,6 +48,7 @@ export function WalletDialog() {
       type: "cash",
       currency: "usd",
       balance: "0",
+
       isDefault: false,
     },
   });
@@ -55,11 +60,13 @@ export function WalletDialog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Wallet created successfully" });
+
       setIsOpen(false);
       form.reset();
     },
     onError: () => {
       toast({ title: "Failed to create wallet", variant: "destructive" });
+
     },
   });
 
@@ -67,6 +74,7 @@ export function WalletDialog() {
     const payload: InsertWallet = {
       ...data,
       balance: data.balance?.toString() || "0",
+
     };
     createWalletMutation.mutate(payload);
   };
@@ -99,6 +107,7 @@ export function WalletDialog() {
                       placeholder="Main Wallet"
                       data-testid="input-wallet-name"
                     />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>

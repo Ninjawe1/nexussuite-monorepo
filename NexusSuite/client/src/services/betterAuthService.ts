@@ -41,6 +41,7 @@ export async function refreshUser() {
 class BetterAuthService {
   private apiUrl = "/api/auth"; // ✅ correct route
 
+
   /**
    * Login with email and password
    */
@@ -52,16 +53,19 @@ class BetterAuthService {
         Accept: "application/json",
       },
       credentials: "include", // Essential for cookie-based sessions
+
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
       let msg = "Login failed";
+
       try {
         const err = await response.json();
         msg = String(err?.message || msg);
       } catch {}
       if (response.status === 401) msg = "Invalid email or password";
+
       throw new Error(msg);
     }
 
@@ -83,16 +87,19 @@ class BetterAuthService {
         Accept: "application/json",
       },
       credentials: "include",
+
       body: JSON.stringify({ email, password, orgName }),
     });
 
     if (!response.ok) {
       let msg = "Registration failed";
+
       try {
         const err = await response.json();
         msg = String(err?.message || msg);
       } catch {}
       if (response.status === 400 && /exist/i.test(msg)) msg = "Email already exists";
+
       throw new Error(msg);
     }
 
@@ -110,6 +117,7 @@ class BetterAuthService {
         headers: { Accept: "application/json" },
         credentials: "include",
         cache: "no-store",
+
       });
 
       if (!response.ok) {
@@ -117,12 +125,14 @@ class BetterAuthService {
           return null; // Not authenticated
         }
         throw new Error("Failed to get current user");
+
       }
 
       const data = await response.json();
       return data.user || data; // Handle both response formats
     } catch (error) {
       console.error("Error getting current user:", error);
+
       return null;
     }
   }
@@ -145,6 +155,7 @@ class BetterAuthService {
       }
     } catch (error) {
       console.error("Error during logout:", error);
+
     }
   }
 
@@ -157,6 +168,7 @@ class BetterAuthService {
         method: "POST",
         headers: { Accept: "application/json" },
         credentials: "include",
+
       });
 
       if (!response.ok) {
@@ -167,6 +179,7 @@ class BetterAuthService {
       return data.user || data;
     } catch (error) {
       console.error("Error refreshing session:", error);
+
       return null;
     }
   }
@@ -187,6 +200,7 @@ class BetterAuthService {
     organizationId: string,
     permission: string,
   ): boolean {
+
     if (!user.permissions) return false;
     const orgPermissions = user.permissions[organizationId] || [];
     return orgPermissions.includes(permission);
@@ -205,6 +219,7 @@ class BetterAuthService {
     return permissions.some((permission) =>
       orgPermissions.includes(permission),
     );
+
   }
 
   /**
@@ -220,6 +235,7 @@ class BetterAuthService {
     return permissions.every((permission) =>
       orgPermissions.includes(permission),
     );
+
   }
 
   /**
@@ -243,6 +259,7 @@ class BetterAuthService {
     return (
       this.hasRole(user, organizationId, "admin") ||
       this.hasRole(user, organizationId, "owner")
+
     );
   }
 

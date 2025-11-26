@@ -59,6 +59,10 @@ export interface IStorage {
   createUser(userData: UpsertUser): Promise<User>;
   updateUser(id: string, userData: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser & { tenantId?: string }): Promise<User>;
+<<<<<<< HEAD
+=======
+  deleteUser(id: string): Promise<void>;
+>>>>>>> e6da67b (feat(repo): initial clean upload)
 
   // Tenant operations
   getTenant(id: string): Promise<Tenant | undefined>;
@@ -205,6 +209,10 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(userData: UpsertUser): Promise<User> {
     const [user] = await db.insert(users).values(userData).returning();
+<<<<<<< HEAD
+=======
+    if (!user) throw new Error("user_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return user;
   }
 
@@ -214,6 +222,10 @@ export class DatabaseStorage implements IStorage {
       .set({ ...userData, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
+<<<<<<< HEAD
+=======
+    if (!user) throw new Error("user_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return user;
   }
 
@@ -245,9 +257,20 @@ export class DatabaseStorage implements IStorage {
         },
       })
       .returning();
+<<<<<<< HEAD
     return user;
   }
 
+=======
+    if (!user) throw new Error("user_upsert_failed");
+    return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+>>>>>>> e6da67b (feat(repo): initial clean upload)
   // Tenant operations
   async getTenant(id: string): Promise<Tenant | undefined> {
     const [tenant] = await db.select().from(tenants).where(eq(tenants.id, id));
@@ -256,6 +279,10 @@ export class DatabaseStorage implements IStorage {
 
   async createTenant(tenantData: InsertTenant): Promise<Tenant> {
     const [tenant] = await db.insert(tenants).values(tenantData).returning();
+<<<<<<< HEAD
+=======
+    if (!tenant) throw new Error("tenant_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return tenant;
   }
 
@@ -265,6 +292,10 @@ export class DatabaseStorage implements IStorage {
       .set({ ...tenantData, updatedAt: new Date() })
       .where(eq(tenants.id, id))
       .returning();
+<<<<<<< HEAD
+=======
+    if (!tenant) throw new Error("tenant_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return tenant;
   }
 
@@ -286,6 +317,10 @@ export class DatabaseStorage implements IStorage {
       ...staffData,
       permissions: staffData.permissions as any,
     }).returning();
+<<<<<<< HEAD
+=======
+    if (!staffMember) throw new Error("staff_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return staffMember;
   }
 
@@ -299,6 +334,10 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(and(eq(staff.id, id), eq(staff.tenantId, tenantId)))
       .returning();
+<<<<<<< HEAD
+=======
+    if (!staffMember) throw new Error("staff_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return staffMember;
   }
 
@@ -320,16 +359,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPayroll(payrollData: InsertPayroll): Promise<Payroll> {
+<<<<<<< HEAD
     const [payrollEntry] = await db.insert(payroll).values(payrollData).returning();
+=======
+    type PDbInsert = typeof payroll.$inferInsert;
+    const normalized: PDbInsert = {
+      ...payrollData,
+      date:
+        typeof payrollData.date === "string"
+          ? new Date(payrollData.date)
+          : payrollData.date,
+    } as PDbInsert;
+    const [payrollEntry] = await db.insert(payroll).values(normalized as any).returning();
+    if (!payrollEntry) throw new Error("payroll_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return payrollEntry;
   }
 
   async updatePayroll(id: string, tenantId: string, payrollData: Partial<InsertPayroll>): Promise<Payroll> {
+<<<<<<< HEAD
     const [payrollEntry] = await db
       .update(payroll)
       .set({ ...payrollData, updatedAt: new Date() })
       .where(and(eq(payroll.id, id), eq(payroll.tenantId, tenantId)))
       .returning();
+=======
+    type PDbInsert = typeof payroll.$inferInsert;
+    const { date, ...rest } = payrollData as any;
+    const normalized: Partial<PDbInsert> = { ...rest, updatedAt: new Date() } as any;
+    if (date !== undefined) {
+      (normalized as any).date = typeof date === "string" ? new Date(date) : (date as Date);
+    } else {
+      delete (normalized as any).date;
+    }
+    const [payrollEntry] = await db
+      .update(payroll)
+      .set(normalized as any)
+      .where(and(eq(payroll.id, id), eq(payroll.tenantId, tenantId)))
+      .returning();
+    if (!payrollEntry) throw new Error("payroll_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return payrollEntry;
   }
 
@@ -352,6 +421,10 @@ export class DatabaseStorage implements IStorage {
 
   async createRoster(rosterData: InsertRoster): Promise<Roster> {
     const [row] = await db.insert(rosters).values(rosterData).returning();
+<<<<<<< HEAD
+=======
+    if (!row) throw new Error("roster_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return row;
   }
 
@@ -361,6 +434,10 @@ export class DatabaseStorage implements IStorage {
       .set({ ...rosterData, updatedAt: new Date() })
       .where(and(eq(rosters.id, id), eq(rosters.tenantId, tenantId)))
       .returning();
+<<<<<<< HEAD
+=======
+    if (!row) throw new Error("roster_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return row;
   }
 
@@ -382,16 +459,54 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTournament(tournamentData: InsertTournament): Promise<Tournament> {
+<<<<<<< HEAD
     const [tournament] = await db.insert(tournaments).values(tournamentData).returning();
+=======
+    type TDbInsert = typeof tournaments.$inferInsert;
+    const normalized: TDbInsert = {
+      ...tournamentData,
+      startDate:
+        typeof (tournamentData as any).startDate === "string"
+          ? new Date((tournamentData as any).startDate)
+          : (tournamentData as any).startDate,
+      endDate:
+        typeof (tournamentData as any).endDate === "string"
+          ? new Date((tournamentData as any).endDate)
+          : (tournamentData as any).endDate,
+    } as TDbInsert;
+    const [tournament] = await db.insert(tournaments).values(normalized as any).returning();
+    if (!tournament) throw new Error("tournament_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return tournament;
   }
 
   async updateTournament(id: string, tenantId: string, tournamentData: Partial<InsertTournament>): Promise<Tournament> {
+<<<<<<< HEAD
     const [tournament] = await db
       .update(tournaments)
       .set({ ...tournamentData, updatedAt: new Date() })
       .where(and(eq(tournaments.id, id), eq(tournaments.tenantId, tenantId)))
       .returning();
+=======
+    const { startDate, endDate, ...rest } = tournamentData as any;
+    const normalized: any = { ...rest, updatedAt: new Date() };
+    if (startDate !== undefined) {
+      normalized.startDate = typeof startDate === "string" ? new Date(startDate) : (startDate as Date);
+    } else {
+      delete normalized.startDate;
+    }
+    if (endDate !== undefined) {
+      normalized.endDate = typeof endDate === "string" ? new Date(endDate) : (endDate as Date);
+    } else {
+      delete normalized.endDate;
+    }
+    const [tournament] = await db
+      .update(tournaments)
+      .set(normalized as any)
+      .where(and(eq(tournaments.id, id), eq(tournaments.tenantId, tenantId)))
+      .returning();
+    if (!tournament) throw new Error("tournament_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return tournament;
   }
 
@@ -421,16 +536,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRound(roundData: InsertTournamentRound): Promise<TournamentRound> {
+<<<<<<< HEAD
     const [round] = await db.insert(tournamentRounds).values(roundData).returning();
+=======
+    type RDbInsert = typeof tournamentRounds.$inferInsert;
+    const normalized: RDbInsert = {
+      ...roundData,
+      startDate:
+        typeof (roundData as any).startDate === "string"
+          ? new Date((roundData as any).startDate)
+          : (roundData as any).startDate,
+    } as RDbInsert;
+    const [round] = await db.insert(tournamentRounds).values(normalized as any).returning();
+    if (!round) throw new Error("round_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return round;
   }
 
   async updateRound(id: string, tournamentId: string, roundData: Partial<InsertTournamentRound>): Promise<TournamentRound> {
+<<<<<<< HEAD
     const [round] = await db
       .update(tournamentRounds)
       .set(roundData)
       .where(and(eq(tournamentRounds.id, id), eq(tournamentRounds.tournamentId, tournamentId)))
       .returning();
+=======
+    const { startDate, ...rest } = roundData as any;
+    const updateData: any = { ...rest };
+    if (startDate !== undefined) {
+      updateData.startDate = typeof startDate === "string" ? new Date(startDate) : (startDate as Date);
+    } else {
+      delete updateData.startDate;
+    }
+    const [round] = await db
+      .update(tournamentRounds)
+      .set(updateData as any)
+      .where(and(eq(tournamentRounds.id, id), eq(tournamentRounds.tournamentId, tournamentId)))
+      .returning();
+    if (!round) throw new Error("round_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return round;
   }
 
@@ -463,16 +607,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMatch(matchData: InsertMatch): Promise<Match> {
+<<<<<<< HEAD
     const [match] = await db.insert(matches).values(matchData).returning();
+=======
+    type MDbInsert = typeof matches.$inferInsert;
+    const normalized: MDbInsert = {
+      ...matchData,
+      date: typeof matchData.date === "string" ? new Date(matchData.date) : matchData.date,
+    } as MDbInsert;
+    const [match] = await db.insert(matches).values(normalized as any).returning();
+    if (!match) throw new Error("match_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return match;
   }
 
   async updateMatch(id: string, tenantId: string, matchData: Partial<InsertMatch>): Promise<Match> {
+<<<<<<< HEAD
     const [match] = await db
       .update(matches)
       .set({ ...matchData, updatedAt: new Date() })
       .where(and(eq(matches.id, id), eq(matches.tenantId, tenantId)))
       .returning();
+=======
+    type MDbInsert = typeof matches.$inferInsert;
+    const { date, ...rest } = matchData as any;
+    const normalized: Partial<MDbInsert> = { ...rest, updatedAt: new Date() } as any;
+    if (date !== undefined) {
+      (normalized as any).date = typeof date === "string" ? new Date(date) : (date as Date);
+    } else {
+      delete (normalized as any).date;
+    }
+    const [match] = await db
+      .update(matches)
+      .set(normalized as any)
+      .where(and(eq(matches.id, id), eq(matches.tenantId, tenantId)))
+      .returning();
+    if (!match) throw new Error("match_update_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return match;
   }
 
@@ -494,14 +665,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCampaign(campaignData: InsertCampaign): Promise<Campaign> {
+<<<<<<< HEAD
     const [campaign] = await db.insert(campaigns).values({
       ...campaignData,
       platforms: campaignData.platforms as any,
     }).returning();
+=======
+    type CgDbInsert = typeof campaigns.$inferInsert;
+    const normalized: CgDbInsert = {
+      ...campaignData,
+      startDate:
+        typeof campaignData.startDate === "string"
+          ? new Date(campaignData.startDate)
+          : campaignData.startDate,
+      endDate:
+        typeof campaignData.endDate === "string"
+          ? new Date(campaignData.endDate)
+          : campaignData.endDate,
+      platforms: campaignData.platforms as any,
+    } as CgDbInsert;
+    const [campaign] = await db.insert(campaigns).values(normalized as any).returning();
+    if (!campaign) throw new Error("campaign_create_failed");
+>>>>>>> e6da67b (feat(repo): initial clean upload)
     return campaign;
   }
 
   async updateCampaign(id: string, tenantId: string, campaignData: Partial<InsertCampaign>): Promise<Campaign> {
+<<<<<<< HEAD
     const updateData: any = { ...campaignData, updatedAt: new Date() };
     if (campaignData.platforms) {
       updateData.platforms = campaignData.platforms as any;
@@ -511,6 +701,20 @@ export class DatabaseStorage implements IStorage {
       .set(updateData)
       .where(and(eq(campaigns.id, id), eq(campaigns.tenantId, tenantId)))
       .returning();
+=======
+    const { startDate, endDate, platforms, ...rest } = campaignData as any;
+    const updateData: any = { ...rest, updatedAt: new Date() };
+    if (platforms !== undefined) updateData.platforms = platforms as any;
+    if (startDate !== undefined)
+      updateData.startDate = typeof startDate === "string" ? new Date(startDate) : (startDate as Date);
+    if (endDate !== undefined)
+      updateData.endDate = typeof endDate === "string" ? new Date(endDate) : (endDate as Date);
+    const [campaign] = await db
+      .update(campaigns)
+      .set(updateData as any)
+      .where(and(eq(campaigns.id, id), eq(campaigns.tenantId, tenantId)))
+      .returning();
+    if (!campaign) throw new Error("campaign_update_failed");
     return campaign;
   }
 
@@ -532,16 +736,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createContract(contractData: InsertContract): Promise<Contract> {
-    const [contract] = await db.insert(contracts).values(contractData).returning();
+    type CDbInsert = typeof contracts.$inferInsert;
+    const normalized: CDbInsert = {
+      ...contractData,
+      expirationDate:
+        typeof contractData.expirationDate === "string"
+          ? new Date(contractData.expirationDate)
+          : contractData.expirationDate,
+    } as CDbInsert;
+    const [contract] = await db.insert(contracts).values(normalized as any).returning();
+    if (!contract) throw new Error("contract_create_failed");
+    
     return contract;
   }
 
   async updateContract(id: string, tenantId: string, contractData: Partial<InsertContract>): Promise<Contract> {
+    type CDbInsert = typeof contracts.$inferInsert;
+    const { expirationDate, ...rest } = contractData as any;
+    const normalized: Partial<CDbInsert> = { ...rest, updatedAt: new Date() } as any;
+    if (expirationDate !== undefined) {
+      (normalized as any).expirationDate =
+        typeof expirationDate === "string"
+          ? new Date(expirationDate)
+          : (expirationDate as Date);
+    } else {
+      delete (normalized as any).expirationDate;
+    }
     const [contract] = await db
       .update(contracts)
-      .set({ ...contractData, updatedAt: new Date() })
+      .set(normalized as any)
       .where(and(eq(contracts.id, id), eq(contracts.tenantId, tenantId)))
       .returning();
+    if (!contract) throw new Error("contract_update_failed");
+    
     return contract;
   }
 
@@ -589,6 +816,7 @@ export class DatabaseStorage implements IStorage {
 
   async createAuditLog(logData: InsertAuditLog): Promise<AuditLog> {
     const [log] = await db.insert(auditLogs).values(logData).returning();
+    if (!log) throw new Error("audit_log_create_failed");
     return log;
   }
 
@@ -603,6 +831,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...tenantData, updatedAt: new Date() })
       .where(eq(tenants.id, id))
       .returning();
+    if (!tenant) throw new Error("tenant_update_failed");
     return tenant;
   }
 
@@ -620,6 +849,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...userData, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
+    if (!user) throw new Error("user_update_failed");
     return user;
   }
   
@@ -630,6 +860,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...stripeData, updatedAt: new Date() })
       .where(eq(tenants.id, id))
       .returning();
+    if (!tenant) throw new Error("tenant_stripe_update_failed");
     return tenant;
   }
 
@@ -653,6 +884,7 @@ export class DatabaseStorage implements IStorage {
       ...inviteData,
       permissions: inviteData.permissions as any,
     }).returning();
+    if (!invite) throw new Error("invite_create_failed");
     return invite;
   }
 
@@ -662,6 +894,7 @@ export class DatabaseStorage implements IStorage {
       .set({ status })
       .where(eq(invites.token, token))
       .returning();
+    if (!invite) throw new Error("invite_update_failed");
     return invite;
   }
 
@@ -688,6 +921,7 @@ export class DatabaseStorage implements IStorage {
 
   async createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount> {
     const [newAccount] = await db.insert(socialAccounts).values(account).returning();
+    if (!newAccount) throw new Error("social_account_create_failed");
     return newAccount;
   }
 
@@ -701,6 +935,7 @@ export class DatabaseStorage implements IStorage {
       .set({ ...account, updatedAt: new Date() })
       .where(and(eq(socialAccounts.id, id), eq(socialAccounts.tenantId, tenantId)))
       .returning();
+    if (!updated) throw new Error("social_account_update_failed");
     return updated;
   }
 
@@ -723,7 +958,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSocialMetric(metric: InsertSocialMetric): Promise<SocialMetric> {
-    const [newMetric] = await db.insert(socialMetrics).values(metric).returning();
+    type SmDbInsert = typeof socialMetrics.$inferInsert;
+    const normalized: SmDbInsert = {
+      ...metric,
+      date: typeof metric.date === "string" ? new Date(metric.date) : metric.date,
+    } as SmDbInsert;
+    const [newMetric] = await db.insert(socialMetrics).values(normalized as any).returning();
+    if (!newMetric) throw new Error("social_metric_create_failed");
+    
     return newMetric;
   }
 
@@ -793,26 +1035,25 @@ export class DatabaseStorage implements IStorage {
           ? new Date(transactionData.date)
           : transactionData.date,
     } as TxDbInsert;
-    const [row] = await db.insert(transactions).values(normalized).returning();
+    const [row] = await db.insert(transactions).values(normalized as any).returning();
     if (!row) throw new Error("transaction_create_failed");
     return row;
   }
 
   async updateTransaction(id: string, tenantId: string, transactionData: Partial<InsertTransaction>): Promise<Transaction> {
     type TxDbInsert = typeof transactions.$inferInsert;
-    const normalized: Partial<TxDbInsert> = {
-      ...transactionData,
-      date:
-        transactionData.date === undefined
-          ? undefined
-          : typeof transactionData.date === "string"
-            ? new Date(transactionData.date)
-            : transactionData.date as Date,
-      updatedAt: new Date(),
-    };
+    const { date, ...rest } = transactionData as any;
+    const normalized: Partial<TxDbInsert> = { ...rest, updatedAt: new Date() } as any;
+    if (date !== undefined) {
+      (normalized as any).date =
+        typeof date === "string" ? new Date(date) : (date as Date);
+    } else {
+      delete (normalized as any).date;
+    }
     const [row] = await db
       .update(transactions)
-      .set(normalized)
+      .set(normalized as any)
+    
       .where(and(eq(transactions.id, id), eq(transactions.tenantId, tenantId)))
       .returning();
     if (!row) throw new Error("transaction_update_failed");

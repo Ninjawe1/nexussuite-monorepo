@@ -24,6 +24,7 @@ export const GAME_OPTIONS = [
   "RENNSPORT",
   "Fatal Fury",
   "Street Fighter",
+
 ] as const;
 
 export type GameOption = (typeof GAME_OPTIONS)[number];
@@ -95,6 +96,7 @@ const LEGACY_GAME_ALIASES: Record<string, GameOption> = {
 
 const CANONICAL_SET = new Set<string>(
   (GAME_OPTIONS as readonly string[]).map((g) => g.toLowerCase()),
+
 );
 
 /**
@@ -106,6 +108,7 @@ const CANONICAL_SET = new Set<string>(
  */
 export function normalizeGameTitle(input: string | null | undefined): string {
   const raw = (input ?? "").trim();
+
   if (raw.length === 0) return raw;
   const lower = raw.toLowerCase();
   // If already a canonical title (case-insensitive), return the canonical cased version
@@ -113,6 +116,7 @@ export function normalizeGameTitle(input: string | null | undefined): string {
     const idx = (GAME_OPTIONS as readonly string[]).findIndex(
       (g) => g.toLowerCase() === lower,
     );
+
     return idx >= 0 ? GAME_OPTIONS[idx] : raw;
   }
   // Map via aliases

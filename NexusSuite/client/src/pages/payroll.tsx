@@ -2,6 +2,7 @@ import { PayrollDialog } from "@/components/payroll-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+
 import {
   Table,
   TableBody,
@@ -19,12 +20,14 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatDateSafe } from "@/lib/date";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import {
   MoreHorizontal,
   DollarSign,
@@ -41,11 +44,13 @@ export default function Payroll() {
   const [selectedPayroll, setSelectedPayroll] = useState<
     PayrollType | undefined
   >();
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: payrollEntries = [], isLoading } = useQuery<PayrollType[]>({
     queryKey: ["/api/payroll"],
+
   });
 
   const deleteMutation = useMutation({
@@ -57,6 +62,7 @@ export default function Payroll() {
       toast({
         title: "Success",
         description: "Payroll entry deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -68,6 +74,7 @@ export default function Payroll() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -75,6 +82,7 @@ export default function Payroll() {
         title: "Error",
         description: error.message || "Failed to delete payroll entry",
         variant: "destructive",
+
       });
     },
   });
@@ -88,6 +96,7 @@ export default function Payroll() {
     .reduce((sum, e) => sum + Number(e.amount), 0);
   const pendingAmount = payrollEntries
     .filter((e) => e.status === "pending")
+
     .reduce((sum, e) => sum + Number(e.amount), 0);
 
   const handleEdit = (payroll: PayrollType) => {
@@ -102,6 +111,7 @@ export default function Payroll() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this payroll entry?")) {
+
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -119,6 +129,7 @@ export default function Payroll() {
           <p className="text-muted-foreground">
             Manage staff salaries and financial transactions
           </p>
+
         </div>
         <div className="flex gap-2">
           <Button variant="outline" data-testid="button-export">
@@ -154,6 +165,7 @@ export default function Payroll() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Total payroll
                 </p>
+
               </>
             )}
           </CardContent>
@@ -164,6 +176,7 @@ export default function Payroll() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Paid
             </CardTitle>
+
             <TrendingUp className="h-4 w-4 text-chart-2" />
           </CardHeader>
           <CardContent>
@@ -177,6 +190,7 @@ export default function Payroll() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {payrollEntries.filter((e) => e.status === "paid").length}{" "}
                   transactions
+
                 </p>
               </>
             )}
@@ -188,6 +202,7 @@ export default function Payroll() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending
             </CardTitle>
+
             <TrendingDown className="h-4 w-4 text-chart-4" />
           </CardHeader>
           <CardContent>
@@ -201,6 +216,7 @@ export default function Payroll() {
                 <p className="text-xs text-muted-foreground mt-1">
                   {payrollEntries.filter((e) => e.status === "pending").length}{" "}
                   transactions
+
                 </p>
               </>
             )}
@@ -213,11 +229,13 @@ export default function Payroll() {
           <CardTitle className="text-lg font-heading">
             Payment History
           </CardTitle>
+
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map((i) => (
+
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
@@ -240,6 +258,7 @@ export default function Payroll() {
               </TableHeader>
               <TableBody>
                 {payrollEntries.map((entry) => (
+
                   <TableRow
                     key={entry.id}
                     className="hover-elevate"
@@ -258,6 +277,7 @@ export default function Payroll() {
                       >
                         {entry.type.charAt(0).toUpperCase() +
                           entry.type.slice(1)}
+
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono font-semibold">
@@ -265,6 +285,7 @@ export default function Payroll() {
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {formatDateSafe(entry.date, "MMM dd, yyyy")}
+
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -276,6 +297,7 @@ export default function Payroll() {
                       >
                         {entry.status.charAt(0).toUpperCase() +
                           entry.status.slice(1)}
+
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -321,6 +343,7 @@ export default function Payroll() {
         onOpenChange={setDialogOpen}
         payroll={selectedPayroll}
       />
+
     </div>
   );
 }

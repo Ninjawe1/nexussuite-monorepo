@@ -53,11 +53,13 @@ const PaginationLink = ({
         size,
       }),
       className,
+
     )}
     {...props}
   />
 );
 PaginationLink.displayName = "PaginationLink";
+
 
 const PaginationPrevious = ({
   className,
@@ -67,6 +69,7 @@ const PaginationPrevious = ({
     aria-label="Go to previous page"
     size="default"
     className={tweakcn("gap-1 pl-2.5", className)}
+
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
@@ -83,6 +86,7 @@ const PaginationNext = ({
     aria-label="Go to next page"
     size="default"
     className={tweakcn("gap-1 pr-2.5", className)}
+
     {...props}
   >
     <span>Next</span>
@@ -98,6 +102,7 @@ const PaginationEllipsis = ({
   <span
     aria-hidden
     className={tweakcn("flex h-9 w-9 items-center justify-center", className)}
+
     {...props}
   >
     <MoreHorizontal className="h-4 w-4" />
@@ -105,6 +110,7 @@ const PaginationEllipsis = ({
   </span>
 );
 PaginationEllipsis.displayName = "PaginationEllipsis";
+
 
 export {
   Pagination,

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   Form,
   FormControl,
@@ -27,6 +28,7 @@ import { Link } from "wouter";
 
 const forgotSchema = z.object({
   email: z.string().email("Invalid email address"),
+
 });
 
 type ForgotForm = z.infer<typeof forgotSchema>;
@@ -42,6 +44,7 @@ export default function ForgotPassword() {
 
   useEffect(() => {
     const t = setTimeout(() => form.setFocus("email"), 50);
+
     return () => clearTimeout(t);
   }, [form]);
 
@@ -49,6 +52,7 @@ export default function ForgotPassword() {
     try {
       setIsLoading(true);
       const res = await apiRequest("/api/auth/forgot-password", "POST", {
+
         email: data.email,
       });
       // If no throw, treat as success
@@ -56,6 +60,7 @@ export default function ForgotPassword() {
         toast({
           title: "Password reset link sent",
           description: "Password reset link sent to your email",
+
         });
       } else {
         const json = await res.json().catch(() => null);
@@ -73,6 +78,7 @@ export default function ForgotPassword() {
         title: "Reset request failed",
         description: message,
         variant: "destructive",
+
       });
     } finally {
       setIsLoading(false);
@@ -81,6 +87,7 @@ export default function ForgotPassword() {
 
   function onInvalid(errors: FieldErrors<ForgotForm>) {
     if (errors.email) form.setFocus("email");
+
   }
 
   return (
@@ -101,6 +108,7 @@ export default function ForgotPassword() {
                 className="grid gap-6"
                 onSubmit={form.handleSubmit(onSubmit, onInvalid)}
               >
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -141,6 +149,7 @@ export default function ForgotPassword() {
                   <span className="text-muted-foreground">
                     Remembered your password?{" "}
                   </span>
+
                   <Link href="/login">
                     <span className="underline underline-offset-4 cursor-pointer text-primary">
                       Back to login

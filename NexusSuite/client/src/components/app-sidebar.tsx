@@ -58,6 +58,7 @@ const adminMenuItems = [
   { title: "Roles", url: "/admin/roles", icon: UserCog },
   { title: "Marketing", url: "/admin/marketing", icon: Wallet },
   { title: "Reports", url: "/admin/reports", icon: FileText },
+
 ];
 
 export function AppSidebar() {
@@ -66,6 +67,7 @@ export function AppSidebar() {
   const { currentMembership } = useOrganization();
   const menuItems = user?.isSuperAdmin ? adminMenuItems : clubMenuItems;
   let baseNavItems = menuItems.map((item) => ({
+
     ...item,
     isActive: location === item.url,
   }));
@@ -98,6 +100,7 @@ export function AppSidebar() {
         url: "/dashboard/org/billing",
         icon: DollarSign,
         isActive: location === "/dashboard/org/billing",
+
       },
     ],
   };
@@ -105,6 +108,7 @@ export function AppSidebar() {
   const navItems = canSeeOrgSection
     ? [orgSection, ...baseNavItems]
     : baseNavItems;
+
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -128,6 +132,7 @@ export function AppSidebar() {
               (user?.email ? user.email.split("@")[0] : "User"),
             email: user?.email ?? "",
             avatar: (user as any)?.profileImageUrl ?? "",
+
           }}
         />
       </SidebarFooter>

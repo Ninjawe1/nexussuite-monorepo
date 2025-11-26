@@ -1,11 +1,7 @@
-function getCookie(req: any, name: string): string | null {
+function extractToken(req: any): string | null {
   const h = req.headers?.cookie || ""
-  const parts = h.split(/;\s*/)
-  for (const p of parts) {
-    const [k, v] = p.split("=")
-    if (k === name) return v || ""
-  }
-  return null
+  const m = h.match(/(?:better_auth_session|better-auth\.session|authToken)=([^;]+)/)
+  return m ? m[1] : null
 }
 
 export default function handler(req: any, res: any) {
@@ -14,7 +10,7 @@ export default function handler(req: any, res: any) {
     return
   }
 
-  const sess = getCookie(req, "session")
+  const sess = extractToken(req)
   if (!sess) {
     res.status(401).json({ message: "Unauthorized" })
     return
@@ -23,5 +19,5 @@ export default function handler(req: any, res: any) {
   const tokenStr = Buffer.from(sess, "base64").toString("utf8")
   const email = tokenStr.split(":")[0] || "user@example.com"
   const user = { id: email, email, name: String(email).split("@")[0] }
-  res.status(200).json(user)
+  res.status(200).json({ success: true, user })
 }

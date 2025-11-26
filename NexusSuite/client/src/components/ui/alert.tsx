@@ -17,6 +17,7 @@ const alertVariants = cva(
       variant: "default",
     },
   },
+
 );
 
 const Alert = React.forwardRef<
@@ -47,6 +48,7 @@ const AlertTitle = React.forwardRef<
 ));
 AlertTitle.displayName = "AlertTitle";
 
+
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -58,5 +60,6 @@ const AlertDescription = React.forwardRef<
   />
 ));
 AlertDescription.displayName = "AlertDescription";
+
 
 export { Alert, AlertTitle, AlertDescription };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormField,
@@ -18,6 +20,7 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -27,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import type { Staff } from "@shared/schema";
 import { TEAM_ROLES } from "@/constants/teamRoles";
+
 
 interface PlayerRoleEditDialogProps {
   open: boolean;
@@ -44,6 +48,7 @@ const roleEnumValues = TEAM_ROLES.map((r) => r.value) as [
 
 const schema = z.object({
   role: z.enum(roleEnumValues).default("Player"),
+
 });
 
 export function PlayerRoleEditDialog({
@@ -52,6 +57,7 @@ export function PlayerRoleEditDialog({
   player,
   rosterName,
   currentRole = "Player",
+
   onSubmit,
 }: PlayerRoleEditDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
@@ -59,6 +65,7 @@ export function PlayerRoleEditDialog({
     resolver: zodResolver(schema),
     defaultValues: { role: (currentRole as any) || "Player" },
     values: { role: (currentRole as any) || "Player" },
+
   });
 
   const handleSubmit = async (values: z.infer<typeof schema>) => {
@@ -77,6 +84,7 @@ export function PlayerRoleEditDialog({
             {player
               ? `Update ${player.name}'s role${rosterName ? ` for ${rosterName}` : ""}`
               : "Update player role"}
+
           </DialogDescription>
         </DialogHeader>
 
@@ -85,6 +93,7 @@ export function PlayerRoleEditDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
+
             <FormField
               control={form.control}
               name="role"
@@ -99,6 +108,7 @@ export function PlayerRoleEditDialog({
                     </FormControl>
                     <SelectContent>
                       {TEAM_ROLES.map((r) => (
+
                         <SelectItem key={r.value} value={r.value}>
                           {r.label}
                         </SelectItem>
@@ -115,6 +125,7 @@ export function PlayerRoleEditDialog({
               <span className="text-xs text-muted-foreground">Preview:</span>
               <span className="px-2 py-0.5 rounded border border-orange-500 bg-orange-500/10 text-orange-400 transition-colors">
                 {form.getValues("role")}
+
               </span>
             </div>
 
@@ -128,6 +139,7 @@ export function PlayerRoleEditDialog({
               </Button>
               <Button type="submit" disabled={isSaving}>
                 {isSaving ? "Saving..." : "Save"}
+
               </Button>
             </div>
           </form>

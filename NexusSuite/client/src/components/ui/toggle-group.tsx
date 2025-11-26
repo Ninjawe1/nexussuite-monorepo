@@ -12,6 +12,7 @@ const ToggleGroupContext = React.createContext<
 >({
   size: "default",
   variant: "default",
+
 });
 
 const ToggleGroup = React.forwardRef<
@@ -27,6 +28,7 @@ const ToggleGroup = React.forwardRef<
     <ToggleGroupContext.Provider value={{ variant, size }}>
       {children}
     </ToggleGroupContext.Provider>
+
   </ToggleGroupPrimitive.Root>
 ));
 
@@ -48,6 +50,7 @@ const ToggleGroupItem = React.forwardRef<
           size: context.size || size,
         }),
         className,
+
       )}
       {...props}
     >

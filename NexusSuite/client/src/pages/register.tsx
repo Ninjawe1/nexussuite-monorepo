@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   Card,
   CardContent,
@@ -19,6 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Mail, Lock, User, Eye, EyeOff, Building } from "lucide-react";
+
 
 // Validation schema
 const registerSchema = z
@@ -42,6 +44,7 @@ const registerSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
+
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -67,6 +70,7 @@ export function Register() {
       password: "",
       confirmPassword: "",
       organizationName: "",
+
       acceptTerms: false,
     },
   });
@@ -93,6 +97,7 @@ export function Register() {
         setFormError("password", { message: errorMessage });
       } else if (errorMessage.toLowerCase().includes("organization")) {
         setFormError("organizationName", { message: errorMessage });
+
       }
     }
   };
@@ -112,6 +117,7 @@ export function Register() {
             <CardTitle className="text-2xl text-center">
               Create your account
             </CardTitle>
+
             <CardDescription className="text-center">
               Get started with NexusSuite today
             </CardDescription>
@@ -131,6 +137,7 @@ export function Register() {
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...register("name")}
+
                     id="name"
                     type="text"
                     placeholder="John Doe"
@@ -143,6 +150,7 @@ export function Register() {
                     {errors.name.message}
                   </p>
                 )}
+
               </div>
 
               <div className="space-y-2">
@@ -151,6 +159,7 @@ export function Register() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...register("email")}
+
                     id="email"
                     type="email"
                     placeholder="you@example.com"
@@ -163,6 +172,7 @@ export function Register() {
                     {errors.email.message}
                   </p>
                 )}
+
               </div>
 
               <div className="space-y-2">
@@ -173,6 +183,7 @@ export function Register() {
                     {...register("password")}
                     id="password"
                     type={showPassword ? "text" : "password"}
+
                     placeholder="Create a strong password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -193,6 +204,7 @@ export function Register() {
                   <p className="text-sm text-destructive">
                     {errors.password.message}
                   </p>
+
                 )}
               </div>
 
@@ -204,6 +216,7 @@ export function Register() {
                     {...register("confirmPassword")}
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
+
                     placeholder="Confirm your password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -224,6 +237,7 @@ export function Register() {
                   <p className="text-sm text-destructive">
                     {errors.confirmPassword.message}
                   </p>
+
                 )}
               </div>
 
@@ -233,6 +247,7 @@ export function Register() {
                   <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...register("organizationName")}
+
                     id="organizationName"
                     type="text"
                     placeholder="Your Company Inc."
@@ -244,6 +259,7 @@ export function Register() {
                   <p className="text-sm text-destructive">
                     {errors.organizationName.message}
                   </p>
+
                 )}
               </div>
 
@@ -256,6 +272,7 @@ export function Register() {
                       id="acceptTerms"
                       checked={!!field.value}
                       onCheckedChange={(checked) => field.onChange(!!checked)}
+
                       disabled={isLoading}
                     />
                   )}
@@ -273,6 +290,7 @@ export function Register() {
                 <p className="text-sm text-destructive">
                   {errors.acceptTerms.message}
                 </p>
+
               )}
             </CardContent>
 
@@ -285,6 +303,7 @@ export function Register() {
                   </>
                 ) : (
                   "Create Account"
+
                 )}
               </Button>
 
@@ -296,6 +315,7 @@ export function Register() {
                   variant="link"
                   size="sm"
                   onClick={() => setLocation("/login")}
+
                   className="text-sm p-0 h-auto"
                   disabled={isLoading}
                 >
@@ -312,6 +332,7 @@ export function Register() {
             By registering, you'll create both a user account and your first
             organization
           </p>
+
         </div>
       </div>
     </div>

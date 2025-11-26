@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { useQuery } from "@tanstack/react-query";
+
 import type {
   Staff as StaffType,
   Payroll as PayrollType,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { DashboardLineChart } from "@/components/ui/chart";
 import { toDateSafe, formatDateSafe } from "@/lib/date";
+
 
 // Simple loading fallback used while auth/org context resolves
 function LoadingScreen() {
@@ -81,6 +83,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
   });
   const { data: auditLogs = [] } = useQuery<AuditLogType[]>({
     queryKey: ["/api/audit-logs"],
+
     enabled: !!currentOrganization?.id,
   });
 
@@ -95,6 +98,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
   const activeContracts = contracts.filter((c) => {
     const exp = toDateSafe((c as any).expirationDate);
     const isActiveStatus = (c as any).status === "active";
+
     return isActiveStatus && (!exp || exp.getTime() > Date.now());
   }).length;
 
@@ -120,11 +124,13 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
   const activeCampaigns = campaigns
     .filter((c) => (c as any).status === "active")
     .slice(0, 3);
+
   const recentLogs = auditLogs.slice(0, 5);
 
   // Live analytics (win rate) with fallback mock
   const { data: liveAnalytics } = useQuery<any>({
     queryKey: ["/api/analytics"],
+
     enabled: !!currentOrganization?.id,
   });
   const winRate = (liveAnalytics?.winRate as number | undefined) ?? 68;
@@ -152,6 +158,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
         <StatCard title="Rosters" value={rosterCount} icon={ClipboardList} subtitle="Active rosters" />
         <StatCard title="Tournaments" value={tournaments.length} icon={Trophy} subtitle="Tracked tournaments" />
         <StatCard title="Win Rate" value={`${winRate}%`} icon={Trophy} subtitle="Recent performance" valueClassName="text-chart-2" />
+
       </div>
 
       {/* Finance + Team KPIs */}
@@ -159,6 +166,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
         <StatCard title="Team Members" value={teamMembers} icon={Users} subtitle="All staff" />
         <StatCard title="Payroll Total" value={`$${payrollTotal.toLocaleString()}`} icon={Wallet} subtitle="Latest period" />
         <StatCard title="Active Contracts" value={activeContracts} icon={CreditCard} subtitle="Valid today" />
+
       </div>
 
       {/* Small trend graph */}
@@ -174,6 +182,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
             data={trendData}
             xKey="date"
             series={[{ key: "value", label: "Amount", colorToken: "hsl(var(--chart-2))" }]}
+
             height={160}
           />
         </CardContent>
@@ -190,6 +199,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
               <p className="text-sm text-muted-foreground">No upcoming matches</p>
             ) : (
               upcomingMatches.map((m) => (
+
                 <div key={m.id} className="flex items-center justify-between rounded-md border p-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">
@@ -197,6 +207,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {formatDateSafe((m as any).date, "MMM dd, HH:mm", "—")} • {(m as any).tournament || (m as any).game}
+
                     </p>
                   </div>
                 </div>
@@ -204,6 +215,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
             )}
             <div className="flex justify-end">
               <Button variant="outline" size="sm" onClick={() => (window.location.href = "/matches")}>View all matches</Button>
+
             </div>
           </CardContent>
         </Card>
@@ -224,6 +236,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       {formatDateSafe((log as any).timestamp, "MMM dd, HH:mm", "—")}
+
                     </p>
                   </div>
                 </div>
@@ -231,6 +244,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
             )}
             <div className="flex justify-end">
               <Button variant="outline" size="sm" onClick={() => (window.location.href = "/audit-log")}>View all</Button>
+
             </div>
           </CardContent>
         </Card>
@@ -246,6 +260,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
             <p className="text-sm text-muted-foreground">No active campaigns</p>
           ) : (
             activeCampaigns.map((c) => (
+
               <CampaignCard
                 key={c.id}
                 id={c.id}
@@ -270,6 +285,7 @@ function DashboardContent({ user, currentOrganization }: DashboardContentProps) 
         <Button variant="outline" onClick={() => (window.location.href = "/tournaments")}>Manage Tournaments</Button>
         <Button variant="outline" onClick={() => (window.location.href = "/rosters")}>Manage Rosters</Button>
         <Button variant="outline" onClick={() => (window.location.href = "/team")}>Team Management</Button>
+
       </div>
     </div>
   );

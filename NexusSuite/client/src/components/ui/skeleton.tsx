@@ -10,6 +10,7 @@ function Skeleton({
       {...props}
     />
   );
+
 }
 
 export { Skeleton };

@@ -23,6 +23,7 @@ export default function AdminMarketingPage() {
   const saveBanner = () =>
     toast({ title: "Banner", description: `Saved '${bannerTitle}' (demo)` });
 
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -30,6 +31,7 @@ export default function AdminMarketingPage() {
         <p className="text-muted-foreground">
           Affiliates, banners, and campaigns
         </p>
+
       </div>
 
       <Card>
@@ -45,12 +47,14 @@ export default function AdminMarketingPage() {
               value={affiliateCode}
               onChange={(e) => setAffiliateCode(e.target.value)}
             />
+
             <Button onClick={saveAffiliate}>Save</Button>
           </div>
           <ul className="mt-3 space-y-2">
             {[
               { user: "alice@example.com", referrals: 11, commission: 44.2 },
               { user: "bob@example.com", referrals: 7, commission: 28.1 },
+
             ].map((r, idx) => (
               <li
                 key={idx}
@@ -77,6 +81,7 @@ export default function AdminMarketingPage() {
               value={bannerTitle}
               onChange={(e) => setBannerTitle(e.target.value)}
             />
+
             <Button onClick={saveBanner}>Save</Button>
           </div>
         </CardContent>
@@ -91,6 +96,7 @@ export default function AdminMarketingPage() {
             {[
               { campaign: "Fall Promo", clicks: 1200, signups: 80 },
               { campaign: "Black Friday", clicks: 3400, signups: 270 },
+
             ].map((c, idx) => (
               <li
                 key={idx}

@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import {
   Dialog,
   DialogContent,
@@ -38,6 +40,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
+
 interface OrganizationSelectorProps {
   className?: string;
   showCreateButton?: boolean;
@@ -46,6 +49,7 @@ interface OrganizationSelectorProps {
 
 export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
   className = "",
+
   showCreateButton = true,
   showSettings = true,
 }) => {
@@ -65,6 +69,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
   const [newOrgSlug, setNewOrgSlug] = useState("");
+
   const [isCreating, setIsCreating] = useState(false);
 
   /**
@@ -91,6 +96,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         title: "Organization name required",
         description: "Please enter a name for your organization",
         variant: "destructive",
+
       });
       return;
     }
@@ -110,6 +116,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
       toast({
         title: "Organization created",
         description: "Your new organization has been created successfully",
+
       });
     } catch (error) {
       // Error handling is done in the context
@@ -126,6 +133,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
+
       .substring(0, 50);
   };
 
@@ -148,6 +156,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         <span className="text-sm text-muted-foreground">
           Loading organizations...
         </span>
+
       </div>
     );
   }
@@ -161,6 +170,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
         <span className="text-sm text-destructive">
           No organization selected
         </span>
+
       </div>
     );
   }
@@ -179,6 +189,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
               <span className="text-sm font-medium truncate">
                 {currentOrganization.name}
               </span>
+
               {currentMembership && (
                 <Badge variant="outline" className="text-xs">
                   {currentMembership.role}
@@ -198,6 +209,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
           <DropdownMenuSeparator />
 
           {organizations.map((org) => {
+
             const isCurrent = org.id === currentOrganization.id;
             return (
               <DropdownMenuItem
@@ -224,6 +236,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                 {isCurrent && (
                   <div className="w-2 h-2 rounded-full bg-primary" />
                 )}
+
               </DropdownMenuItem>
             );
           })}
@@ -279,6 +292,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
               <DialogDescription>
                 Create a new organization to collaborate with your team. You'll
                 be the owner of this organization.
+
               </DialogDescription>
             </DialogHeader>
 
@@ -289,6 +303,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                   id="org-name"
                   value={newOrgName}
                   onChange={(e) => handleNameChange(e.target.value)}
+
                   placeholder="Acme Corporation"
                   required
                   disabled={isCreating}
@@ -305,6 +320,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                     id="org-slug"
                     value={newOrgSlug}
                     onChange={(e) => setNewOrgSlug(e.target.value)}
+
                     placeholder="acme-corp"
                     pattern="[a-z0-9-]+"
                     disabled={isCreating}
@@ -313,6 +329,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                 <p className="text-xs text-muted-foreground">
                   Used in URLs and must be unique. Leave blank to auto-generate
                   from name.
+
                 </p>
               </div>
             </div>
@@ -334,6 +351,7 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
                   </>
                 ) : (
                   "Create Organization"
+
                 )}
               </Button>
             </DialogFooter>

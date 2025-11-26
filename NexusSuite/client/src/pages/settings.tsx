@@ -23,6 +23,7 @@ import {
   Rocket,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Select,
   SelectContent,
@@ -44,6 +46,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { Users, Building, CreditCard, Settings as SettingsIcon } from "lucide-react";
 import { formatDateSafe } from "@/lib/date";
+
 
 function InviteManagement() {
   const { toast } = useToast();
@@ -79,6 +82,7 @@ function InviteManagement() {
         title: "Error",
         description: "Failed to create invite",
         variant: "destructive",
+
       });
     },
   });
@@ -96,6 +100,7 @@ function InviteManagement() {
         title: "Error",
         description: "Failed to delete invite",
         variant: "destructive",
+
       });
     },
   });
@@ -106,6 +111,7 @@ function InviteManagement() {
     setCopiedToken(token);
     toast({ title: "Copied!", description: "Invite link copied to clipboard" });
     setTimeout(() => setCopiedToken(""), 2000);
+
   };
 
   const handleCreateInvite = () => {
@@ -114,6 +120,7 @@ function InviteManagement() {
         title: "Error",
         description: "Email is required",
         variant: "destructive",
+
       });
       return;
     }
@@ -126,6 +133,7 @@ function InviteManagement() {
     window.addEventListener("openInviteDialog", handler as EventListener);
     return () => {
       window.removeEventListener("openInviteDialog", handler as EventListener);
+
     };
   }, []);
 
@@ -140,6 +148,7 @@ function InviteManagement() {
             <CardDescription>
               Invite team members to join your club
             </CardDescription>
+
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -161,6 +170,7 @@ function InviteManagement() {
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+
                     placeholder="staff@example.com"
                     type="email"
                     data-testid="input-invite-email"
@@ -192,6 +202,7 @@ function InviteManagement() {
                   {createInviteMutation.isPending
                     ? "Creating..."
                     : "Create Invite"}
+
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -206,6 +217,7 @@ function InviteManagement() {
         ) : (
           <div className="space-y-3">
             {invites.map((invite) => (
+
               <div
                 key={invite.id}
                 className="flex items-center justify-between p-4 rounded-lg border"
@@ -225,6 +237,7 @@ function InviteManagement() {
                     <span className="text-xs text-muted-foreground">
                       Expires:{" "}
                       {formatDateSafe(invite.expiresAt, "MMM dd, yyyy", "—")}
+
                     </span>
                   </div>
                 </div>
@@ -263,6 +276,7 @@ function SubscriptionManagement() {
   const { toast } = useToast();
   const { data: tenant, isLoading } = useQuery<Tenant>({
     queryKey: ["/api/tenant"],
+
   });
 
   const upgradeMutation = useMutation({
@@ -272,6 +286,7 @@ function SubscriptionManagement() {
         "POST",
         { plan },
       );
+
       return response;
     },
     onSuccess: (data: { url: string }) => {
@@ -282,6 +297,7 @@ function SubscriptionManagement() {
         title: "Error",
         description: "Failed to start checkout",
         variant: "destructive",
+
       });
     },
   });
@@ -293,6 +309,7 @@ function SubscriptionManagement() {
         "POST",
         {},
       );
+
       return response;
     },
     onSuccess: (data: { url: string }) => {
@@ -303,6 +320,7 @@ function SubscriptionManagement() {
         title: "Error",
         description: "Failed to open billing portal",
         variant: "destructive",
+
       });
     },
   });
@@ -345,12 +363,14 @@ function SubscriptionManagement() {
         "Unlimited storage",
         "Full social media suite",
         "API access",
+
       ],
     },
   ];
 
   const currentPlan = tenant?.subscriptionPlan || "starter";
   const subscriptionStatus = tenant?.subscriptionStatus || "active";
+
 
   return (
     <Card>
@@ -363,6 +383,7 @@ function SubscriptionManagement() {
             <CardDescription>
               Manage your subscription and billing
             </CardDescription>
+
           </div>
           {tenant?.stripeCustomerId && (
             <Button
@@ -372,6 +393,7 @@ function SubscriptionManagement() {
               data-testid="button-billing-portal"
             >
               {portalMutation.isPending ? "Loading..." : "Manage Billing"}
+
             </Button>
           )}
         </div>
@@ -394,6 +416,7 @@ function SubscriptionManagement() {
               </Badge>
               <span className="text-sm text-muted-foreground">
                 Current plan:{" "}
+
                 <span className="font-semibold text-foreground">
                   {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
                 </span>
@@ -402,6 +425,7 @@ function SubscriptionManagement() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {plans.map((plan) => {
+
                 const Icon = plan.icon;
                 const isCurrentPlan = currentPlan === plan.value;
 
@@ -412,6 +436,7 @@ function SubscriptionManagement() {
                       isCurrentPlan
                         ? "border-primary bg-primary/5"
                         : "border-border"
+
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-3">
@@ -419,6 +444,7 @@ function SubscriptionManagement() {
                       <h3 className="font-heading font-semibold">
                         {plan.name}
                       </h3>
+
                     </div>
                     <div className="mb-4">
                       <span className="text-3xl font-bold">{plan.price}</span>
@@ -438,6 +464,7 @@ function SubscriptionManagement() {
                     <Button
                       className="w-full"
                       variant={isCurrentPlan ? "outline" : "default"}
+
                       disabled={isCurrentPlan || upgradeMutation.isPending}
                       onClick={() => upgradeMutation.mutate(plan.value)}
                       data-testid={`button-upgrade-${plan.value}`}
@@ -447,6 +474,7 @@ function SubscriptionManagement() {
                         : upgradeMutation.isPending
                           ? "Loading..."
                           : "Upgrade"}
+
                     </Button>
                   </div>
                 );
@@ -474,6 +502,7 @@ export default function Settings() {
 
   const { data: tenant, isLoading } = useQuery<Tenant>({
     queryKey: ["/api/tenant"],
+
   });
 
   useEffect(() => {
@@ -484,6 +513,7 @@ export default function Settings() {
       setRegion(tenant.region || "");
       setPrimaryColor(tenant.primaryColor || "#a855f7");
       setLogoUrl(tenant.logoUrl || "");
+
     }
   }, [tenant]);
 
@@ -504,6 +534,7 @@ export default function Settings() {
           toast({
             title: "Success",
             description: "Your subscription has been updated!",
+
           });
         })
         .catch((error: Error) => {
@@ -515,6 +546,7 @@ export default function Settings() {
               error.message ||
               "Failed to sync subscription. Please contact support.",
             variant: "destructive",
+
           });
         });
     }
@@ -529,6 +561,7 @@ export default function Settings() {
       toast({
         title: "Success",
         description: "Settings updated successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -540,6 +573,7 @@ export default function Settings() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -547,6 +581,7 @@ export default function Settings() {
         title: "Error",
         description: error.message || "Failed to update settings",
         variant: "destructive",
+
       });
     },
   });
@@ -579,6 +614,7 @@ export default function Settings() {
         <p className="text-muted-foreground">
           Customize your club's branding and preferences
         </p>
+
       </div>
 
       {/* Organization Settings section header */}
@@ -587,6 +623,7 @@ export default function Settings() {
           className="text-2xl font-heading font-bold"
           data-testid="organization-settings-section"
         >
+
           Organization Settings
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -603,6 +640,7 @@ export default function Settings() {
             <CardDescription>
               Upload your club logo and customize colors
             </CardDescription>
+
           </CardHeader>
           <CardContent className="space-y-6">
             {isLoading ? (
@@ -626,6 +664,7 @@ export default function Settings() {
                       ) : (
                         <span className="text-primary-foreground font-heading font-bold text-3xl">
                           {clubTag?.charAt(0) || "N"}
+
                         </span>
                       )}
                     </div>
@@ -635,6 +674,7 @@ export default function Settings() {
                         placeholder="https://example.com/logo.png"
                         value={logoUrl}
                         onChange={(e) => setLogoUrl(e.target.value)}
+
                         data-testid="input-logo-url"
                       />
                     </div>
@@ -662,6 +702,7 @@ export default function Settings() {
                     <span className="font-mono text-sm text-muted-foreground">
                       {primaryColor}
                     </span>
+
                   </div>
                 </div>
 
@@ -674,6 +715,7 @@ export default function Settings() {
                   {updateMutation.isPending
                     ? "Saving..."
                     : "Save Branding Changes"}
+
                 </Button>
               </>
             )}
@@ -688,6 +730,7 @@ export default function Settings() {
             <CardDescription>
               Update your club's basic information
             </CardDescription>
+
           </CardHeader>
           <CardContent className="space-y-4">
             {isLoading ? (
@@ -705,6 +748,7 @@ export default function Settings() {
                     id="club-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+
                     data-testid="input-club-name"
                   />
                 </div>
@@ -715,6 +759,7 @@ export default function Settings() {
                     id="club-tag"
                     value={clubTag}
                     onChange={(e) => setClubTag(e.target.value)}
+
                     maxLength={5}
                     data-testid="input-club-tag"
                   />
@@ -727,6 +772,7 @@ export default function Settings() {
                     type="url"
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
+
                     placeholder="https://nexus.gg"
                     data-testid="input-club-website"
                   />
@@ -738,6 +784,7 @@ export default function Settings() {
                     id="club-region"
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
+
                     data-testid="input-club-region"
                   />
                 </div>
@@ -749,6 +796,7 @@ export default function Settings() {
                   data-testid="button-save-info"
                 >
                   {updateMutation.isPending ? "Saving..." : "Save Information"}
+
                 </Button>
               </>
             )}
@@ -772,6 +820,7 @@ export default function Settings() {
             <p className="text-muted-foreground">
               Here's what's happening with your organization.
             </p>
+
           </div>
           <div className="flex items-center gap-2">
             {user?.role && <Badge variant="outline">{user.role}</Badge>}
@@ -792,6 +841,7 @@ export default function Settings() {
               {currentOrganization
                 ? `You are currently working with ${currentOrganization.name}`
                 : "No organization selected. Please select or create an organization."}
+
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -805,6 +855,7 @@ export default function Settings() {
                   <span className="text-sm font-medium">Your Role:</span>
                   <Badge variant="outline">
                     {user?.organizationRoles?.[currentOrganization.id] || "N/A"}
+
                   </Badge>
                 </div>
                 {currentOrganization.plan && (
@@ -819,6 +870,7 @@ export default function Settings() {
                 <p className="text-muted-foreground mb-4">
                   You don't have any organizations yet.
                 </p>
+
                 <Button>Create Your First Organization</Button>
               </div>
             )}
@@ -832,6 +884,7 @@ export default function Settings() {
               <CardTitle className="text-sm font-medium">
                 Organization Settings
               </CardTitle>
+
               <SettingsIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -851,6 +904,7 @@ export default function Settings() {
               <div className="text-2xl font-bold">
                 {currentOrganization?.plan || "Free"}
               </div>
+
               <p className="text-xs text-muted-foreground">Current plan</p>
             </CardContent>
           </Card>
@@ -864,6 +918,7 @@ export default function Settings() {
               <div className="text-2xl font-bold">
                 {currentOrganization?.memberCount || 0}
               </div>
+
               <p className="text-xs text-muted-foreground">Active members</p>
             </CardContent>
           </Card>
@@ -882,11 +937,13 @@ export default function Settings() {
                   onClick={() => {
                     // Dispatch a custom event to open the Invite dialog managed by InviteManagement
                     window.dispatchEvent(new Event("openInviteDialog"));
+
                   }}
                 >
                   Invite Team Member
                 </Button>
                 <Button variant="outline" size="sm" className="w-full" onClick={() => (window.location.href = "/dashboard") }>
+
                   View Analytics
                 </Button>
               </div>
@@ -916,6 +973,7 @@ export default function Settings() {
                   <div className="flex-1">
                     <p className="text-sm font-medium">Organization joined</p>
                     <p className="text-xs text-muted-foreground">You joined {currentOrganization.name}</p>
+
                   </div>
                 </div>
               )}
@@ -954,6 +1012,7 @@ export default function Settings() {
               </div>
             ),
           )}
+
         </CardContent>
       </Card>
     </div>

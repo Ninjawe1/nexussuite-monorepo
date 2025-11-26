@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+
 import {
   Form,
   FormControl,
@@ -21,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -31,6 +34,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CreateRosterData } from "@/services/rosterService";
 import { GAME_OPTIONS } from "@/constants/games";
+
 
 const rosterFormSchema = z.object({
   name: z
@@ -55,6 +59,7 @@ const rosterFormSchema = z.object({
     .number()
     .min(1, "Maximum players must be at least 1")
     .max(12, "Maximum players must not exceed 12"),
+
 });
 
 type RosterFormValues = z.infer<typeof rosterFormSchema>;
@@ -83,6 +88,7 @@ const rosterTypes = [
     value: "Academy",
     label: "Academy",
     description: "Development/feeder teams",
+
   },
 ];
 
@@ -101,6 +107,7 @@ export function RosterCreationDialog({
       description: "",
       game: "Valorant",
       type: "International competitive",
+
       maxPlayers: 5,
     },
   });
@@ -118,6 +125,7 @@ export function RosterCreationDialog({
     } catch (error) {
       // Error handling is done in the parent component
       console.error("Error creating roster:", error);
+
     }
   };
 
@@ -136,6 +144,7 @@ export function RosterCreationDialog({
           <DialogDescription>
             Set up a new roster for your team. Fill in the details below to get
             started.
+
           </DialogDescription>
         </DialogHeader>
 
@@ -144,6 +153,7 @@ export function RosterCreationDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
           >
+
             <FormField
               control={form.control}
               name="name"
@@ -182,6 +192,7 @@ export function RosterCreationDialog({
                   <FormDescription>
                     Provide additional context about this roster (max 200
                     characters)
+
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -199,6 +210,7 @@ export function RosterCreationDialog({
                     value={field.value}
                     disabled={isLoading}
                   >
+
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Choose a game" />
@@ -206,6 +218,7 @@ export function RosterCreationDialog({
                     </FormControl>
                     <SelectContent>
                       {GAME_OPTIONS.map((g) => (
+
                         <SelectItem key={g} value={g}>
                           {g}
                         </SelectItem>
@@ -215,6 +228,7 @@ export function RosterCreationDialog({
                   <FormDescription>
                     Select the game this roster is for.
                   </FormDescription>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -232,6 +246,7 @@ export function RosterCreationDialog({
                         key={type.value}
                         type="button"
                         className={`rounded-md border p-3 text-left transition ${field.value === type.value ? "border-primary bg-primary/10" : "hover:bg-muted"}`}
+
                         onClick={() => field.onChange(type.value)}
                         disabled={isLoading}
                       >
@@ -239,12 +254,14 @@ export function RosterCreationDialog({
                         <div className="text-xs text-muted-foreground">
                           {type.description}
                         </div>
+
                       </button>
                     ))}
                   </div>
                   <FormDescription>
                     Choose between International competitive, Local Competitive,
                     or Academy
+
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -263,6 +280,7 @@ export function RosterCreationDialog({
                   <FormDescription>
                     Default is 5. Adjust to limit how many players can be
                     assigned.
+
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -286,6 +304,7 @@ export function RosterCreationDialog({
                   </>
                 ) : (
                   "Create Roster"
+
                 )}
               </Button>
             </DialogFooter>

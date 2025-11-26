@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import RoleSelectDropdown from "@/components/RoleSelectDropdown";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
+
 interface InviteMemberModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,6 +17,7 @@ export function InviteMemberModal({ open, onOpenChange, onInvited }: InviteMembe
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("admin");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInvite = async () => {
@@ -27,6 +29,7 @@ export function InviteMemberModal({ open, onOpenChange, onInvited }: InviteMembe
       setName("");
       setEmail("");
       setRole("admin");
+
       onInvited?.();
     } finally {
       setIsSubmitting(false);
@@ -45,26 +48,31 @@ export function InviteMemberModal({ open, onOpenChange, onInvited }: InviteMembe
         <div className="grid gap-4">
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="invite-name">Name</label>
+
             <Input
               id="invite-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+
               placeholder="Full name"
             />
           </div>
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="invite-email">Email</label>
+
             <Input
               id="invite-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+
               placeholder="user@example.com"
             />
           </div>
           <div className="grid gap-2">
             <label className="text-sm font-medium" htmlFor="invite-role">Role</label>
+
             <RoleSelectDropdown value={role} onChange={setRole} className="w-[220px]" />
           </div>
         </div>
@@ -74,6 +82,7 @@ export function InviteMemberModal({ open, onOpenChange, onInvited }: InviteMembe
           </Button>
           <Button onClick={handleInvite} disabled={isSubmitting || !email}>
             {isSubmitting ? "Inviting..." : "Invite"}
+
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -82,3 +91,4 @@ export function InviteMemberModal({ open, onOpenChange, onInvited }: InviteMembe
 }
 
 export default InviteMemberModal;
+

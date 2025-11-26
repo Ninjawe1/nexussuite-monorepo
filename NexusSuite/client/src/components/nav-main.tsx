@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -20,6 +21,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebar } from "@/components/ui/sidebar";
 import { tweakcn } from "@/lib/tweakcn";
+
 
 export function NavMain({
   items,
@@ -39,6 +41,7 @@ export function NavMain({
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+
   return (
     <SidebarGroup>
       {/* Hide group label entirely when collapsed to keep a clean icon stack */}
@@ -47,6 +50,7 @@ export function NavMain({
         {items.map((item) => {
           const hasChildren =
             Array.isArray(item.items) && item.items.length > 0;
+
 
           if (hasChildren) {
             return (
@@ -57,6 +61,7 @@ export function NavMain({
                 className="group/collapsible"
               >
                 <SidebarMenuItem className={isCollapsed ? "p-0 m-0 flex justify-center items-center w-full" : undefined}>
+
                   <CollapsibleTrigger asChild>
                     {/* When collapsed: icon-only button centered with tooltip. When expanded: icon + text. */}
                     {isCollapsed ? (
@@ -66,6 +71,7 @@ export function NavMain({
                         className={tweakcn(
                           // Ensure perfect centering within the 45px column
                           "h-[45px] w-[45px] rounded-md flex items-center justify-center transition-all duration-200 mx-auto p-0",
+
                         )}
                       >
                         {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
@@ -75,6 +81,7 @@ export function NavMain({
                         tooltip={undefined}
                         isActive={item.isActive}
                         className={tweakcn("h-[45px] transition-all justify-start px-2.5 gap-2")}
+
                       >
                         {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                         <span className="truncate text-sm font-medium">{item.title}</span>
@@ -85,6 +92,7 @@ export function NavMain({
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
+
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
                             <a href={subItem.url}>
@@ -113,6 +121,7 @@ export function NavMain({
                   asChild
                 >
                   <a href={item.url} aria-current={item.isActive ? "page" : undefined}>
+
                     {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                   </a>
                 </SidebarMenuButton>
@@ -123,6 +132,7 @@ export function NavMain({
                   asChild
                 >
                   <a href={item.url} aria-current={item.isActive ? "page" : undefined}>
+
                     {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                     <span className="truncate text-sm font-medium">{item.title}</span>
                   </a>

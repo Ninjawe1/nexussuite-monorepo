@@ -22,6 +22,7 @@ export default function AdminCommunicationPage() {
   const sendEmail = () =>
     toast({
       title: "Email",
+
       description: `Template ${emailTemplate} to ${emailTo} (demo)`,
     });
 
@@ -32,6 +33,7 @@ export default function AdminCommunicationPage() {
         <p className="text-muted-foreground">
           Announcements, emails, and notifications
         </p>
+
       </div>
 
       <Card>
@@ -43,6 +45,7 @@ export default function AdminCommunicationPage() {
             placeholder="Message"
             value={announcement}
             onChange={(e) => setAnnouncement(e.target.value)}
+
           />
           <div className="mt-2">
             <Button onClick={sendAnnouncement}>Send</Button>
@@ -56,6 +59,7 @@ export default function AdminCommunicationPage() {
           <CardDescription>
             Welcome, payment success/failure, etc.
           </CardDescription>
+
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -63,11 +67,13 @@ export default function AdminCommunicationPage() {
               placeholder="Recipients"
               value={emailTo}
               onChange={(e) => setEmailTo(e.target.value)}
+
             />
             <Input
               placeholder="Template name"
               value={emailTemplate}
               onChange={(e) => setEmailTemplate(e.target.value)}
+
             />
             <Button onClick={sendEmail}>Send Email</Button>
           </div>
@@ -82,6 +88,7 @@ export default function AdminCommunicationPage() {
         <CardContent>
           <ul className="space-y-2">
             {[1, 2, 3].map((i) => (
+
               <li
                 key={i}
                 className="flex items-center justify-between p-3 border border-border rounded-lg"

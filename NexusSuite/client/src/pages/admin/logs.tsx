@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+
 const demoLogs = [
   {
     id: 1,
@@ -24,6 +25,7 @@ const demoLogs = [
     type: "Error",
     message: "Stripe webhook retry",
     ts: "2024-10-22 11:02:44",
+
   },
 ];
 
@@ -35,6 +37,7 @@ export default function AdminLogsPage() {
         <p className="text-muted-foreground">
           Recent events and actions (demo)
         </p>
+
       </div>
 
       <Card>
@@ -45,6 +48,7 @@ export default function AdminLogsPage() {
         <CardContent>
           <ul className="space-y-2">
             {demoLogs.map((l) => (
+
               <li
                 key={l.id}
                 className="flex items-center justify-between p-3 border border-border rounded-lg"

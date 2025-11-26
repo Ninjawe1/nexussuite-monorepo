@@ -8,6 +8,7 @@ import {
   type InsertStaff,
   type Staff,
 } from "@shared/schema";
+
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -23,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import {
   Select,
   SelectContent,
@@ -35,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+
 
 interface StaffDialogProps {
   open: boolean;
@@ -51,6 +55,7 @@ const modules = [
   { id: "Contracts", label: "Contracts" },
   { id: "Settings", label: "Settings" },
   { id: "Audit", label: "Audit Logs" },
+
 ];
 
 export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
@@ -68,6 +73,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
       avatar: staff?.avatar || "",
       permissions: staff?.permissions || [],
       status: staff?.status || "active",
+
     },
   });
 
@@ -80,6 +86,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
       toast({
         title: "Success",
         description: "Staff member added successfully",
+
       });
       onOpenChange(false);
       form.reset();
@@ -93,6 +100,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -101,6 +109,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
         title: "Error",
         description: error.message || "Failed to add staff member",
         variant: "destructive",
+
       });
     },
   });
@@ -114,6 +123,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
       toast({
         title: "Success",
         description: "Staff member updated successfully",
+
       });
       onOpenChange(false);
     },
@@ -126,6 +136,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -133,6 +144,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
         title: "Error",
         description: error.message || "Failed to update staff member",
         variant: "destructive",
+
       });
     },
   });
@@ -158,6 +170,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
             {staff
               ? "Update staff member information and permissions"
               : "Add a new staff member to your organization"}
+
           </DialogDescription>
         </DialogHeader>
 
@@ -175,6 +188,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                       placeholder="John Doe"
                       data-testid="input-name"
                     />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,6 +224,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                     <Input
                       {...field}
                       value={field.value || ""}
+
                       placeholder="+1 555-0123"
                       data-testid="input-phone"
                     />
@@ -229,6 +244,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
+
                     <FormControl>
                       <SelectTrigger data-testid="select-role">
                         <SelectValue placeholder="Select a role" />
@@ -260,6 +276,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
+
                     <FormControl>
                       <SelectTrigger data-testid="select-status">
                         <SelectValue placeholder="Select status" />
@@ -287,6 +304,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {modules.map((module) => (
+
                       <FormField
                         key={module.id}
                         control={form.control}
@@ -310,6 +328,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                                           field.value?.filter(
                                             (value) => value !== module.id,
                                           ),
+
                                         );
                                   }}
                                   data-testid={`checkbox-${module.id.toLowerCase()}`}
@@ -318,6 +337,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                               <FormLabel className="font-normal">
                                 {module.label}
                               </FormLabel>
+
                             </FormItem>
                           );
                         }}
@@ -348,6 +368,7 @@ export function StaffDialog({ open, onOpenChange, staff }: StaffDialogProps) {
                   : staff
                     ? "Update Staff"
                     : "Add Staff"}
+
               </Button>
             </div>
           </form>

@@ -6,6 +6,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { tweakcn } from "@/lib/tweakcn";
 
+
 const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
@@ -21,6 +22,7 @@ const SelectTrigger = React.forwardRef<
     className={tweakcn(
       "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className,
+
     )}
     {...props}
   >
@@ -42,6 +44,7 @@ const SelectScrollUpButton = React.forwardRef<
       "flex cursor-default items-center justify-center py-1",
       className,
     )}
+
     {...props}
   >
     <ChevronUp className="h-4 w-4" />
@@ -59,6 +62,7 @@ const SelectScrollDownButton = React.forwardRef<
       "flex cursor-default items-center justify-center py-1",
       className,
     )}
+
     {...props}
   >
     <ChevronDown className="h-4 w-4" />
@@ -67,10 +71,12 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName;
 
+
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => (
+
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
@@ -79,6 +85,7 @@ const SelectContent = React.forwardRef<
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className,
+
       )}
       position={position}
       {...props}
@@ -89,6 +96,7 @@ const SelectContent = React.forwardRef<
           "p-1",
           position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+
         )}
       >
         {children}
@@ -106,6 +114,7 @@ const SelectLabel = React.forwardRef<
   <SelectPrimitive.Label
     ref={ref}
     className={tweakcn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
+
     {...props}
   />
 ));
@@ -120,6 +129,7 @@ const SelectItem = React.forwardRef<
     className={tweakcn(
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
+
     )}
     {...props}
   >
@@ -141,6 +151,7 @@ const SelectSeparator = React.forwardRef<
   <SelectPrimitive.Separator
     ref={ref}
     className={tweakcn("-mx-1 my-1 h-px bg-muted", className)}
+
     {...props}
   />
 ));

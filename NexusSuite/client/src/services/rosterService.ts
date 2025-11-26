@@ -1,5 +1,6 @@
 import { apiRequest } from "../lib/queryClient";
 
+
 export interface Roster {
   id: string;
   organizationId: string; // maps from tenantId
@@ -9,6 +10,7 @@ export interface Roster {
   game: string;
   // Roster type per product spec
   type: "International competitive" | "Local Competitive" | "Academy";
+
   // Capacity defaults to 5 until backend provides a value
   maxPlayers: number; // default 5
   // playerCount defaults to 0 until backend provides a value
@@ -34,6 +36,7 @@ export interface CreateRosterData {
   description?: string;
   game: string;
   type: "International competitive" | "Local Competitive" | "Academy";
+
   maxPlayers: number;
 }
 
@@ -54,6 +57,7 @@ export interface PlayerAssignment {
 function toDate(value: string | Date | null | undefined): Date {
   if (!value) return new Date();
   return typeof value === "string" ? new Date(value) : value;
+
 }
 
 function toRoster(api: any): Roster {
@@ -65,6 +69,7 @@ function toRoster(api: any): Roster {
     description: api.description ?? undefined,
     game: api.game ?? "",
     type: (api.type as Roster["type"]) ?? "International competitive",
+
     maxPlayers: api.maxPlayers ?? 5,
     playerCount: api.playerCount ?? 0,
     isActive: api.isActive ?? true,
@@ -79,12 +84,14 @@ export class RosterService {
     _filters?: RosterFilters,
   ): Promise<Roster[]> {
     const res = await apiRequest("/api/rosters", "GET");
+
     const json = await res.json();
     return (json as any[]).map(toRoster);
   }
 
   async getRosterById(rosterId: string): Promise<Roster | null> {
     const res = await apiRequest(`/api/rosters/${rosterId}`, "GET");
+
     const json = await res.json();
     return json ? toRoster(json) : null;
   }
@@ -98,6 +105,7 @@ export class RosterService {
       playerId: data.createdBy, // placeholder: caller should provide proper playerId via API in future
     };
     const res = await apiRequest("/api/rosters", "POST", payload);
+
     const json = await res.json();
     return toRoster(json);
   }
@@ -106,6 +114,7 @@ export class RosterService {
     rosterId: string,
     updates: Partial<Roster>,
   ): Promise<void> {
+
     // Map client-side Roster fields to server document. The backend allows partial updates.
     // Firestore storage is schemaless, so additional fields like `name`, `description`, `type`, `maxPlayers`
     // can be stored even if not present in the SQL schema. For SQL/Drizzle, unknown fields are ignored.
@@ -133,12 +142,14 @@ export class RosterService {
 
   async getRosterPlayers(rosterId: string): Promise<RosterPlayer[]> {
     const res = await apiRequest(`/api/rosters/${rosterId}/players`, "GET");
+
     const json = await res.json();
     return (json as any[]).map((p: any) => ({
       id: p.id,
       rosterId,
       playerId: p.playerId,
       role: p.role ?? "player",
+
       joinedAt: toDate(p.joinedAt),
       isActive: p.isActive ?? true,
     }));
@@ -156,12 +167,14 @@ export class RosterService {
     playerId: string,
   ): Promise<void> {
     await apiRequest(`/api/rosters/${rosterId}/players/${playerId}`, "DELETE");
+
   }
 
   async getPlayerRosters(playerId: string): Promise<Roster[]> {
     // Fallback: fetch all and filter client-side
     const all = await this.getRosters("", undefined);
     return all.filter((r) => (r as any).playerId === playerId);
+
   }
 }
 

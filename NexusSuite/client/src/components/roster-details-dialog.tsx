@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import {
 import { Roster } from "@/types/roster";
 import { normalizeGameTitle } from "@/constants/games";
 import { useRosterContext } from "@/contexts/RosterContext";
+
 import {
   Select,
   SelectTrigger,
@@ -30,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TEAM_ROLES } from "@/constants/teamRoles";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +45,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+
 interface RosterDetailsDialogProps {
   roster: Roster | null;
   open: boolean;
@@ -53,6 +57,7 @@ export function RosterDetailsDialog({
   open,
   onOpenChange,
 }: RosterDetailsDialogProps) {
+
   const {
     rosterPlayers,
     isLoadingPlayers,
@@ -71,6 +76,7 @@ export function RosterDetailsDialog({
       year: "numeric",
       month: "long",
       day: "numeric",
+
     });
   };
 
@@ -84,6 +90,7 @@ export function RosterDetailsDialog({
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+
     }
   };
 
@@ -94,6 +101,7 @@ export function RosterDetailsDialog({
       case "casual":
         return <Users className="h-4 w-4" />;
       case "practice":
+
         return <Clock className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
@@ -109,6 +117,7 @@ export function RosterDetailsDialog({
             <Badge
               className={`${getTypeColor(roster.type)} flex items-center gap-1`}
             >
+
               {getTypeIcon(roster.type)}
               {roster.type.charAt(0).toUpperCase() + roster.type.slice(1)}
             </Badge>
@@ -116,6 +125,7 @@ export function RosterDetailsDialog({
           <DialogDescription>
             Roster details and member information
           </DialogDescription>
+
         </DialogHeader>
 
         <div className="space-y-6">
@@ -130,6 +140,7 @@ export function RosterDetailsDialog({
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">
                     Description
                   </h4>
+
                   <p className="text-sm">{roster.description}</p>
                 </div>
               )}
@@ -139,6 +150,7 @@ export function RosterDetailsDialog({
                   <Gamepad2 className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
                     {normalizeGameTitle((roster as any).game) || "Unknown Game"}
+
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -153,6 +165,7 @@ export function RosterDetailsDialog({
                   <span className="text-sm">
                     Created {formatDate(roster.createdAt)}
                   </span>
+
                 </div>
               </div>
             </CardContent>
@@ -178,6 +191,7 @@ export function RosterDetailsDialog({
                       key={i}
                       className="h-12 rounded-lg bg-muted animate-pulse"
                     />
+
                   ))}
                 </div>
               ) : rosterPlayers && rosterPlayers.length > 0 ? (
@@ -191,6 +205,7 @@ export function RosterDetailsDialog({
                         <AvatarFallback>
                           {player.playerId.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
+
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -206,6 +221,7 @@ export function RosterDetailsDialog({
                                 onValueChange={async (val) => {
                                   setUpdatingRoleFor(player.playerId);
                                   setLocalRoles((prev) => ({
+
                                     ...prev,
                                     [player.playerId]: val,
                                   }));
@@ -227,6 +243,7 @@ export function RosterDetailsDialog({
                                 </SelectTrigger>
                                 <SelectContent>
                                   {TEAM_ROLES.map((r) => (
+
                                     <SelectItem key={r.value} value={r.value}>
                                       {r.label}
                                     </SelectItem>
@@ -250,6 +267,7 @@ export function RosterDetailsDialog({
                                   onClick={() =>
                                     setEditRoleFor(player.playerId)
                                   }
+
                                   title="Edit role"
                                 >
                                   <Pencil className="h-3 w-3" />
@@ -261,6 +279,7 @@ export function RosterDetailsDialog({
                         <p className="text-sm text-muted-foreground">
                           Joined:{" "}
                           {player.joinedAt?.toLocaleDateString?.() || "-"}
+
                         </p>
                       </div>
                       {/* Remove player action */}
@@ -290,6 +309,7 @@ export function RosterDetailsDialog({
                               <strong>{player.playerId}</strong> from{" "}
                               <strong>{roster.name}</strong>. You can re-assign
                               this player at any time.
+
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -302,6 +322,7 @@ export function RosterDetailsDialog({
                                     roster.id,
                                     player.playerId,
                                   );
+
                                 } finally {
                                   setRemovingId(null);
                                 }
@@ -324,6 +345,7 @@ export function RosterDetailsDialog({
                   <p className="text-sm text-muted-foreground">
                     This roster doesn't have any players assigned yet. Use the
                     assign players option to add team members.
+
                   </p>
                 </div>
               )}

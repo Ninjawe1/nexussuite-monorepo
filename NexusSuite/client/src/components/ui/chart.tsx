@@ -8,6 +8,7 @@ import { tweakcn } from "@/lib/tweakcn";
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const;
 
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode;
@@ -29,6 +30,7 @@ function useChart() {
 
   if (!context) {
     throw new Error("useChart must be used within a <ChartContainer />");
+
   }
 
   return context;
@@ -46,6 +48,7 @@ const ChartContainer = React.forwardRef<
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
 
+
   return (
     <ChartContext.Provider value={{ config }}>
       <div
@@ -54,6 +57,7 @@ const ChartContainer = React.forwardRef<
         className={tweakcn(
           "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className,
+
         )}
         {...props}
       >
@@ -61,6 +65,7 @@ const ChartContainer = React.forwardRef<
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
+
       </div>
     </ChartContext.Provider>
   );
@@ -71,6 +76,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color,
   );
+
 
   if (!colorConfig.length) {
     return null;
@@ -95,6 +101,7 @@ ${colorConfig
 `,
           )
           .join("\n"),
+
       }}
     />
   );
@@ -109,6 +116,7 @@ const ChartTooltipContent = React.forwardRef<
       hideLabel?: boolean;
       hideIndicator?: boolean;
       indicator?: "line" | "dot" | "dashed";
+
       nameKey?: string;
       labelKey?: string;
     }
@@ -119,6 +127,7 @@ const ChartTooltipContent = React.forwardRef<
       payload,
       className,
       indicator = "dot",
+
       hideLabel = false,
       hideIndicator = false,
       label,
@@ -130,6 +139,7 @@ const ChartTooltipContent = React.forwardRef<
       labelKey,
     },
     ref,
+
   ) => {
     const { config } = useChart();
 
@@ -143,12 +153,14 @@ const ChartTooltipContent = React.forwardRef<
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === "string"
+
           ? config[label as keyof typeof config]?.label || label
           : itemConfig?.label;
 
       if (labelFormatter) {
         return (
           <div className={tweakcn("font-medium", labelClassName)}>
+
             {labelFormatter(value, payload)}
           </div>
         );
@@ -171,11 +183,13 @@ const ChartTooltipContent = React.forwardRef<
       labelKey,
     ]);
 
+
     if (!active || !payload?.length) {
       return null;
     }
 
     const nestLabel = payload.length === 1 && indicator !== "dot";
+
 
     return (
       <div
@@ -183,12 +197,14 @@ const ChartTooltipContent = React.forwardRef<
         className={tweakcn(
           "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
           className,
+
         )}
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`;
+
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
             const indicatorColor = color || item.payload.fill || item.color;
 
@@ -198,6 +214,7 @@ const ChartTooltipContent = React.forwardRef<
                 className={tweakcn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center",
+
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
@@ -223,6 +240,7 @@ const ChartTooltipContent = React.forwardRef<
                             {
                               "--color-bg": indicatorColor,
                               "--color-border": indicatorColor,
+
                             } as React.CSSProperties
                           }
                         />
@@ -232,6 +250,7 @@ const ChartTooltipContent = React.forwardRef<
                       className={tweakcn(
                         "flex flex-1 justify-between leading-none",
                         nestLabel ? "items-end" : "items-center",
+
                       )}
                     >
                       <div className="grid gap-1.5">
@@ -257,6 +276,7 @@ const ChartTooltipContent = React.forwardRef<
   },
 );
 ChartTooltipContent.displayName = "ChartTooltip";
+
 
 const ChartLegend = RechartsPrimitive.Legend;
 
@@ -325,6 +345,7 @@ function getPayloadConfigFromPayload(
   key: string,
 ) {
   if (typeof payload !== "object" || payload === null) {
+
     return undefined;
   }
 
@@ -332,6 +353,7 @@ function getPayloadConfigFromPayload(
     "payload" in payload &&
     typeof payload.payload === "object" &&
     payload.payload !== null
+
       ? payload.payload
       : undefined;
 
@@ -341,6 +363,7 @@ function getPayloadConfigFromPayload(
     key in payload &&
     typeof payload[key as keyof typeof payload] === "string"
   ) {
+
     configLabelKey = payload[key as keyof typeof payload] as string;
   } else if (
     payloadPayload &&
@@ -355,6 +378,7 @@ function getPayloadConfigFromPayload(
   return configLabelKey in config
     ? config[configLabelKey]
     : config[key as keyof typeof config];
+
 }
 
 export {
@@ -380,12 +404,14 @@ function buildConfigFromSeries(series: Array<{ key: string; label?: string; colo
     "hsl(var(--chart-3))",
     "hsl(var(--chart-4))",
     "hsl(var(--chart-5))",
+
   ];
   const cfg: ChartConfig = {};
   series.forEach((s, idx) => {
     cfg[s.key] = {
       label: s.label ?? s.key,
       theme: { light: s.colorToken ?? defaultTokens[idx % defaultTokens.length], dark: s.colorToken ?? defaultTokens[idx % defaultTokens.length] },
+
     };
   });
   return cfg;
@@ -418,6 +444,7 @@ export function DashboardLineChart({
           <ChartLegend content={<ChartLegendContent />} />
           {series.map((s, idx) => (
             <RechartsPrimitive.Line key={s.key} type="monotone" dataKey={s.key} name={s.label ?? s.key} stroke={`var(--color-${s.key})`} strokeWidth={2} dot={{ r: 3 }} />
+
           ))}
         </RechartsPrimitive.LineChart>
       </ChartContainer>
@@ -452,6 +479,7 @@ export function DashboardBarChart({
           <ChartLegend content={<ChartLegendContent />} />
           {series.map((s) => (
             <RechartsPrimitive.Bar key={s.key} dataKey={s.key} name={s.label ?? s.key} fill={`var(--color-${s.key})`} />
+
           ))}
         </RechartsPrimitive.BarChart>
       </ChartContainer>
@@ -474,6 +502,7 @@ export function DashboardDonutChart({
 }) {
   // Build config from items or fallback token cycle
   const items = series ?? data.map((d: any, idx: number) => ({ key: String(d[nameKey] ?? idx), label: String(d[nameKey] ?? idx) }));
+
   const config = React.useMemo(() => buildConfigFromSeries(items), [items]);
 
   return (
@@ -484,6 +513,7 @@ export function DashboardDonutChart({
           <RechartsPrimitive.Pie data={data} dataKey={dataKey} nameKey={nameKey} innerRadius={60} outerRadius={100}>
             {data.map((entry: any, index: number) => (
               <RechartsPrimitive.Cell key={`cell-${index}`} fill={`var(--color-${String(entry[nameKey])})`} />
+
             ))}
           </RechartsPrimitive.Pie>
           <ChartLegend content={<ChartLegendContent nameKey={nameKey} />} />

@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { OrganizationSelector } from "@/components/OrganizationSelector";
 
+
 /**
  * DashboardLayout
  * Wraps authenticated dashboard pages with the App Shell (Sidebar + Topbar)
@@ -24,9 +25,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <div className="container mx-auto px-6 md:px-8 py-6">
               {children}
             </div>
+
           </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
   );
 };
+

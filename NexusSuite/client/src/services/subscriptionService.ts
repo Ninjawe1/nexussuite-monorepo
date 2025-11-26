@@ -5,6 +5,7 @@
 
 import { apiRequest } from "@/lib/queryClient";
 
+
 export interface SubscriptionPlan {
   id: string;
   priceId?: string;
@@ -13,6 +14,7 @@ export interface SubscriptionPlan {
   price: number;
   currency: string;
   interval: "month" | "year";
+
   features: string[];
   limits: {
     apiCalls?: number;
@@ -27,6 +29,7 @@ export interface Subscription {
   organizationId: string;
   planId: string;
   status: "active" | "canceled" | "past_due" | "trialing" | "incomplete";
+
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
@@ -42,6 +45,7 @@ export interface CheckoutSession {
   organizationId: string;
   planId: string;
   status: "open" | "complete" | "expired";
+
   expiresAt: string;
   createdAt: string;
 }
@@ -70,6 +74,7 @@ export interface BillingInfo {
   organizationId: string;
   paymentMethod: {
     type: "card" | "bank_account";
+
     last4?: string;
     brand?: string;
   } | null;
@@ -97,12 +102,14 @@ class SubscriptionService {
         ? `/api/subscription/plans/normalized/by-product/${encodeURIComponent(productId)}`
         : "/api/subscription/plans/normalized?strict=true";
       const response = await apiRequest(url, "GET");
+
       const data = await response.json();
       const plans = (data?.plans || []) as Array<SubscriptionPlan>;
       return plans;
     } catch (error) {
       console.error("Failed to fetch subscription plans:", error);
       throw new Error("Unable to load subscription plans");
+
     }
   }
 
@@ -116,6 +123,7 @@ class SubscriptionService {
         credentials: "include",
         cache: "no-store",
         headers: { Accept: "application/json" },
+
       });
       if (!response.ok) {
         // Gracefully handle unauthorized or bad request without breaking the page
@@ -130,6 +138,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to fetch subscription:", error);
       throw new Error("Unable to load subscription details");
+
     }
   }
 
@@ -162,12 +171,14 @@ class SubscriptionService {
         }
       );
 
+
       const data = await response.json();
       const url = data?.checkoutUrl || data?.url || null;
       return { url } as CheckoutSession;
     } catch (error) {
       console.error("Failed to create checkout session:", error);
       throw new Error("Unable to initiate checkout");
+
     }
   }
 
@@ -180,12 +191,14 @@ class SubscriptionService {
         method: "GET",
         credentials: "include",
         cache: "no-store",
+
       });
       if (!response.ok) return null;
       const data = await response.json();
       return data?.portalUrl || null;
     } catch (e) {
       console.error("Failed to get portal URL:", e);
+
       return null;
     }
   }
@@ -193,6 +206,7 @@ class SubscriptionService {
   async resolveProductId(slug: string): Promise<string | null> {
     try {
       const response = await apiRequest(`/api/subscription/resolve-product/${encodeURIComponent(slug)}`, "GET");
+
       const data = await response.json();
       return data?.productId || null;
     } catch (e) {
@@ -215,6 +229,7 @@ class SubscriptionService {
       // Server uses PATCH /api/subscription for updates
       const response = await apiRequest("/api/subscription", "PATCH", {
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({ organizationId, plan, prorationBehavior }),
       });
 
@@ -223,6 +238,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to update subscription:", error);
       throw new Error("Unable to update subscription");
+
     }
   }
 
@@ -238,12 +254,14 @@ class SubscriptionService {
       const response = await apiRequest(
         "/api/subscription/cancel",
         "POST",
+
         {
           organizationId,
           cancelAtPeriodEnd,
           reason,
         },
         { headers: { "X-Organization-Id": String(organizationId || "") } }
+
       );
 
       const data = await response.json();
@@ -254,6 +272,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to cancel subscription:", error);
       throw new Error("Unable to cancel subscription");
+
     }
   }
 
@@ -268,6 +287,7 @@ class SubscriptionService {
         "PATCH",
         { organizationId, cancelAtPeriodEnd: false },
         { headers: { "X-Organization-Id": String(organizationId || "") } }
+
       );
 
       const data = await response.json();
@@ -278,6 +298,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to reactivate subscription:", error);
       throw new Error("Unable to reactivate subscription");
+
     }
   }
 
@@ -289,12 +310,14 @@ class SubscriptionService {
       const response = await apiRequest(
         `/api/subscription/usage?organizationId=${organizationId}`,
         "GET"
+
       );
       const data = await response.json();
       return data.usage;
     } catch (error) {
       console.error("Failed to fetch usage metrics:", error);
       throw new Error("Unable to load usage metrics");
+
     }
   }
 
@@ -317,6 +340,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to update usage:", error);
       throw new Error("Unable to update usage");
+
     }
   }
 
@@ -328,12 +352,14 @@ class SubscriptionService {
       const response = await apiRequest(
         `/api/subscription/billing?organizationId=${organizationId}`,
         "GET"
+
       );
       const data = await response.json();
       return data.billingInfo;
     } catch (error) {
       console.error("Failed to fetch billing info:", error);
       throw new Error("Unable to load billing information");
+
     }
   }
 
@@ -347,6 +373,7 @@ class SubscriptionService {
     try {
       const response = await apiRequest("/api/subscription/billing", "PUT", {
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({ organizationId, ...billingInfo }),
       });
 
@@ -355,6 +382,7 @@ class SubscriptionService {
     } catch (error) {
       console.error("Failed to update billing info:", error);
       throw new Error("Unable to update billing information");
+
     }
   }
 
@@ -366,12 +394,14 @@ class SubscriptionService {
       const response = await apiRequest(
         `/api/subscription/invoices?organizationId=${organizationId}`,
         "GET"
+
       );
       const data = await response.json();
       return data.invoices || [];
     } catch (error) {
       console.error("Failed to fetch invoices:", error);
       throw new Error("Unable to load billing history");
+
     }
   }
 
@@ -382,6 +412,7 @@ class SubscriptionService {
     // This would typically be called by the backend webhook handler
     // Frontend can listen for subscription updates via polling or WebSocket
     console.log("Subscription webhook event:", event);
+
   }
 
   /**
@@ -391,6 +422,7 @@ class SubscriptionService {
     organizationId: string,
     maxAttempts: number = 10,
     intervalMs: number = 2000,
+
   ): Promise<Subscription> {
     let attempts = 0;
 
@@ -405,12 +437,14 @@ class SubscriptionService {
           subscription &&
           ["active", "canceled"].includes(subscription.status)
         ) {
+
           return subscription;
         }
 
         // Continue polling if not at max attempts
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
+
           return poll();
         }
 
@@ -418,6 +452,7 @@ class SubscriptionService {
       } catch (error) {
         if (attempts < maxAttempts) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
+
           return poll();
         }
         throw error;

@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -40,6 +41,7 @@ export default function Players() {
         organizationId={organizationId}
         currentUserId={currentUserId}
       />
+
     </RosterProvider>
   );
 }
@@ -57,6 +59,7 @@ function PlayersContent({
   const [selectedPlayer, setSelectedPlayer] = useState<Staff | null>(null);
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("players");
+
   const [roleEditOpen, setRoleEditOpen] = useState(false);
   const [roleEditState, setRoleEditState] = useState<{
     rosterId: string;
@@ -81,6 +84,7 @@ function PlayersContent({
 
   const { data: contracts = [] } = useQuery<Contract[]>({
     queryKey: ["/api/contracts"],
+
   });
 
   const deleteMutation = useMutation({
@@ -92,6 +96,7 @@ function PlayersContent({
       toast({
         title: "Player deleted",
         description: "The player has been removed successfully.",
+
       });
     },
     onError: (error: Error) => {
@@ -99,6 +104,7 @@ function PlayersContent({
         title: "Delete failed",
         description: error.message || "Could not delete player.",
         variant: "destructive",
+
       });
     },
   });
@@ -109,6 +115,7 @@ function PlayersContent({
       (s) =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.email.toLowerCase().includes(searchQuery.toLowerCase()),
+
     );
 
   const filteredPlayers = players; // Game filtering removed due to roster.game deprecation
@@ -131,6 +138,7 @@ function PlayersContent({
           (toDateSafe(a.date)?.getTime() ?? 0) -
           (toDateSafe(b.date)?.getTime() ?? 0),
       )
+
       .at(-1)!;
     return `${latest.amount} (${latest.type})`;
   };
@@ -148,6 +156,7 @@ function PlayersContent({
     role: "starter",
     game: "valorant",
     status: "active" as const,
+
   }));
 
   return (
@@ -169,6 +178,7 @@ function PlayersContent({
             + Add Player
           </Button>
           <Button onClick={() => (window.location.href = "/contracts")}>
+
             <FileText className="w-4 h-4 mr-2" />
             Manage Contracts
           </Button>
@@ -197,6 +207,7 @@ function PlayersContent({
                 className="pl-9"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+
               />
             </div>
             <Select value={gameFilter} onValueChange={setGameFilter}>
@@ -226,6 +237,7 @@ function PlayersContent({
                 const playerAssignments = rosterPlayers.filter(
                   (rp) => rp.playerId === player.id,
                 );
+
                 const contract = getContractFor(player.name);
 
                 return (
@@ -235,6 +247,7 @@ function PlayersContent({
                         <CardTitle className="text-base">
                           {player.name}
                         </CardTitle>
+
                         <div className="flex items-center gap-2">
                           <Badge>Player</Badge>
                           <Button
@@ -265,6 +278,7 @@ function PlayersContent({
                           <span className="text-xs text-muted-foreground">
                             Salary
                           </span>
+
                           <Badge variant="outline" className="text-xs">
                             {getSalaryText(player.id)}
                           </Badge>
@@ -276,6 +290,7 @@ function PlayersContent({
                           <span className="text-xs text-muted-foreground">
                             Rosters
                           </span>
+
                           <Button
                             size="sm"
                             variant="outline"
@@ -302,6 +317,7 @@ function PlayersContent({
                                     variant="secondary"
                                     className="text-xs"
                                   >
+
                                     {rosterName} · {ap.role}
                                   </Badge>
                                   <Button
@@ -330,6 +346,7 @@ function PlayersContent({
                           <p className="text-xs text-muted-foreground">
                             No rosters assigned
                           </p>
+
                         )}
                       </div>
 
@@ -345,6 +362,7 @@ function PlayersContent({
                                 contract.expirationDate,
                                 "MMM dd, yyyy",
                               )}
+
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs">
@@ -359,6 +377,7 @@ function PlayersContent({
                       <AssignToRosterDialog
                         open={true}
                         onOpenChange={(o) => {
+
                           if (!o) {
                             setDialogOpenFor(null);
                             setSelectedPlayer(null);
@@ -374,6 +393,7 @@ function PlayersContent({
                           await assignPlayersToRoster(rosterId, [
                             { playerId: player.id, role },
                           ]);
+
                         }}
                         isLoading={isLoadingRosters}
                       />
@@ -407,6 +427,7 @@ function PlayersContent({
         <PlayerRoleEditDialog
           open={roleEditOpen}
           onOpenChange={(o) => {
+
             setRoleEditOpen(o);
             if (!o) setRoleEditState(null);
           }}
@@ -414,6 +435,7 @@ function PlayersContent({
           rosterName={roleEditState.rosterName}
           currentRole={roleEditState.role}
           onSubmit={async (nextRole) => {
+
             await assignPlayersToRoster(roleEditState.rosterId, [
               { playerId: roleEditState.playerId, role: nextRole },
             ]);
@@ -432,6 +454,7 @@ function PlayersContent({
             ? staffMembers.find((s) => s.id === editOpenFor)
             : undefined
         }
+
       />
     </div>
   );

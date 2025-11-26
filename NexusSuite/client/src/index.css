@@ -113,6 +113,59 @@
     transform: translateX(-100%);
     animation: shimmer 2.2s ease-in-out infinite;
   }
+
+  /* Esports / Glassmorphism Utilities */
+  .glass {
+    background: rgba(13, 13, 13, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .border-glow {
+    position: relative;
+    border: 1px solid rgba(var(--primary), 0.3);
+    box-shadow: 0 0 15px -5px rgba(var(--primary), 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .border-glow:hover {
+    border-color: rgba(var(--primary), 0.6);
+    box-shadow: 0 0 20px -5px rgba(var(--primary), 0.5);
+  }
+
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanline::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(18, 16, 16, 0) 50%,
+      rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.1;
+  }
+
+  .hover-elevate {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hover-elevate:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  }
 }
 
 @layer base {

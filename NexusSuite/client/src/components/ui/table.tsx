@@ -16,6 +16,7 @@ const Table = React.forwardRef<
 ));
 Table.displayName = "Table";
 
+
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -28,6 +29,7 @@ const TableHeader = React.forwardRef<
 ));
 TableHeader.displayName = "TableHeader";
 
+
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -39,6 +41,7 @@ const TableBody = React.forwardRef<
   />
 ));
 TableBody.displayName = "TableBody";
+
 
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
@@ -70,6 +73,7 @@ const TableRow = React.forwardRef<
 ));
 TableRow.displayName = "TableRow";
 
+
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -79,11 +83,13 @@ const TableHead = React.forwardRef<
     className={tweakcn(
       "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
       className,
+
     )}
     {...props}
   />
 ));
 TableHead.displayName = "TableHead";
+
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
@@ -99,6 +105,7 @@ const TableCell = React.forwardRef<
   />
 ));
 TableCell.displayName = "TableCell";
+
 
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
@@ -122,3 +129,4 @@ export {
   TableCell,
   TableCaption,
 };
+

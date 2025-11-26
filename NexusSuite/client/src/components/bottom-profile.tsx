@@ -5,6 +5,7 @@ import { LogOut, User, Settings, ChevronUp } from "lucide-react";
 import { useLocation } from "wouter";
 import { tweakcn } from "@/lib/tweakcn";
 import { useSidebar } from "@/components/ui/sidebar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 
 export function BottomProfile() {
   const { user, logout } = useAuth();
@@ -27,16 +29,19 @@ export function BottomProfile() {
       setIsOpen(false);
     } catch (error) {
       console.error("Logout failed:", error);
+
     }
   };
 
   const handleProfileClick = () => {
     setLocation("/profile");
+
     setIsOpen(false);
   };
 
   const handleSettingsClick = () => {
     setLocation("/settings");
+
     setIsOpen(false);
   };
 
@@ -45,6 +50,7 @@ export function BottomProfile() {
   if (!user) return null;
 
   const isCollapsed = sidebarState === "collapsed";
+
 
   return (
     <div
@@ -57,6 +63,7 @@ export function BottomProfile() {
       data-sidebar-state={sidebarState}
       role="complementary"
       aria-label={`User profile section - ${isCollapsed ? "collapsed" : "expanded"}`}
+
     >
       {/* Main Profile Card */}
       <div
@@ -72,6 +79,7 @@ export function BottomProfile() {
         data-sidebar-state={sidebarState}
         aria-expanded={!isCollapsed}
         aria-label={`User profile ${sidebarState === "collapsed" ? "collapsed" : "expanded"}`}
+
       >
         {/* Profile Dropdown using shadcn/ui */}
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -90,6 +98,7 @@ export function BottomProfile() {
               aria-expanded={isOpen}
               aria-haspopup="menu"
               aria-label={`User menu for ${user.firstName} ${user.lastName} - ${isCollapsed ? "collapsed" : "expanded"}`}
+
               aria-describedby="profile-description"
               disabled={isCollapsed}
             >
@@ -103,6 +112,7 @@ export function BottomProfile() {
                     isCollapsed
                       ? "w-7 h-7 sm:w-8 sm:h-8"
                       : "w-9 h-9 sm:w-10 sm:h-10",
+
                   )}
                 >
                   <AvatarImage
@@ -122,6 +132,7 @@ export function BottomProfile() {
                 {isCollapsed
                   ? "User profile collapsed - expand sidebar for full profile options"
                   : "Click to open user menu with profile, settings, and logout options"}
+
               </span>
 
               {/* User Info */}
@@ -130,6 +141,7 @@ export function BottomProfile() {
                   // Align text block left relative to avatar when expanded
                   "flex flex-col justify-center items-start min-w-0 transition-all duration-300 ease-in-out",
                   isCollapsed ? "hidden opacity-0 w-0" : "flex opacity-100",
+
                 )}
               >
                 <span className="text-sm font-medium text-foreground truncate max-w-32 lg:max-w-40 text-left">
@@ -146,6 +158,7 @@ export function BottomProfile() {
                   "w-4 h-4 text-muted-foreground transition-all duration-300 ease-in-out flex-shrink-0",
                   isCollapsed ? "hidden opacity-0" : "block opacity-100",
                   isOpen ? "rotate-180" : "",
+
                 )}
               />
             </button>

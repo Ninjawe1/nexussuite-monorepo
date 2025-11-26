@@ -13,6 +13,7 @@ import React, {
 import { betterAuthService, User, Session } from "@/services/betterAuthService";
 import { useToast } from "@/hooks/use-toast";
 
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -24,6 +25,7 @@ interface AuthContextType {
     password: string,
     orgName?: string,
   ) => Promise<void>;
+
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   hasRole: (organizationId: string, role: string) => boolean;
@@ -41,6 +43,7 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
+
   }
   return context;
 };
@@ -65,6 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return userData;
     } catch (error) {
       console.error("Failed to refresh user:", error);
+
       setUser(null);
       setSession(null);
       return null;
@@ -93,6 +97,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           title: "Login failed",
           description: message,
           variant: "destructive",
+
         });
         throw error;
       } finally {
@@ -100,6 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     },
     [toast],
+
   );
 
   /**
@@ -115,6 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           orgName,
         );
 
+
         setUser(result.user);
         setSession(result.session);
 
@@ -129,6 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           title: "Registration failed",
           description: message,
           variant: "destructive",
+
         });
         throw error;
       } finally {
@@ -136,6 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     },
     [toast],
+
   );
 
   /**
@@ -155,6 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
     } catch (error) {
       console.error("Logout error:", error);
+
       // Still clear local state even if server logout fails
       setUser(null);
       setSession(null);
@@ -172,6 +182,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return betterAuthService.hasRole(user, organizationId, role);
     },
     [user],
+
   );
 
   const hasPermission = useCallback(
@@ -180,6 +191,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return betterAuthService.hasPermission(user, organizationId, permission);
     },
     [user],
+
   );
 
   const hasAnyPermission = useCallback(
@@ -192,6 +204,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
     },
     [user],
+
   );
 
   const hasAllPermissions = useCallback(
@@ -204,6 +217,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
     },
     [user],
+
   );
 
   const getUserRole = useCallback(
@@ -212,6 +226,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return betterAuthService.getUserRole(user, organizationId);
     },
     [user],
+
   );
 
   const isOrganizationAdmin = useCallback(
@@ -220,6 +235,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return betterAuthService.isOrganizationAdmin(user, organizationId);
     },
     [user],
+
   );
 
   const isSystemAdmin = useCallback((): boolean => {
@@ -247,6 +263,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } catch (error) {
         console.error("Auth initialization failed:", error);
+
       } finally {
         setIsLoading(false);
       }
@@ -254,6 +271,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   initializeAuth();
 }, []); // ✅ empty dependency array
+
 
   /**
    * Session timeout handling
@@ -277,6 +295,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const interval = setInterval(checkSessionTimeout, 60 * 1000); // check every minute
       return () => clearInterval(interval); // ✅ cleanup
+
   }, [user, session]); // ✅ only re-run when user or session changes
 
   const value: AuthContextType = {

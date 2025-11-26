@@ -1,6 +1,7 @@
 import { type ClassValue } from "clsx";
 import { cn } from "./utils";
 
+
 /**
  * tweakcn: Small utility to centralize theme tokens and class merging.
  * - Provides design tokens that mirror CSS variables defined in index.css.
@@ -51,6 +52,7 @@ export const themeTokens = {
     md: "var(--shadow-md)",
     lg: "var(--shadow-lg)",
     xl: "var(--shadow-xl)",
+
   },
 };
 

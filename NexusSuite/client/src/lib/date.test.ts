@@ -16,6 +16,7 @@ describe("toDateSafe", () => {
 
   it("handles Date instance", () => {
     const d = new Date("2024-05-12T10:20:30Z");
+
     const res = toDateSafe(d);
     expect(res).toBeInstanceOf(Date);
     expect(res!.getTime()).toBe(d.getTime());
@@ -23,6 +24,7 @@ describe("toDateSafe", () => {
 
   it("parses string date (YYYY-MM-DD)", () => {
     const res = toDateSafe("2025-10-21");
+
     expect(res).toBeInstanceOf(Date);
     // Check components in UTC to avoid TZ differences
     expect(res!.getUTCFullYear()).toBe(2025);
@@ -32,12 +34,14 @@ describe("toDateSafe", () => {
 
   it("parses ISO string date-time", () => {
     const iso = "2024-12-31T23:59:59.000Z";
+
     const res = toDateSafe(iso);
     expect(res).toBeInstanceOf(Date);
     expect(res!.toISOString()).toBe(iso);
   });
 
   it("parses number (milliseconds timestamp)", () => {
+
     const ts = Date.UTC(2023, 0, 1);
     const res = toDateSafe(ts);
     expect(res).toBeInstanceOf(Date);
@@ -53,12 +57,14 @@ describe("toDateSafe", () => {
     const bad = {
       toDate: () => {
         throw new Error("bad");
+
       },
     } as any;
     expect(toDateSafe(bad)).toBeNull();
   });
 
   it("supports Firestore-like timestamp object {seconds, nanoseconds}", () => {
+
     const seconds = 1700000000; // roughly Nov 2023
     const nanos = 500_000_000; // +0.5s
     const res = toDateSafe({ seconds, nanoseconds: nanos });
@@ -96,6 +102,7 @@ describe("formatDateSafe", () => {
     const formatted = formatDateSafe({ seconds }, "yyyy-MM-dd");
     // Basic check: should not be "Invalid date" and match pattern
     expect(formatted).not.toBe("Invalid date");
+
     expect(/\d{4}-\d{2}-\d{2}/.test(formatted)).toBe(true);
   });
 });

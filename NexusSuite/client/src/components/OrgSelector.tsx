@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+
 /* SidebarMenuButton replaces Button for TeamSwitcher parity */
 import {
   DropdownMenu,
@@ -10,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
+
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -25,6 +27,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronsUpDown, Loader2, Plus } from "lucide-react";
 import { useOrganization } from "@/contexts/OrganizationContext";
+
 import {
   Dialog,
   DialogContent,
@@ -34,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 
 type OrgSelectorProps = {
   className?: string;
@@ -48,6 +52,7 @@ type OrgSelectorProps = {
 export function OrgSelector({ className = "" }: OrgSelectorProps) {
   const { isMobile, state } = useSidebar();
   const isCollapsed = state === "collapsed";
+
   const {
     organizations,
     currentOrganization,
@@ -60,6 +65,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
   const [pendingOrgId, setPendingOrgId] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState("");
+
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSwitch = async (orgId: string) => {
@@ -77,6 +83,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
     return (
       <div className={`h-[45px] w-full rounded-lg bg-muted/40 animate-pulse ${className}`} />
     );
+
   }
 
   if (!currentOrganization) {
@@ -115,6 +122,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                       <SidebarMenuButton
                         size="icon"
                         className={`h-[45px] w-full justify-center transition-all data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${className} ${isPending ? "opacity-60" : ""}`}
+
                         disabled={isPending}
                       >
                         {isPending ? (
@@ -122,6 +130,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                         ) : (
                           <Avatar className="h-8 w-8 shrink-0 rounded-full">
                             <AvatarImage src={(currentOrganization as any)?.avatarUrl || ""} alt={currentOrganization.name} />
+
                             <AvatarFallback className="text-[11px] font-medium leading-none">
                               {initials(currentOrganization.name)}
                             </AvatarFallback>
@@ -136,6 +145,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                       >
                         <Avatar className="h-8 w-8 shrink-0 rounded-lg">
                           <AvatarImage src={(currentOrganization as any)?.avatarUrl || ""} alt={currentOrganization.name} />
+
                           <AvatarFallback className="text-[11px] font-medium leading-none">
                             {initials(currentOrganization.name)}
                           </AvatarFallback>
@@ -143,6 +153,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                         <div className="grid flex-1 text-left text-sm leading-tight overflow-hidden">
                           <span className="truncate font-medium">{currentOrganization.name}</span>
                           <span className="truncate text-xs text-muted-foreground">{currentMembership?.role ?? ""}</span>
+
                         </div>
                         {isPending ? (
                           <Loader2 className="ml-auto h-4 w-4 animate-spin opacity-70" />
@@ -159,6 +170,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                   <div className="flex flex-col">
                     <span className="font-medium text-sm">{currentOrganization.name}</span>
                     <span className="text-xs text-muted-foreground">{currentMembership?.role ?? ""}</span>
+
                   </div>
                 </TooltipContent>
               )}
@@ -168,6 +180,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
             className="min-w-56 rounded-lg"
             align="start"
             side={isMobile ? "bottom" : "right"}
+
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
@@ -183,6 +196,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
               >
                 <Avatar className="h-6 w-6 rounded-md border">
                   <AvatarImage src={(org as any)?.avatarUrl || ""} alt={org.name} />
+
                   <AvatarFallback className="text-[10px] leading-none">
                     {initials(org.name)}
                   </AvatarFallback>
@@ -198,6 +212,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2" onClick={() => { setIsCreateOpen(true); }}>
+
               <div className="flex h-6 w-6 items-center justify-center rounded-md border">
                 <Plus className="h-4 w-4" />
               </div>
@@ -214,21 +229,25 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
             <DialogTitle>Create Organization</DialogTitle>
             <DialogDescription>
               Enter a name for your new organization. You will switch to it automatically after creation.
+
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-2">
               <label htmlFor="org-name" className="text-sm font-medium">Organization Name</label>
+
               <Input
                 id="org-name"
                 placeholder="e.g. TechGear Inc."
                 value={newOrgName}
                 onChange={(e) => setNewOrgName(e.target.value)}
+
                 disabled={isCreating}
               />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isCreating}>
+
                 Cancel
               </Button>
               <Button
@@ -239,6 +258,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                     await createOrganization(newOrgName.trim());
                     setIsCreateOpen(false);
                     setNewOrgName("");
+
                   } finally {
                     setIsCreating(false);
                   }
@@ -249,6 +269,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                   <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Creating…</span>
                 ) : (
                   "Create"
+
                 )}
               </Button>
             </div>
@@ -260,3 +281,4 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
 }
 
 export default OrgSelector;
+

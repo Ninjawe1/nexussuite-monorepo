@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Download, Eye } from "lucide-react";
 
+
 interface ContractAttachmentsProps {
   contractId: string;
 }
@@ -22,16 +23,19 @@ interface ContractFile {
 export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
   contractId,
 }) => {
+
   const qc = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isReading, setIsReading] = useState(false);
 
   const queryKey = useMemo(() => ["contract-files", contractId], [contractId]);
 
+
   const { data, isLoading, error } = useQuery<ContractFile[]>({
     queryKey,
     queryFn: async () => {
       const res = await apiRequest(`/api/contracts/${contractId}/files`, "GET");
+
       return res.json();
     },
   });
@@ -47,6 +51,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
         "POST",
         payload,
       );
+
       return res.json();
     },
     onSuccess: () => {
@@ -61,6 +66,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
         `/api/contracts/${contractId}/files/${fileId}`,
         "DELETE",
       );
+
       return res.json();
     },
     onSuccess: () => {
@@ -94,6 +100,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
     } catch (err) {
       console.error(err);
       alert((err as Error)?.message || "Failed to upload file");
+
     } finally {
       setIsReading(false);
     }
@@ -109,6 +116,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
       }
     },
     [deleteMutation],
+
   );
 
   const onDownload = useCallback((file: ContractFile) => {
@@ -116,6 +124,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
     const link = document.createElement("a");
     link.href = file.base64;
     link.download = file.fileName || "download";
+
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -127,6 +136,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
     if (w) {
       const isImage = (file.contentType || "").startsWith("image/");
       const isPdf = (file.contentType || "").includes("pdf");
+
       const content = isImage
         ? `<img src="${file.base64}" style="max-width:100%;height:auto" />`
         : isPdf
@@ -135,6 +145,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
       w.document.write(
         `<!doctype html><title>${file.fileName}</title>${content}`,
       );
+
       w.document.close();
     }
   }, []);
@@ -148,6 +159,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
           disabled={!selectedFile || uploadMutation.isPending || isReading}
         >
           {uploadMutation.isPending || isReading ? "Uploading..." : "Upload"}
+
         </Button>
       </div>
 
@@ -167,6 +179,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
               key={file.id}
               className="flex items-center justify-between rounded border p-2"
             >
+
               <div className="truncate">
                 <div className="font-medium truncate">{file.fileName}</div>
                 {file.createdAt && (
@@ -190,6 +203,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
                   onClick={() => onDownload(file)}
                   title="Download"
                 >
+
                   <Download className="h-4 w-4" />
                 </Button>
                 <Button

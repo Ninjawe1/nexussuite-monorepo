@@ -18,6 +18,7 @@ import {
   CheckCircle,
   Download,
 } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -36,6 +38,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -61,6 +64,7 @@ const clubSchema = z.object({
 
 const suspendSchema = z.object({
   reason: z.string().min(1, "Please provide a reason for suspension"),
+
 });
 
 export default function AdminPage() {
@@ -75,6 +79,7 @@ export default function AdminPage() {
 
   const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
+
   });
 
   const createClubMutation = useMutation({
@@ -91,6 +96,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to create club",
         variant: "destructive",
+
       });
     },
   });
@@ -115,6 +121,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to update club",
         variant: "destructive",
+
       });
     },
   });
@@ -132,6 +139,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to delete club",
         variant: "destructive",
+
       });
     },
   });
@@ -139,6 +147,7 @@ export default function AdminPage() {
   const suspendClubMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       return await apiRequest(`/api/admin/clubs/${id}/suspend`, "POST", {
+
         reason,
       });
     },
@@ -152,6 +161,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to suspend club",
         variant: "destructive",
+
       });
     },
   });
@@ -169,6 +179,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to reactivate club",
         variant: "destructive",
+
       });
     },
   });
@@ -180,6 +191,7 @@ export default function AdminPage() {
       clubTag: "",
       subscriptionPlan: "starter",
       subscriptionStatus: "trial",
+
     },
   });
 
@@ -187,6 +199,7 @@ export default function AdminPage() {
     resolver: zodResolver(suspendSchema),
     defaultValues: {
       reason: "",
+
     },
   });
 
@@ -205,6 +218,7 @@ export default function AdminPage() {
       clubTag: club.clubTag || "",
       subscriptionPlan: (club.subscriptionPlan as any) || "starter",
       subscriptionStatus: (club.subscriptionStatus as any) || "active",
+
     });
   };
 
@@ -219,12 +233,14 @@ export default function AdminPage() {
 
   const handleSuspendClick = (club: Tenant) => {
     if (club.subscriptionStatus === "suspended") {
+
       // Reactivate without dialog
       reactivateClubMutation.mutate(club.id);
     } else {
       // Show suspension dialog
       setSuspendingClub(club);
       suspendForm.reset({ reason: "" });
+
     }
   };
 
@@ -237,6 +253,7 @@ export default function AdminPage() {
 
       if (!response.ok) {
         throw new Error("Failed to export database");
+
       }
 
       const blob = await response.blob();
@@ -244,6 +261,7 @@ export default function AdminPage() {
       const a = document.createElement("a");
       a.href = url;
       a.download = `nexus-database-export-${new Date().toISOString().split("T")[0]}.json`;
+
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -258,6 +276,7 @@ export default function AdminPage() {
         title: "Error",
         description: "Failed to export database",
         variant: "destructive",
+
       });
     }
   };
@@ -274,6 +293,7 @@ export default function AdminPage() {
           variant="outline"
           data-testid="button-export-database"
         >
+
           <Download className="h-4 w-4 mr-2" />
           Export Database
         </Button>
@@ -303,11 +323,13 @@ export default function AdminPage() {
             <CardTitle className="text-sm font-medium">
               Active Subscriptions
             </CardTitle>
+
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {clubs.filter((c) => c.subscriptionStatus === "active").length}
+
             </div>
           </CardContent>
         </Card>
@@ -323,6 +345,7 @@ export default function AdminPage() {
             <Dialog
               open={isCreateDialogOpen || !!editingClub}
               onOpenChange={(open) => {
+
                 setIsCreateDialogOpen(open);
                 if (!open) {
                   setEditingClub(null);
@@ -355,6 +378,7 @@ export default function AdminPage() {
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-4"
                   >
+
                     <FormField
                       control={form.control}
                       name="name"
@@ -384,6 +408,7 @@ export default function AdminPage() {
                               placeholder="TL"
                               data-testid="input-club-tag"
                             />
+
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -399,6 +424,7 @@ export default function AdminPage() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger data-testid="select-subscription-plan">
                                 <SelectValue />
@@ -410,6 +436,7 @@ export default function AdminPage() {
                               <SelectItem value="enterprise">
                                 Enterprise
                               </SelectItem>
+
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -426,6 +453,7 @@ export default function AdminPage() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger data-testid="select-subscription-status">
                                 <SelectValue />
@@ -437,6 +465,7 @@ export default function AdminPage() {
                               <SelectItem value="suspended">
                                 Suspended
                               </SelectItem>
+
                               <SelectItem value="canceled">Canceled</SelectItem>
                             </SelectContent>
                           </Select>
@@ -459,6 +488,7 @@ export default function AdminPage() {
                           : editingClub
                             ? "Update"
                             : "Create"}
+
                       </Button>
                     </DialogFooter>
                   </form>
@@ -475,6 +505,7 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-4">
               {clubs.map((club) => (
+
                 <div
                   key={club.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -496,6 +527,7 @@ export default function AdminPage() {
                             ? "default"
                             : "secondary"
                         }
+
                       >
                         {club.subscriptionStatus}
                       </Badge>
@@ -518,6 +550,7 @@ export default function AdminPage() {
                           )}
                         </div>
                       )}
+
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -534,11 +567,13 @@ export default function AdminPage() {
                           ? "default"
                           : "outline"
                       }
+
                       size="sm"
                       onClick={() => handleSuspendClick(club)}
                       data-testid={`button-suspend-club-${club.id}`}
                     >
                       {club.subscriptionStatus === "suspended" ? (
+
                         <>
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Reactivate
@@ -559,6 +594,7 @@ export default function AdminPage() {
                             `Delete ${club.name}? This action cannot be undone.`,
                           )
                         ) {
+
                           deleteClubMutation.mutate(club.id);
                         }
                       }}
@@ -581,6 +617,7 @@ export default function AdminPage() {
       <Dialog
         open={!!suspendingClub}
         onOpenChange={(open) => {
+
           if (!open) {
             setSuspendingClub(null);
             suspendForm.reset();
@@ -600,6 +637,7 @@ export default function AdminPage() {
               onSubmit={suspendForm.handleSubmit(onSuspendSubmit)}
               className="space-y-4"
             >
+
               <FormField
                 control={suspendForm.control}
                 name="reason"
@@ -636,6 +674,7 @@ export default function AdminPage() {
                   {suspendClubMutation.isPending
                     ? "Suspending..."
                     : "Suspend Club"}
+
                 </Button>
               </DialogFooter>
             </form>
@@ -654,11 +693,13 @@ function UsersManagement({
   users: User[];
   loadingUsers: boolean;
 }) {
+
   const { toast } = useToast();
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const userEditSchema = z.object({
     email: z.string().email("Invalid email address"),
+
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     password: z
@@ -666,6 +707,7 @@ function UsersManagement({
       .min(8, "Password must be at least 8 characters")
       .optional()
       .or(z.literal("")),
+
   });
 
   const userForm = useForm<z.infer<typeof userEditSchema>>({
@@ -675,6 +717,7 @@ function UsersManagement({
       firstName: "",
       lastName: "",
       password: "",
+
     },
   });
 
@@ -686,6 +729,7 @@ function UsersManagement({
       id: string;
       data: z.infer<typeof userEditSchema>;
     }) => {
+
       // Remove empty password from request
       const payload = { ...data };
       if (!payload.password) {
@@ -703,6 +747,7 @@ function UsersManagement({
         title: "Error",
         description: error.message || "Failed to update user",
         variant: "destructive",
+
       });
     },
   });
@@ -714,6 +759,7 @@ function UsersManagement({
       firstName: user.firstName || "",
       lastName: user.lastName || "",
       password: "",
+
     });
   };
 
@@ -731,6 +777,7 @@ function UsersManagement({
           <CardDescription>
             Manage user accounts across all clubs
           </CardDescription>
+
         </CardHeader>
         <CardContent>
           {loadingUsers ? (
@@ -740,6 +787,7 @@ function UsersManagement({
           ) : (
             <div className="space-y-4">
               {users.map((user) => (
+
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-4 border rounded-lg"
@@ -758,6 +806,7 @@ function UsersManagement({
                       <span className="text-sm text-muted-foreground">
                         {user.email}
                       </span>
+
                       <Badge variant="outline">{user.role}</Badge>
                     </div>
                   </div>
@@ -780,6 +829,7 @@ function UsersManagement({
       <Dialog
         open={!!editingUser}
         onOpenChange={(open) => {
+
           if (!open) {
             setEditingUser(null);
             userForm.reset();
@@ -798,6 +848,7 @@ function UsersManagement({
               onSubmit={userForm.handleSubmit(onUserSubmit)}
               className="space-y-4"
             >
+
               <FormField
                 control={userForm.control}
                 name="email"
@@ -810,6 +861,7 @@ function UsersManagement({
                         type="email"
                         data-testid="input-user-email"
                       />
+
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -874,6 +926,7 @@ function UsersManagement({
                   data-testid="button-submit-edit-user"
                 >
                   {updateUserMutation.isPending ? "Updating..." : "Update User"}
+
                 </Button>
               </DialogFooter>
             </form>

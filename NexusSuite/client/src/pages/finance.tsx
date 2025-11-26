@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { WalletDialog } from "@/components/wallet-dialog";
+
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectContent,
@@ -31,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +57,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 // removed direct date-fns format import; using formatDateSafe instead
 import { formatDateSafe, toDateSafe } from "@/lib/date";
+
 import {
   Plus,
   TrendingUp,
@@ -94,6 +99,7 @@ const paymentMethods = [
   { value: "paypal", label: "PayPal" },
   { value: "crypto", label: "Cryptocurrency" },
   { value: "other", label: "Other" },
+
 ];
 
 export default function Finance() {
@@ -106,6 +112,7 @@ export default function Finance() {
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/finance"],
+
   });
 
   const {
@@ -126,6 +133,7 @@ export default function Finance() {
       wallets.find((w) => w.isDefault) ??
       (wallets.length === 1 ? wallets[0] : undefined),
     [wallets],
+
   );
   const { data: monthlyData = [] } = useQuery<
     Array<{
@@ -136,6 +144,7 @@ export default function Finance() {
     }>
   >({
     queryKey: ["/api/finance/monthly"],
+
   });
 
   const handleExport = async () => {
@@ -151,6 +160,7 @@ export default function Finance() {
       const a = document.createElement("a");
       a.href = url;
       a.download = `transactions-${formatDateSafe(new Date(), "yyyy-MM-dd")}.csv`;
+
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -161,6 +171,7 @@ export default function Finance() {
       toast({
         title: "Failed to export transactions",
         variant: "destructive",
+
       });
     }
   };
@@ -178,6 +189,7 @@ export default function Finance() {
       paymentMethod: "",
       reference: "",
       walletId: "",
+
     },
   });
 
@@ -189,6 +201,7 @@ export default function Finance() {
       queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Transaction created successfully" });
+
       setIsOpen(false);
       form.reset();
     },
@@ -196,6 +209,7 @@ export default function Finance() {
       toast({
         title: "Failed to create transaction",
         variant: "destructive",
+
       });
     },
   });
@@ -214,6 +228,7 @@ export default function Finance() {
       queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       toast({ title: "Transaction updated successfully" });
+
       setIsOpen(false);
       setEditingTransaction(null);
       form.reset();
@@ -222,6 +237,7 @@ export default function Finance() {
       toast({
         title: "Failed to update transaction",
         variant: "destructive",
+
       });
     },
   });
@@ -239,6 +255,7 @@ export default function Finance() {
       toast({
         title: "Failed to delete transaction",
         variant: "destructive",
+
       });
     },
   });
@@ -257,6 +274,7 @@ export default function Finance() {
       toast({
         title: "Failed to delete wallet",
         variant: "destructive",
+
       });
     },
   });
@@ -268,6 +286,7 @@ export default function Finance() {
         title: "Invalid date",
         description: "Please provide a valid date for the transaction.",
         variant: "destructive",
+
       });
       return;
     }
@@ -278,6 +297,7 @@ export default function Finance() {
     };
     // If no wallet selected, fallback to default wallet if available
     if (!submitData.walletId || submitData.walletId === "") {
+
       if (defaultWallet?.id) {
         submitData.walletId = defaultWallet.id;
       } else {
@@ -302,6 +322,7 @@ export default function Finance() {
       paymentMethod: transaction.paymentMethod || "",
       reference: transaction.reference || "",
       walletId: transaction.walletId || "",
+
     });
     setIsOpen(true);
   };
@@ -319,6 +340,7 @@ export default function Finance() {
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const expenses = transactions
       .filter((t) => t.type === "expense")
+
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const profit = income - expenses;
     return { income, expenses, profit };
@@ -330,6 +352,7 @@ export default function Finance() {
       if (filterType !== "all" && t.type !== filterType) return false;
       if (filterCategory !== "all" && t.category !== filterCategory)
         return false;
+
       return true;
     });
   }, [transactions, filterType, filterCategory]);
@@ -337,6 +360,7 @@ export default function Finance() {
   const selectedType = form.watch("type");
   const categories =
     selectedType === "income" ? incomeCategories : expenseCategories;
+
 
   return (
     <div className="p-6 space-y-6">
@@ -353,6 +377,7 @@ export default function Finance() {
             onClick={handleExport}
             data-testid="button-export-transactions"
           >
+
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -367,6 +392,7 @@ export default function Finance() {
                 onClick={() => setIsOpen(true)}
                 data-testid="button-add-transaction"
               >
+
                 <Plus className="h-4 w-4 mr-2" />
                 Add Transaction
               </Button>
@@ -379,6 +405,7 @@ export default function Finance() {
               <DialogHeader>
                 <DialogTitle>
                   {editingTransaction ? "Edit Transaction" : "Add Transaction"}
+
                 </DialogTitle>
               </DialogHeader>
 
@@ -387,6 +414,7 @@ export default function Finance() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-4"
                 >
+
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -398,6 +426,7 @@ export default function Finance() {
                             onValueChange={(value) => {
                               field.onChange(value);
                               form.setValue("category", "");
+
                             }}
                             value={field.value}
                           >
@@ -426,6 +455,7 @@ export default function Finance() {
                             onValueChange={field.onChange}
                             value={field.value}
                           >
+
                             <FormControl>
                               <SelectTrigger data-testid="select-category">
                                 <SelectValue placeholder="Select category" />
@@ -433,6 +463,7 @@ export default function Finance() {
                             </FormControl>
                             <SelectContent>
                               {categories.map((cat) => (
+
                                 <SelectItem key={cat.value} value={cat.value}>
                                   {cat.label}
                                 </SelectItem>
@@ -478,6 +509,7 @@ export default function Finance() {
                               type="date"
                               data-testid="input-date"
                             />
+
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -514,6 +546,7 @@ export default function Finance() {
                             onValueChange={field.onChange}
                             value={field.value || ""}
                           >
+
                             <FormControl>
                               <SelectTrigger data-testid="select-payment-method">
                                 <SelectValue placeholder="Select method" />
@@ -525,6 +558,7 @@ export default function Finance() {
                                   key={method.value}
                                   value={method.value}
                                 >
+
                                   {method.label}
                                 </SelectItem>
                               ))}
@@ -564,6 +598,7 @@ export default function Finance() {
                             field.onChange(v === "none" ? "" : v)
                           }
                           value={field.value === "" ? "none" : field.value}
+
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-wallet">
@@ -575,6 +610,7 @@ export default function Finance() {
                               No wallet
                             </SelectItem>
                             {wallets.map((w) => (
+
                               <SelectItem key={w.id} value={w.id}>
                                 {w.name} ({w.currency.toUpperCase()})
                               </SelectItem>
@@ -603,6 +639,7 @@ export default function Finance() {
                       data-testid="button-submit"
                     >
                       {editingTransaction ? "Update" : "Create"} Transaction
+
                     </Button>
                   </div>
                 </form>
@@ -629,6 +666,7 @@ export default function Finance() {
             <p className="text-xs text-muted-foreground mt-1">
               {transactions.filter((t) => t.type === "income").length}{" "}
               transactions
+
             </p>
           </CardContent>
         </Card>
@@ -650,6 +688,7 @@ export default function Finance() {
             <p className="text-xs text-muted-foreground mt-1">
               {transactions.filter((t) => t.type === "expense").length}{" "}
               transactions
+
             </p>
           </CardContent>
         </Card>
@@ -659,12 +698,14 @@ export default function Finance() {
             <CardTitle className="text-sm font-medium">
               Net Profit/Loss
             </CardTitle>
+
             <DollarSign className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div
               className={`text-2xl font-bold font-mono ${
                 summary.profit >= 0 ? "text-success" : "text-destructive"
+
               }`}
               data-testid="text-profit"
             >
@@ -672,6 +713,7 @@ export default function Finance() {
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {summary.profit >= 0 ? "Profitable" : "Loss"}
+
             </p>
           </CardContent>
         </Card>
@@ -700,6 +742,7 @@ export default function Finance() {
           <div className="text-sm text-destructive">
             Failed to load wallets.
           </div>
+
         ) : wallets.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
@@ -720,6 +763,7 @@ export default function Finance() {
               const typeLabel = w.type
                 .replace(/_/g, " ")
                 .replace(/^\w/, (c) => c.toUpperCase());
+
               return (
                 <Card
                   key={w.id}
@@ -732,6 +776,7 @@ export default function Finance() {
                         <CardTitle className="text-base leading-tight">
                           {w.name}
                         </CardTitle>
+
                         <div className="text-xs text-muted-foreground mt-1">
                           {typeLabel} • {w.currency.toUpperCase()}
                         </div>
@@ -768,6 +813,7 @@ export default function Finance() {
                                 {w.name}". Transactions linked to this wallet
                                 will remain, but may show with an unknown wallet
                                 label. This action cannot be undone.
+
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -776,6 +822,7 @@ export default function Finance() {
                                 onClick={() =>
                                   deleteWalletMutation.mutate(w.id)
                                 }
+
                                 data-testid={`confirm-delete-wallet-${w.id}`}
                               >
                                 Delete
@@ -815,6 +862,7 @@ export default function Finance() {
                 height={300}
                 xTickFormatter={(value: any) => {
                   const v = String(value ?? "");
+
                   const m = v.match(/^(\d{4})-(\d{2})$/);
                   if (m) {
                     const d = new Date(Number(m[1]), Number(m[2]) - 1, 1);
@@ -826,6 +874,7 @@ export default function Finance() {
                         });
                   }
                   return v || "Unknown";
+
                 }}
                 yTickFormatter={(value: number) => `$${value.toLocaleString()}`}
               />
@@ -847,6 +896,7 @@ export default function Finance() {
                 className="w-[180px]"
                 data-testid="select-filter-type"
               >
+
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
@@ -861,11 +911,13 @@ export default function Finance() {
                 className="w-[180px]"
                 data-testid="select-filter-category"
               >
+
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {[...incomeCategories, ...expenseCategories].map((cat) => (
+
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>
@@ -893,6 +945,7 @@ export default function Finance() {
           ) : (
             <div className="space-y-2">
               {filteredTransactions.map((transaction) => (
+
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-4 rounded-lg border hover-elevate active-elevate-2"
@@ -907,6 +960,7 @@ export default function Finance() {
                       }`}
                     >
                       {transaction.type === "income" ? (
+
                         <TrendingUp className="h-5 w-5" />
                       ) : (
                         <TrendingDown className="h-5 w-5" />
@@ -928,6 +982,7 @@ export default function Finance() {
                           }
                         >
                           {transaction.category.replace(/_/g, " ")}
+
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -951,6 +1006,7 @@ export default function Finance() {
                             {walletMap[transaction.walletId]?.currency
                               ? `(${walletMap[transaction.walletId]?.currency.toUpperCase()})`
                               : ""}
+
                           </span>
                         )}
                       </div>
@@ -964,6 +1020,7 @@ export default function Finance() {
                       data-testid={`text-amount-${transaction.id}`}
                     >
                       {transaction.type === "income" ? "+" : "-"}$
+
                       {parseFloat(transaction.amount).toFixed(2)}
                     </div>
                   </div>
@@ -994,6 +1051,7 @@ export default function Finance() {
                           <AlertDialogDescription>
                             Are you sure you want to delete this transaction?
                             This action cannot be undone.
+
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -1004,6 +1062,7 @@ export default function Finance() {
                             onClick={() =>
                               deleteMutation.mutate(transaction.id)
                             }
+
                             data-testid="button-confirm-delete"
                           >
                             Delete
@@ -1044,6 +1103,7 @@ export default function Finance() {
     const safe = Number.isFinite(numeric) ? numeric : 0;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
+
       currency: code,
       maximumFractionDigits: 2,
     }).format(safe);

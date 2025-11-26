@@ -16,6 +16,7 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold tracking-tight">
@@ -72,6 +73,7 @@ export function LoginForm({
                     placeholder="m@example.com"
                     required
                   />
+
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
@@ -91,6 +93,7 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
+
                 <a href="/register" className="underline underline-offset-4">
                   Sign up
                 </a>
@@ -102,6 +105,7 @@ export function LoginForm({
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
         By clicking continue, you agree to our{" "}
         <a href="/terms">Terms of Service</a> and{" "}
+
         <a href="/privacy">Privacy Policy</a>.
       </div>
     </div>

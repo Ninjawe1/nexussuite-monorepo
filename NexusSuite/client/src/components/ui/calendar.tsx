@@ -49,6 +49,7 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+
         ...classNames,
       }}
       components={{
@@ -57,6 +58,7 @@ function Calendar({
         ),
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={tweakcn("h-4 w-4", className)} {...props} />
+
         ),
       }}
       {...props}
@@ -64,5 +66,6 @@ function Calendar({
   );
 }
 Calendar.displayName = "Calendar";
+
 
 export { Calendar };

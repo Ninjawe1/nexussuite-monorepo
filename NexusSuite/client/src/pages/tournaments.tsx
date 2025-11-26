@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+
 import {
   Plus,
   Trophy,
@@ -16,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Tournament, TournamentRound, Match } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +42,7 @@ const formatStatusBadge = (status: string) => {
   return (
     statusColors[status as keyof typeof statusColors] || statusColors.upcoming
   );
+
 };
 
 const formatFormatBadge = (formatType: string) => {
@@ -56,6 +59,7 @@ const formatFormatBadge = (formatType: string) => {
   return (
     formatColors[formatType as keyof typeof formatColors] || formatColors.custom
   );
+
 };
 
 function TournamentCard({
@@ -77,6 +81,7 @@ function TournamentCard({
     TournamentRound[]
   >({
     queryKey: ["/api/tournaments", tournament.id, "rounds"],
+
     enabled: isExpanded,
   });
 
@@ -89,6 +94,7 @@ function TournamentCard({
       toast({
         title: "Success",
         description: "Tournament deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -100,6 +106,7 @@ function TournamentCard({
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -107,6 +114,7 @@ function TournamentCard({
         title: "Error",
         description: error.message || "Failed to delete tournament",
         variant: "destructive",
+
       });
     },
   });
@@ -117,6 +125,7 @@ function TournamentCard({
         "Are you sure? This will delete the tournament and all its rounds and matches.",
       )
     ) {
+
       await deleteTournamentMutation.mutateAsync(id);
     }
   };
@@ -151,6 +160,7 @@ function TournamentCard({
             <p className="text-sm text-muted-foreground truncate ml-14">
               {tournament.description}
             </p>
+
           )}
         </div>
         <DropdownMenu>
@@ -192,6 +202,7 @@ function TournamentCard({
           <Badge
             variant="outline"
             className={tweakcn("border", formatStatusBadge(tournament.status))}
+
           >
             {tournament.status}
           </Badge>
@@ -200,6 +211,7 @@ function TournamentCard({
             className={tweakcn("border", formatFormatBadge(tournament.format))}
           >
             {tournament.format.replace("-", " ")}
+
           </Badge>
           {tournament.game && (
             <Badge variant="outline">
@@ -213,11 +225,13 @@ function TournamentCard({
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
             <span>{formatDateSafe(tournament.startDate, "MMM d, yyyy")}</span>
+
           </div>
           {tournament.endDate && (
             <div className="flex items-center gap-1">
               <span>-</span>
               <span>{formatDateSafe(tournament.endDate, "MMM d, yyyy")}</span>
+
             </div>
           )}
           {tournament.maxTeams && (
@@ -241,6 +255,7 @@ function TournamentCard({
               </div>
             ) : (
               rounds.map((round) => (
+
                 <RoundItem
                   key={round.id}
                   round={round}
@@ -271,6 +286,7 @@ function RoundItem({
 
   const { data: matches = [], isLoading: loadingMatches } = useQuery<Match[]>({
     queryKey: ["/api/rounds", round.id, "matches"],
+
     enabled: isExpanded,
   });
 
@@ -288,6 +304,7 @@ function RoundItem({
       toast({
         title: "Success",
         description: "Round deleted successfully",
+
       });
     },
     onError: (error: Error) => {
@@ -299,6 +316,7 @@ function RoundItem({
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -306,12 +324,14 @@ function RoundItem({
         title: "Error",
         description: error.message || "Failed to delete round",
         variant: "destructive",
+
       });
     },
   });
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure? This will delete all matches in this round.")) {
+
       await deleteRoundMutation.mutateAsync(id);
     }
   };
@@ -338,6 +358,7 @@ function RoundItem({
               className="text-base truncate"
               data-testid={`text-round-name-${round.id}`}
             >
+
               {round.name}
             </CardTitle>
           </div>
@@ -345,6 +366,7 @@ function RoundItem({
             <p className="text-sm text-muted-foreground truncate ml-14">
               {round.description}
             </p>
+
           )}
         </div>
         <DropdownMenu>
@@ -394,6 +416,7 @@ function RoundItem({
                   key={match.id}
                   className="flex items-center justify-between gap-3"
                 >
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">{match.team1}</Badge>
@@ -411,6 +434,7 @@ function RoundItem({
                             "MMM d, yyyy h:mm a",
                           )}
                         </span>
+
                       </div>
                     )}
                     {match.result && (
@@ -430,6 +454,7 @@ function RoundItem({
                           : match.result === "team2"
                             ? match.team2
                             : "draw"}
+
                       </Badge>
                     )}
                   </div>
@@ -462,6 +487,7 @@ export default function TournamentsPage() {
       toast({
         title: "Success",
         description: "Tournament created successfully",
+
       });
       setDialogOpen(false);
     },
@@ -474,6 +500,7 @@ export default function TournamentsPage() {
         });
         setTimeout(() => {
           window.location.href = "/login";
+
         }, 500);
         return;
       }
@@ -481,11 +508,13 @@ export default function TournamentsPage() {
         title: "Error",
         description: error.message || "Failed to create tournament",
         variant: "destructive",
+
       });
     },
   });
 
   const handleCreateTournament = async (payload: Omit<Tournament, "id">) => {
+
     await createTournamentMutation.mutateAsync(payload);
   };
 
@@ -523,6 +552,7 @@ export default function TournamentsPage() {
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {tournaments.map((tournament) => (
+
             <TournamentCard
               key={tournament.id}
               tournament={tournament}

@@ -14,6 +14,7 @@ const demoPosts = [
   { id: "p1", title: "New Feature: Campaign Analytics", status: "pending" },
   { id: "p2", title: "Tips: Growing your Club", status: "approved" },
   { id: "p3", title: "Case Study: Phoenix Esports", status: "rejected" },
+
 ];
 
 export default function AdminContentPage() {
@@ -31,6 +32,7 @@ export default function AdminContentPage() {
   const exportData = () =>
     toast({
       title: "Export",
+
       description: `Exported as ${exportFormat.toUpperCase()} (demo)`,
     });
 
@@ -41,6 +43,7 @@ export default function AdminContentPage() {
         <p className="text-muted-foreground">
           Manage content, approvals, and data exports
         </p>
+
       </div>
 
       <Card>
@@ -51,6 +54,7 @@ export default function AdminContentPage() {
         <CardContent>
           <ul className="space-y-3">
             {demoPosts.map((p) => (
+
               <li
                 key={p.id}
                 className="flex items-center justify-between p-3 border border-border rounded-lg"
@@ -74,6 +78,7 @@ export default function AdminContentPage() {
                     variant="destructive"
                     onClick={() => reject(p.id)}
                   >
+
                     Reject
                   </Button>
                 </div>
@@ -97,6 +102,7 @@ export default function AdminContentPage() {
               className="w-40"
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value)}
+
             />
             <Button variant="outline" onClick={exportData}>
               Export
@@ -113,6 +119,7 @@ export default function AdminContentPage() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
+
               <div
                 key={i}
                 className="aspect-square bg-muted rounded-lg flex items-center justify-center text-muted-foreground"

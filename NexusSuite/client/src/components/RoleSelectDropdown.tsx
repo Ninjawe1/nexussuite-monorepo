@@ -2,6 +2,7 @@ import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
+
 interface RoleSelectDropdownProps {
   value: string;
   onChange: (value: string) => void;
@@ -30,6 +31,7 @@ export function RoleSelectDropdown({ value, onChange, disabled, className }: Rol
         {ROLE_OPTIONS.map((opt) => {
           const isOwnerOption = opt.value === "owner";
           const disableOwner = isOwnerOption && requesterRole !== "owner";
+
           return (
             <SelectItem key={opt.value} value={opt.value} disabled={disableOwner}>
               {opt.label}
@@ -42,3 +44,4 @@ export function RoleSelectDropdown({ value, onChange, disabled, className }: Rol
 }
 
 export default RoleSelectDropdown;
+
