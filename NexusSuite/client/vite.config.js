@@ -65,6 +65,17 @@ export default defineConfig(({ mode }) => {
         // Allow frontend to import shared types/schemas from the monorepo shared folder
         '@shared': path.resolve(__dirname, '../shared')
       }
+    },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+            ui: ['@radix-ui/react-icons', 'lucide-react', 'recharts', 'framer-motion']
+          }
+        }
+      }
     }
   }
 })

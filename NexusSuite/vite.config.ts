@@ -53,6 +53,15 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
+          ui: ['@radix-ui/react-icons', 'lucide-react', 'recharts', 'framer-motion']
+        }
+      }
+    }
   },
 
   // ✅ Unified server config (Vite + Express = one port)
