@@ -79,7 +79,7 @@ const demoTenants: Tenant[] = [
     name: "Phoenix Esports",
     clubTag: "PHX",
     logoUrl: "",
-    primaryColor: "#a855f7",
+    primaryColor: "#f97316",
     website: "",
     region: "NA",
     subscriptionPlan: "growth",

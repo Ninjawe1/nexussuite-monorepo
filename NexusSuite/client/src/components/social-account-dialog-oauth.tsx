@@ -44,12 +44,12 @@ const platformIcons: Record<string, any> = {
 };
 
 const platformColors: Record<string, string> = {
-  instagram: "bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500",
+  instagram: "bg-gradient-to-br from-orange-500 to-red-500",
   twitter: "bg-black",
   facebook: "bg-blue-600",
   tiktok: "bg-black",
   youtube: "bg-red-600",
-  twitch: "bg-purple-600",
+  twitch: "bg-zinc-800",
 };
 
 export function SocialAccountOAuthDialog({

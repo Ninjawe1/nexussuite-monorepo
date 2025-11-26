@@ -497,7 +497,7 @@ export default function Settings() {
   const [clubTag, setClubTag] = useState("");
   const [website, setWebsite] = useState("");
   const [region, setRegion] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("#a855f7");
+  const [primaryColor, setPrimaryColor] = useState("#f97316");
   const [logoUrl, setLogoUrl] = useState("");
 
   const { data: tenant, isLoading } = useQuery<Tenant>({
@@ -511,7 +511,7 @@ export default function Settings() {
       setClubTag(tenant.clubTag || "");
       setWebsite(tenant.website || "");
       setRegion(tenant.region || "");
-      setPrimaryColor(tenant.primaryColor || "#a855f7");
+      setPrimaryColor(tenant.primaryColor || "#f97316");
       setLogoUrl(tenant.logoUrl || "");
 
     }

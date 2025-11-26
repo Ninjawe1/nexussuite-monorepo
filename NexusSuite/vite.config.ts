@@ -58,7 +58,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
-          ui: ['@radix-ui/react-icons', 'lucide-react', 'recharts', 'framer-motion']
+          ui: ['lucide-react', 'recharts', 'framer-motion']
         }
       }
     }

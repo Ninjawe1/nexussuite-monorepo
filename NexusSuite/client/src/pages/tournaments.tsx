@@ -48,13 +48,13 @@ const formatStatusBadge = (status: string) => {
 const formatFormatBadge = (formatType: string) => {
   const formatColors = {
     "single-elimination":
-      "bg-purple-500/10 text-purple-500 border-purple-500/20",
+      "bg-primary/10 text-primary border-primary/20",
     "double-elimination":
-      "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+      "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
     "round-robin": "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
     league: "bg-teal-500/10 text-teal-500 border-teal-500/20",
     swiss: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-    custom: "bg-pink-500/10 text-pink-500 border-pink-500/20",
+    custom: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
   };
   return (
     formatColors[formatType as keyof typeof formatColors] || formatColors.custom

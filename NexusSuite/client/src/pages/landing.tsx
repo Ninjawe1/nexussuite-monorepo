@@ -98,7 +98,7 @@ export default function Landing() {
             </Button>
             <Button
               size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 fx-glow"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => (window.location.href = "/register")}
             >
               Get Started <ArrowRight className="w-4 h-4 ml-2" />
@@ -134,7 +134,7 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
                   size="lg"
-                  className="text-lg px-8 h-12 bg-primary hover:bg-primary/90 fx-glow"
+                  className="text-lg px-8 h-12 bg-primary hover:bg-primary/90"
                   onClick={() => (window.location.href = "/register")}
                 >
                   <Trophy className="w-5 h-5 mr-2" />
@@ -163,7 +163,6 @@ export default function Landing() {
 
             {/* Hero Visual / Dashboard Preview */}
             <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/50 rounded-2xl blur opacity-20 animate-pulse"></div>
               <div className="relative glass rounded-2xl border border-white/10 p-2 shadow-2xl">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-2xl pointer-events-none"></div>
                 
@@ -330,7 +329,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
                 size="lg"
-                className="text-lg px-10 h-14 bg-primary hover:bg-primary/90 fx-glow"
+                className="text-lg px-10 h-14 bg-primary hover:bg-primary/90"
                 onClick={() => (window.location.href = "/register")}
               >
                 Get Started Now

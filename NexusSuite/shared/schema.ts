@@ -50,7 +50,7 @@ export const tenants = pgTable("tenants", {
   name: varchar("name").notNull(),
   clubTag: varchar("club_tag"),
   logoUrl: varchar("logo_url"),
-  primaryColor: varchar("primary_color").default("#a855f7"),
+  primaryColor: varchar("primary_color").default("#f97316"),
   website: varchar("website"),
   region: varchar("region"),
   // Subscription fields

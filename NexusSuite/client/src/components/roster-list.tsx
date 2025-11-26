@@ -58,7 +58,7 @@ export function RosterList({
       case "International competitive":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "Local Competitive":
-        return "bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200";
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
       case "Academy":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       default:
@@ -136,7 +136,7 @@ export function RosterList({
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
                     {(roster.name || "").trim().charAt(0).toUpperCase() || "?"}
 
                   </AvatarFallback>
@@ -246,7 +246,7 @@ export function RosterList({
                         key={i}
                         className="h-6 w-6 border-2 border-background"
                       >
-                        <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                           P
                         </AvatarFallback>
                       </Avatar>
