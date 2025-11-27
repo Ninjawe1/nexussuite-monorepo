@@ -1,4 +1,4 @@
-import { getFirestoreDb } from "./firebase";
+import { getFirestoreDb } from "./firebase.js";
 import type {
   User, UpsertUser,
   Tenant, InsertTenant,
@@ -16,8 +16,8 @@ import type {
   TournamentRound, InsertTournamentRound,
   Roster, InsertRoster,
   Wallet, InsertWallet, // <-- already present per your view
-} from "../shared/schema";
-import type { IStorage } from "./storage";
+} from "../shared/schema.js";
+import type { IStorage } from "./storage.js";
 
 type WithId<T> = T & { id: string };
 
@@ -49,7 +49,7 @@ async function getById<T>(collection: string, id: string): Promise<WithId<T> | u
 
 async function listAll<T>(collection: string): Promise<WithId<T>[]> {
   const snap = await col(collection).get();
-  return snap.docs.map(d => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
+  return snap.docs.map((d: any) => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
 }
 
 async function listByTenant<T>(collection: string, tenantId: string, orderField = "createdAt"): Promise<WithId<T>[]> {
@@ -58,13 +58,13 @@ async function listByTenant<T>(collection: string, tenantId: string, orderField 
       .where("tenantId", "==", tenantId)
       .orderBy(orderField, "desc")
       .get();
-    return snap.docs.map(d => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
+    return snap.docs.map((d: any) => { const raw = d.data() as any; const { id: _id, ...rest } = raw; return { id: d.id, ...rest } as WithId<T>; });
   } catch (err: any) {
     if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
       const snap = await col(collection)
         .where("tenantId", "==", tenantId)
         .get();
-      const items = snap.docs.map(d => {
+      const items = snap.docs.map((d: any) => {
         const data = d.data() as any;
         const { id: _id, ...rest } = data;
         return { id: d.id, ...rest } as WithId<T>;
@@ -254,7 +254,7 @@ class FirestoreStorage implements IStorage {
   // Rounds
   async getRoundsByTournament(tournamentId: string): Promise<TournamentRound[]> {
     const snap = await col("tournamentRounds").where("tournamentId", "==", tournamentId).orderBy("createdAt", "desc").get();
-    return snap.docs.map(d => { const data = d.data() as Omit<TournamentRound, "id">; return { id: d.id, ...data }; });
+    return snap.docs.map((d: any) => { const data = d.data() as Omit<TournamentRound, "id">; return { id: d.id, ...data }; });
   }
   async getRound(id: string, tournamentId: string): Promise<TournamentRound | undefined> {
     const s = await getById<TournamentRound>("tournamentRounds", id);
@@ -280,7 +280,7 @@ class FirestoreStorage implements IStorage {
         .where("tournamentId", "==", tournamentId)
         .orderBy("matchNumber")
         .get();
-      return snap.docs.map(d => {
+      return snap.docs.map((d: any) => {
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as Match;
@@ -288,7 +288,7 @@ class FirestoreStorage implements IStorage {
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("matches").where("tournamentId", "==", tournamentId).get();
-        const items = snap.docs.map(d => {
+        const items = snap.docs.map((d: any) => {
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as Match;
@@ -309,7 +309,7 @@ class FirestoreStorage implements IStorage {
         .where("roundId", "==", roundId)
         .orderBy("matchNumber")
         .get();
-      return snap.docs.map(d => {
+      return snap.docs.map((d: any) => {
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as Match;
@@ -317,7 +317,7 @@ class FirestoreStorage implements IStorage {
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("matches").where("roundId", "==", roundId).get();
-        const items = snap.docs.map(d => {
+        const items = snap.docs.map((d: any) => {
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as Match;
@@ -398,7 +398,7 @@ class FirestoreStorage implements IStorage {
         .where("contractId", "==", contractId)
         .orderBy("createdAt", "desc")
         .get();
-      return snap.docs.map(d => {
+      return snap.docs.map((d: any) => {
         const data = d.data() as any;
         const { id: _id, ...rest } = data;
         return { id: d.id, ...rest };
@@ -455,13 +455,13 @@ class FirestoreStorage implements IStorage {
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
-      return snap.docs.map(d => { const data = d.data() as Omit<AuditLog, "id">; return { id: d.id, ...data }; });
+      return snap.docs.map((d: any) => { const data = d.data() as Omit<AuditLog, "id">; return { id: d.id, ...data }; });
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("auditLogs")
           .where("tenantId", "==", tenantId)
           .get();
-        const items = snap.docs.map(d => {
+        const items = snap.docs.map((d: any) => {
           const data = d.data() as Omit<AuditLog, "id">;
           return { id: d.id, ...data };
         });
@@ -479,7 +479,7 @@ class FirestoreStorage implements IStorage {
   }
   async getAllAuditLogs(limit = 1000): Promise<AuditLog[]> {
     const snap = await col("auditLogs").orderBy("createdAt", "desc").limit(limit).get();
-    return snap.docs.map(d => {
+    return snap.docs.map((d: any) => {
       const data = d.data() as Omit<AuditLog, "id">;
       return { id: d.id, ...data };
     });
@@ -543,7 +543,7 @@ class FirestoreStorage implements IStorage {
         .orderBy("date", "desc")
         .limit(limit)
         .get();
-      return snap.docs.map(d => {
+      return snap.docs.map((d: any) => {
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as SocialMetric;
@@ -553,7 +553,7 @@ class FirestoreStorage implements IStorage {
         const snap = await col("socialMetrics")
           .where("tenantId", "==", tenantId)
           .get();
-        const items = snap.docs.map(d => {
+        const items = snap.docs.map((d: any) => {
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as SocialMetric;

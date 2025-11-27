@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { setupAuth, isAuthenticated } from "./auth";
+import { setupAuth, isAuthenticated } from "./auth.js";
 import crypto from "crypto";
 
 function makeToken() {
