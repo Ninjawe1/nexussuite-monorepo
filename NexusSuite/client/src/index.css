@@ -124,14 +124,14 @@
 
   .border-glow {
     position: relative;
-    border: 1px solid rgba(var(--primary), 0.3);
-    box-shadow: 0 0 15px -5px rgba(var(--primary), 0.3);
+    border: 1px solid color-mix(in srgb, var(--primary), transparent 70%);
+    box-shadow: 0 0 15px -5px color-mix(in srgb, var(--primary), transparent 70%);
     transition: all 0.3s ease;
   }
 
   .border-glow:hover {
-    border-color: rgba(var(--primary), 0.6);
-    box-shadow: 0 0 20px -5px rgba(var(--primary), 0.5);
+    border-color: color-mix(in srgb, var(--primary), transparent 40%);
+    box-shadow: 0 0 20px -5px color-mix(in srgb, var(--primary), transparent 50%);
   }
 
   .scanline {

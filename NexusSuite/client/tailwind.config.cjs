@@ -1,3 +1,12 @@
+const withOpacity = (variable) => {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `color-mix(in srgb, var(${variable}), transparent ${100 - opacityValue * 100}%)`;
+    }
+    return `var(${variable})`;
+  };
+};
+
 module.exports = {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
@@ -9,69 +18,62 @@ module.exports = {
         sm: ".1875rem", // 3px
       },
       colors: {
-        // Use CSS variables directly so OKLCH values in theme.css work
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        border: "var(--border)",
-        input: "var(--input)",
+        // Use CSS variables with opacity support via color-mix
+        background: withOpacity("--background"),
+        foreground: withOpacity("--foreground"),
+        border: withOpacity("--border"),
+        input: withOpacity("--input"),
+        ring: withOpacity("--ring"),
         card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
-          border: "var(--card-border)",
+          DEFAULT: withOpacity("--card"),
+          foreground: withOpacity("--card-foreground"),
+          border: withOpacity("--border"),
         },
         popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-          border: "var(--popover-border)",
+          DEFAULT: withOpacity("--popover"),
+          foreground: withOpacity("--popover-foreground"),
+          border: withOpacity("--border"),
         },
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-          border: "var(--primary-border)",
+          DEFAULT: withOpacity("--primary"),
+          foreground: withOpacity("--primary-foreground"),
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-          border: "var(--secondary-border)",
+          DEFAULT: withOpacity("--secondary"),
+          foreground: withOpacity("--secondary-foreground"),
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-          border: "var(--muted-border)",
+          DEFAULT: withOpacity("--muted"),
+          foreground: withOpacity("--muted-foreground"),
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-          border: "var(--accent-border)",
+          DEFAULT: withOpacity("--accent"),
+          foreground: withOpacity("--accent-foreground"),
         },
         destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
-          border: "var(--destructive-border)",
+          DEFAULT: withOpacity("--destructive"),
+          foreground: withOpacity("--destructive-foreground"),
         },
-        ring: "var(--ring)",
         chart: {
-          1: "var(--chart-1)",
-          2: "var(--chart-2)",
-          3: "var(--chart-3)",
-          4: "var(--chart-4)",
-          5: "var(--chart-5)",
+          1: withOpacity("--chart-1"),
+          2: withOpacity("--chart-2"),
+          3: withOpacity("--chart-3"),
+          4: withOpacity("--chart-4"),
+          5: withOpacity("--chart-5"),
         },
         sidebar: {
-          ring: "var(--sidebar-ring)",
-          DEFAULT: "var(--sidebar)",
-          foreground: "var(--sidebar-foreground)",
-          border: "var(--sidebar-border)",
+          ring: withOpacity("--sidebar-ring"),
+          DEFAULT: withOpacity("--sidebar"),
+          foreground: withOpacity("--sidebar-foreground"),
+          border: withOpacity("--sidebar-border"),
         },
         "sidebar-primary": {
-          DEFAULT: "var(--sidebar-primary)",
-          foreground: "var(--sidebar-primary-foreground)",
-          border: "var(--sidebar-primary-border)",
+          DEFAULT: withOpacity("--sidebar-primary"),
+          foreground: withOpacity("--sidebar-primary-foreground"),
         },
         "sidebar-accent": {
-          DEFAULT: "var(--sidebar-accent)",
-          foreground: "var(--sidebar-accent-foreground)",
-          border: "var(--sidebar-accent-border)",
+          DEFAULT: withOpacity("--sidebar-accent"),
+          foreground: withOpacity("--sidebar-accent-foreground"),
         },
         status: {
           online: "rgb(34 197 94)",

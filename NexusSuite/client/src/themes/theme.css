@@ -195,3 +195,18 @@
 body {
   letter-spacing: var(--tracking-normal);
 }
+
+/* === ATOMIC (DEEP TEAL) THEME ====================================== */
+.atomic {
+  /* Atomic color tokens – switch core brand to deep teal */
+  --primary: hsl(166 72% 45%); /* emerald */
+  --primary-foreground: hsl(0 0% 98%);
+  --ring: hsl(166 72% 45%);
+  --accent: hsl(170 30% 22%);
+  --accent-foreground: hsl(0 0% 92%);
+  --chart-1: hsl(166 72% 50%);
+  --chart-2: hsl(187 92% 45%);
+  --chart-3: hsl(199 89% 48%);
+  --chart-4: hsl(45 97% 55%);
+  --chart-5: hsl(0 75% 55%);
+}
