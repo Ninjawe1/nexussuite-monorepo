@@ -86,7 +86,7 @@ export default function Landing() {
   ];
 
   return (
-    <div id="landing-page-root" className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 selection:text-primary">
+    <div id="landing-page-root" className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden selection:bg-[#00dca5]/20 selection:text-[#00dca5]">
       {/* Background Grid Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:24px_24px]"></div>

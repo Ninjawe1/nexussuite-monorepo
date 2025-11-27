@@ -38,14 +38,28 @@
 /* 3️⃣ Optional: utility layer for simple fixes and animations */
 /* Landing Page Overrides - High Specificity */
 #landing-page-root {
-  --primary: hsl(166 72% 45%) !important;
-  --primary-foreground: hsl(0 0% 98%) !important;
-  --ring: hsl(166 72% 45%) !important;
-  --accent: hsl(170 30% 22%) !important;
-  --accent-foreground: hsl(0 0% 92%) !important;
-  --muted: hsl(170 30% 15%) !important;
-  --muted-foreground: hsl(166 20% 70%) !important;
-  --background: hsl(0 0% 4%) !important; /* Deep black for contrast */
+  /* Atomic Theme Colors (Deep Teal) */
+  --primary: 166 72% 45%;
+  --primary-foreground: 0 0% 98%;
+  --ring: 166 72% 45%;
+  --accent: 170 30% 22%;
+  --accent-foreground: 0 0% 92%;
+  --muted: 170 30% 15%;
+  --muted-foreground: 166 20% 70%;
+  --background: 0 0% 4%;
+  --foreground: 0 0% 98%;
+  
+  /* Force these colors on the root element itself */
+  background-color: hsl(0 0% 4%) !important;
+  color: hsl(0 0% 98%) !important;
+}
+
+/* Re-declare variables for Tailwind usage within the ID scope if needed */
+#landing-page-root {
+  --primary: hsl(166 72% 45%);
+  --primary-foreground: hsl(0 0% 98%);
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 98%);
 }
 
 @layer utilities {
