@@ -36,6 +36,18 @@
 }
 
 /* 3️⃣ Optional: utility layer for simple fixes and animations */
+/* Landing Page Overrides - High Specificity */
+#landing-page-root {
+  --primary: hsl(166 72% 45%) !important;
+  --primary-foreground: hsl(0 0% 98%) !important;
+  --ring: hsl(166 72% 45%) !important;
+  --accent: hsl(170 30% 22%) !important;
+  --accent-foreground: hsl(0 0% 92%) !important;
+  --muted: hsl(170 30% 15%) !important;
+  --muted-foreground: hsl(166 20% 70%) !important;
+  --background: hsl(0 0% 4%) !important; /* Deep black for contrast */
+}
+
 @layer utilities {
   /* Ensure heading utility maps to Geist Mono globally */
   .font-heading {
@@ -118,13 +130,13 @@
   .glass {
     background: linear-gradient(
       135deg,
-      rgba(13, 13, 13, 0.7) 0%,
-      rgba(13, 13, 13, 0.5) 100%
-    );
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    ) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
   }
 
   .border-glow {
