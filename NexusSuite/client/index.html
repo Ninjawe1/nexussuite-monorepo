@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark atomic">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
@@ -14,12 +14,17 @@
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
         var designTheme = localStorage.getItem('design:theme');
-        if (designTheme && ['nova','aqua','atomic'].includes(designTheme)) {
+        if (!designTheme) {
+          designTheme = 'atomic';
+          localStorage.setItem('design:theme', designTheme);
+        }
+        if (['nova','aqua','atomic'].includes(designTheme)) {
           document.documentElement.classList.remove('nova','aqua','atomic');
           document.documentElement.classList.add(designTheme);
         }
       } catch (e) {
         document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('atomic');
       }
     </script>
   </head>
