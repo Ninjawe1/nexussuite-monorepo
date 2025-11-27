@@ -29,20 +29,11 @@ export default function Landing() {
       localStorage.setItem("design:theme", "atomic");
       root.classList.remove("nova", "aqua");
       root.classList.add("atomic", "dark");
-      
-      // Explicitly set atomic colors to ensure they override any defaults
-      // Deep Teal / Emerald for Atomic Theme
-      root.style.setProperty("--primary", "hsl(166 72% 45%)");
-      root.style.setProperty("--ring", "hsl(166 72% 45%)");
-      root.style.setProperty("--accent", "hsl(170 30% 22%)");
     } catch (_) {}
 
     return () => {
       // Cleanup on unmount
       root.classList.remove("atomic");
-      root.style.removeProperty("--primary");
-      root.style.removeProperty("--ring");
-      root.style.removeProperty("--accent");
     };
   }, []);
 
@@ -86,7 +77,7 @@ export default function Landing() {
   ];
 
   return (
-    <div id="landing-page-root" className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden selection:bg-[#00dca5]/20 selection:text-[#00dca5]">
+    <div id="landing-page-root" className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       {/* Background Grid Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -95,7 +86,7 @@ export default function Landing() {
 
       {/* Floating Pill Navigation */}
       <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-        <nav className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex items-center gap-8 shadow-2xl">
+        <nav className="bg-popover/40 backdrop-blur-xl border border-border rounded-full px-6 py-3 flex items-center gap-8 shadow-2xl">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/20 flex items-center justify-center">
               <Gamepad2 className="w-4 h-4 text-primary" />
@@ -116,7 +107,7 @@ export default function Landing() {
              <Button 
                variant="ghost" 
                size="sm" 
-               className="hidden sm:flex hover:bg-white/5 hover:text-white rounded-full px-4"
+               className="hidden sm:flex hover:bg-accent hover:text-accent-foreground rounded-full px-4"
                onClick={() => window.location.href = "/login"}
              >
                Login
@@ -147,7 +138,7 @@ export default function Landing() {
               </span>
             </div>
             
-            <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">
+            <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-foreground via-foreground to-foreground/50">
               Power Your <br />
               <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary">
                 Esports Empire
@@ -156,11 +147,11 @@ export default function Landing() {
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
               The all-in-one platform to manage rosters, streamline operations, 
-              and scale your organization. <span className="text-white">Built for champions.</span>
+              and scale your organization. <span className="text-foreground">Built for champions.</span>
             </p>
             
             {/* Waitlist Integration */}
-            <div className="w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-full shadow-2xl flex items-center gap-2 pl-4 pr-2 py-2 mt-4">
+            <div className="w-full max-w-md bg-popover/40 backdrop-blur-xl border border-border p-2 rounded-full shadow-2xl flex items-center gap-2 pl-4 pr-2 py-2 mt-4">
                <WaitlistForm variant="minimal" />
             </div>
 
@@ -182,32 +173,32 @@ export default function Landing() {
 
           {/* Hero Visual / Dashboard Preview */}
           <div className="relative mt-20 perspective-1000">
-             <div className="relative glass rounded-2xl border border-white/10 p-2 shadow-2xl transform rotate-x-12 scale-95 opacity-90 hover:scale-100 hover:rotate-0 transition-all duration-700 ease-out">
+             <div className="relative glass rounded-2xl border border-border p-2 shadow-2xl transform rotate-x-12 scale-95 opacity-90 hover:scale-100 hover:rotate-0 transition-all duration-700 ease-out">
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-20 pointer-events-none h-1/2 bottom-0"></div>
                 
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-2xl pointer-events-none"></div>
                 
                 {/* Fake UI Header */}
-                <div className="h-10 bg-black/60 rounded-t-xl flex items-center px-4 gap-2 mb-2 border-b border-white/5">
+                <div className="h-10 bg-background/60 rounded-t-xl flex items-center px-4 gap-2 mb-2 border-b border-border">
                   <div className="flex gap-2">
                      <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                      <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                      <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
                   </div>
-                  <div className="ml-4 h-6 w-64 bg-white/5 rounded-md"></div>
+                  <div className="ml-4 h-6 w-64 bg-foreground/5 rounded-md"></div>
                 </div>
 
                 {/* Grid Layout inside the card - Keeping original content but centering visual */}
                 <div className="grid grid-cols-2 gap-4 p-4 min-h-[400px]">
                   {/* Card 1 */}
-                  <div className="col-span-2 bg-black/40 rounded-xl p-6 border border-white/5">
+                  <div className="col-span-2 bg-card/40 rounded-xl p-6 border border-border">
                     <div className="flex justify-between items-start mb-6">
                       <div>
                         <p className="text-xs text-muted-foreground uppercase mb-1">Total Revenue</p>
                         <h3 className="text-3xl font-mono font-bold">$1,240,500</h3>
                       </div>
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 px-3 py-1">
+                      <Badge variant="outline" className="bg-chart-3/10 text-chart-3 border-chart-3/20 px-3 py-1">
                         +12.5%
                       </Badge>
                     </div>
@@ -223,7 +214,7 @@ export default function Landing() {
                   </div>
 
                   {/* Card 2 */}
-                  <div className="bg-black/40 rounded-xl p-6 border border-white/5 flex flex-col justify-between">
+                  <div className="bg-card/40 rounded-xl p-6 border border-border flex flex-col justify-between">
                     <div className="flex items-center gap-3 mb-4">
                       <Swords className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Next Match</span>
@@ -240,24 +231,24 @@ export default function Landing() {
                   </div>
 
                   {/* Card 3 */}
-                  <div className="bg-black/40 rounded-xl p-6 border border-white/5 flex flex-col justify-between">
+                  <div className="bg-card/40 rounded-xl p-6 border border-border flex flex-col justify-between">
                      <div className="flex items-center gap-3 mb-4">
                       <Users className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Active Roster</span>
                     </div>
                     <div className="space-y-3">
                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P1</div>
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs border border-border">P1</div>
                           <div className="text-sm">Simple</div>
                           <div className="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
                        </div>
                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P2</div>
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs border border-border">P2</div>
                           <div className="text-sm">Zywoo</div>
                           <div className="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
                        </div>
                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P3</div>
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs border border-border">P3</div>
                           <div className="text-sm">Niko</div>
                           <div className="ml-auto w-2 h-2 rounded-full bg-yellow-500"></div>
                        </div>
@@ -270,7 +261,7 @@ export default function Landing() {
       </section>
 
       {/* Partners / Trusted By */}
-      <section className="py-10 border-y border-white/5 bg-black/20">
+      <section className="py-10 border-y border-border bg-background/20">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground mb-6 uppercase tracking-widest">
             Trusted by Elite Organizations
@@ -375,7 +366,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10 bg-black/40">
+      <footer className="py-12 border-t border-border bg-popover/40">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div className="col-span-2">
@@ -388,7 +379,7 @@ export default function Landing() {
               </p>
             </div>
             <div>
-              <h4 className="font-bold mb-4 text-white">Platform</h4>
+              <h4 className="font-bold mb-4 text-foreground">Platform</h4>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="hover:text-primary cursor-pointer">Features</li>
                 <li className="hover:text-primary cursor-pointer" onClick={() => window.location.href = "/pricing"}>Pricing</li>
@@ -397,7 +388,7 @@ export default function Landing() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4 text-white">Company</h4>
+              <h4 className="font-bold mb-4 text-foreground">Company</h4>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="hover:text-primary cursor-pointer">About Us</li>
                 <li className="hover:text-primary cursor-pointer">Careers</li>
