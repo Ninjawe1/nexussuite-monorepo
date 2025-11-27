@@ -24,11 +24,26 @@ import { WaitlistForm } from "@/components/WaitlistForm";
 export default function Landing() {
   // Enforce dark/atomic theme for the landing page
   useEffect(() => {
+    const root = document.documentElement;
     try {
       localStorage.setItem("design:theme", "atomic");
-      document.documentElement.classList.remove("nova", "aqua");
-      document.documentElement.classList.add("atomic", "dark");
+      root.classList.remove("nova", "aqua");
+      root.classList.add("atomic", "dark");
+      
+      // Explicitly set atomic colors to ensure they override any defaults
+      // Deep Teal / Emerald for Atomic Theme
+      root.style.setProperty("--primary", "hsl(166 72% 45%)");
+      root.style.setProperty("--ring", "hsl(166 72% 45%)");
+      root.style.setProperty("--accent", "hsl(170 30% 22%)");
     } catch (_) {}
+
+    return () => {
+      // Cleanup on unmount
+      root.classList.remove("atomic");
+      root.style.removeProperty("--primary");
+      root.style.removeProperty("--ring");
+      root.style.removeProperty("--accent");
+    };
   }, []);
 
   const features = [
@@ -74,7 +89,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       {/* Background Grid Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
       </div>
 

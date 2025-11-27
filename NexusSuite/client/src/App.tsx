@@ -78,6 +78,9 @@ function App() {
   // Public routes that should get balanced padding via main wrapper
   const isPublicRoute = location === "/login" || location === "/register";
   useEffect(() => {
+    // If on landing page, let the Landing component handle the theme
+    if (window.location.pathname === "/") return;
+
     // Initialize theme from localStorage or system preference
     const savedTheme = localStorage.getItem("theme");
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
