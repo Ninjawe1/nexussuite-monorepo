@@ -167,14 +167,13 @@ function PlayersContent({
   const getSalaryText = (playerId: string) => {
     const entries = payroll.filter((p) => p.staffId === playerId);
     if (!entries.length) return "No payroll set";
-    const latest = entries
+    const latestSorted = entries
       .sort(
         (a, b) =>
           (toDateSafe(a.date)?.getTime() ?? 0) -
           (toDateSafe(b.date)?.getTime() ?? 0),
-      )
-
-      .at(-1)!;
+      );
+    const latest = latestSorted[latestSorted.length - 1]!;
     return `${latest.amount} (${latest.type})`;
   };
 
