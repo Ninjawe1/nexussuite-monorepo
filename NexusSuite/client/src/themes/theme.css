@@ -136,29 +136,28 @@
   --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
 }
 
-.atomic {
-  --primary: 24 88% 55%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 24 20% 20%;
-  --accent-foreground: 0 0% 100%;
-  --ring: 24 88% 55%;
-  --sidebar-primary: 24 88% 55%;
-  --sidebar-primary-foreground: 0 0% 10%;
-  --sidebar-accent: 24 20% 20%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --chart-2: 24 88% 55%;
+:root.atomic, html.atomic {
+  --primary: 24 88% 55% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --accent: 24 20% 20% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --ring: 24 88% 55% !important;
+  --sidebar-primary: 24 88% 55% !important;
+  --sidebar-primary-foreground: 0 0% 10% !important;
+  --sidebar-accent: 24 20% 20% !important;
+  --sidebar-accent-foreground: 0 0% 100% !important;
+  --chart-2: 24 88% 55% !important;
 }
-
-.dark.atomic {
-  --primary: 24 88% 55%;
-  --primary-foreground: 0 0% 10%;
-  --accent: 24 20% 20%;
-  --accent-foreground: 0 0% 100%;
-  --ring: 24 88% 55%;
-  --sidebar-primary: 24 88% 55%;
-  --sidebar-primary-foreground: 0 0% 10%;
-  --sidebar-accent: 24 20% 20%;
-  --sidebar-accent-foreground: 0 0% 100%;
+html.dark.atomic {
+  --primary: 24 88% 55% !important;
+  --primary-foreground: 0 0% 10% !important;
+  --accent: 24 20% 20% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --ring: 24 88% 55% !important;
+  --sidebar-primary: 24 88% 55% !important;
+  --sidebar-primary-foreground: 0 0% 10% !important;
+  --sidebar-accent: 24 20% 20% !important;
+  --sidebar-accent-foreground: 0 0% 100% !important;
 }
 
 @theme inline {
