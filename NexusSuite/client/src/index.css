@@ -54,13 +54,8 @@
   color: hsl(0 0% 98%) !important;
 }
 
-/* Re-declare variables for Tailwind usage within the ID scope if needed */
-#landing-page-root {
-  --primary: hsl(166 72% 45%);
-  --primary-foreground: hsl(0 0% 98%);
-  --background: hsl(0 0% 4%);
-  --foreground: hsl(0 0% 98%);
-}
+/* Keep variables as raw HSL components for Tailwind (hsl(var(--...))) */
+/* Duplicate declarations removed to prevent invalid hsl(hsl(...)) resolution */
 
 @layer utilities {
   /* Ensure heading utility maps to Geist Mono globally */
