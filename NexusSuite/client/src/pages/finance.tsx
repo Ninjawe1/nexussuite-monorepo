@@ -102,6 +102,8 @@ const paymentMethods = [
 
 ];
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Finance() {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -109,10 +111,16 @@ export default function Finance() {
     useState<Transaction | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const { currentOrganization } = useOrganization();
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
-    queryKey: ["/api/finance"],
-
+    queryKey: ["/api/finance", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/finance?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const {
@@ -120,7 +128,13 @@ export default function Finance() {
     isLoading: walletsLoading,
     isError: walletsError,
   } = useQuery<Wallet[]>({
-    queryKey: ["/api/wallets"],
+    queryKey: ["/api/wallets", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/wallets?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
   const walletMap = useMemo(
     () => Object.fromEntries(wallets.map((w) => [w.id, w])),
@@ -143,13 +157,22 @@ export default function Finance() {
       profit: number;
     }>
   >({
-    queryKey: ["/api/finance/monthly"],
-
+    queryKey: ["/api/finance/monthly", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/finance/monthly?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/finance/export", {
+      if (!currentOrganization?.id) {
+        toast({ title: "No organization selected", variant: "destructive" });
+        return;
+      }
+      const response = await fetch(`/api/finance/export?organizationId=${currentOrganization.id}`, {
         credentials: "include",
       });
 

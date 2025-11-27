@@ -14,13 +14,22 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { AuditLog } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOrganization } from "@/contexts/OrganizationContext";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Audit() {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const { currentOrganization: organization } = useOrganization();
 
   const { data: auditLogs = [], isLoading } = useQuery<AuditLog[]>({
-    queryKey: ["/api/audit-logs"],
+    queryKey: ["/api/audit-logs", organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const res = await apiRequest(`/api/audit-logs?organizationId=${organization.id}`, "GET");
+      return res as any;
+    },
+    enabled: !!organization?.id,
   });
 
   const filteredLogs = auditLogs.filter((log) => {
@@ -104,6 +113,7 @@ export default function Audit() {
 
               <AuditLogEntry
                 key={log.id}
+                id={log.id}
                 user={log.userName}
                 action={log.action}
                 entity={log.entity}

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus, Users } from "lucide-react";
 import { useRosterContext } from "@/contexts/RosterContext";
-import { CreateRosterData, PlayerAssignment } from "@/services/rosterService";
+import { CreateRosterData, PlayerAssignment, Roster } from "@/services/rosterService";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -99,11 +99,11 @@ export function RosterTab({
 
           );
         }
-        await updateRoster(payload.rosterId, { game: gameToSet } as any);
+        await updateRoster(payload.rosterId, { game: gameToSet });
         // Update local selectedRoster snapshot to reflect the change immediately
-        setSelectedRoster((prev: any) =>
-          prev ? { ...prev, game: gameToSet } : prev,
-        );
+        if (selectedRoster) {
+          setSelectedRoster({ ...selectedRoster, game: gameToSet });
+        }
       }
       const players: PlayerAssignment[] = payload.playerIds.map((id) => ({
 
@@ -149,18 +149,18 @@ export function RosterTab({
     }
   };
 
-  const handleDeleteRoster = async (roster: any) => {
+  const handleDeleteRoster = async (roster: Roster) => {
     // Delegate to context mutation which handles toasts and cache invalidation
     await deleteRoster(roster.id);
   };
 
-  const handleAssignPlayersClick = (roster: any) => {
+  const handleAssignPlayersClick = (roster: Roster) => {
     // Sync selection into context so rosterPlayers query activates
     setSelectedRoster(roster);
     setIsAssignDialogOpen(true);
   };
 
-  const handleRosterSelect = (roster: any) => {
+  const handleRosterSelect = (roster: Roster) => {
     // Sync selection into context so details dialog can load rosterPlayers
     setSelectedRoster(roster);
     setIsDetailsDialogOpen(true);

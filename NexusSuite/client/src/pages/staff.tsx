@@ -19,9 +19,12 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Staff as StaffType, Tenant } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Staff() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const { currentOrganization } = useOrganization();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffType | undefined>();
@@ -29,7 +32,13 @@ export default function Staff() {
   const queryClient = useQueryClient();
 
   const { data: staffMembers = [], isLoading } = useQuery<StaffType[]>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/staff?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const { data: tenant } = useQuery<Tenant>({
@@ -219,6 +228,9 @@ export default function Staff() {
             <StaffCard
               key={staff.id}
               {...staff}
+              status={staff.status as "active" | "suspended"}
+              avatar={staff.avatar || undefined}
+              phone={staff.phone || undefined}
               onEdit={() => handleEdit(staff)}
               onDelete={() => deleteMutation.mutate(staff.id)}
               onToggleStatus={() =>

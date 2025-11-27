@@ -1,4 +1,5 @@
 import { PayrollDialog } from "@/components/payroll-dialog";
+import type { Payroll } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -39,18 +40,26 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Payroll() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<
-    PayrollType | undefined
+    Payroll | undefined
   >();
+  const { currentOrganization } = useOrganization();
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: payrollEntries = [], isLoading } = useQuery<PayrollType[]>({
-    queryKey: ["/api/payroll"],
-
+  const { data: payrollEntries = [], isLoading } = useQuery<Payroll[]>({
+    queryKey: ["/api/payroll", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/payroll?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const deleteMutation = useMutation({
@@ -99,7 +108,7 @@ export default function Payroll() {
 
     .reduce((sum, e) => sum + Number(e.amount), 0);
 
-  const handleEdit = (payroll: PayrollType) => {
+  const handleEdit = (payroll: Payroll) => {
     setSelectedPayroll(payroll);
     setDialogOpen(true);
   };

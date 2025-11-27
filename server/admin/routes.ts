@@ -20,6 +20,51 @@ const router = Router();
 router.use(requireAuth);
 router.use(requireSuperAdmin);
 
+// --- Club Management ---
+router.get("/clubs", async (req, res) => {
+  try {
+    const { storage } = await import("../useStorage");
+    const clubs = await storage.getAllTenants();
+    return res.json(clubs);
+  } catch (error) {
+    console.error("Error fetching clubs:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch clubs" });
+  }
+});
+
+router.post("/clubs", async (req, res) => {
+  try {
+    const { storage } = await import("../useStorage");
+    const { name, clubTag, subscriptionPlan, subscriptionStatus } = req.body || {};
+    if (!name || !clubTag) {
+      return res.status(400).json({ success: false, error: "Name and club tag are required" });
+    }
+    const created = await storage.createTenant({
+      name,
+      clubTag,
+      subscriptionPlan: subscriptionPlan || "starter",
+      subscriptionStatus: subscriptionStatus || "active",
+      createdAt: new Date(),
+    });
+    return res.json(created);
+  } catch (error) {
+    console.error("Error creating club:", error);
+    return res.status(500).json({ success: false, error: "Failed to create club" });
+  }
+});
+
+// --- User Management ---
+router.get("/users", async (req, res) => {
+  try {
+    const { storage } = await import("../useStorage");
+    const users = await storage.getAllUsers();
+    return res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch users" });
+  }
+});
+
 // --- Superadmin MFA endpoints (exempt from MFA gate so users can enroll/verify) ---
 router.post("/mfa/generate", async (req, res) => {
   try {

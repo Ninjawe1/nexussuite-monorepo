@@ -31,28 +31,39 @@ import { StaffDialog } from "@/components/staff-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+import { useAuth } from "@/hooks/useAuth"; // Correct hook path? I saw useAuth.ts in hooks/
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Players() {
-  // Mock organization and user data - replace with actual data
-  const organizationId = "org-123";
-  const currentUserId = "user-123";
+  const { currentOrganization } = useOrganization();
+  const organizationId = currentOrganization?.id || "";
+
+  // Wait for organization to be loaded
+  if (!organizationId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          <p className="mt-4 text-muted-foreground">Loading organization...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <RosterProvider organizationId={organizationId}>
-      <PlayersContent
-        organizationId={organizationId}
-        currentUserId={currentUserId}
-      />
-
+      <PlayersContent organizationId={organizationId} />
     </RosterProvider>
   );
 }
 
 function PlayersContent({
   organizationId,
-  currentUserId,
 }: {
   organizationId: string;
-  currentUserId: string;
 }) {
+  const { user } = useAuth();
+  const currentUserId = user?.id || "";
   const [searchQuery, setSearchQuery] = useState("");
   const [gameFilter, setGameFilter] = useState("all");
   const [dialogOpenFor, setDialogOpenFor] = useState<string | null>(null);
@@ -75,16 +86,39 @@ function PlayersContent({
   const { data: staffMembers = [], isLoading: staffLoading } = useQuery<
     Staff[]
   >({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", organizationId],
+    queryFn: async () => {
+      const res = await apiRequest(
+        `/api/staff?organizationId=${organizationId}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!organizationId,
   });
 
   const { data: payroll = [] } = useQuery<Payroll[]>({
-    queryKey: ["/api/payroll"],
+    queryKey: ["/api/payroll", organizationId],
+    queryFn: async () => {
+      const res = await apiRequest(
+        `/api/payroll?organizationId=${organizationId}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!organizationId,
   });
 
   const { data: contracts = [] } = useQuery<Contract[]>({
-    queryKey: ["/api/contracts"],
-
+    queryKey: ["/api/contracts", organizationId],
+    queryFn: async () => {
+      const res = await apiRequest(
+        `/api/contracts?organizationId=${organizationId}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!organizationId,
   });
 
   const deleteMutation = useMutation({
@@ -92,11 +126,12 @@ function PlayersContent({
       return await apiRequest(`/api/staff/${id}`, "DELETE");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/staff"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/staff", organizationId],
+      });
       toast({
         title: "Player deleted",
         description: "The player has been removed successfully.",
-
       });
     },
     onError: (error: Error) => {

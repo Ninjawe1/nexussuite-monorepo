@@ -14,10 +14,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 export default function Analytics() {
   const [selectedRoster, setSelectedRoster] = useState("valorant");
   const { toast } = useToast();
+  const { currentOrganization: organization } = useOrganization();
 
   const rosters = [
     { id: "valorant", name: "Valorant", game: "Valorant" },
@@ -69,13 +71,14 @@ export default function Analytics() {
     data: liveAnalytics,
     error: analyticsError,
   } = useQuery({
-    queryKey: ["/api/analytics", selectedRoster],
-
+    queryKey: ["/api/analytics", selectedRoster, organization?.id],
     queryFn: async () => {
       // Pass roster identifier if supported by backend for filtering
-      const res = await apiRequest(`/api/analytics?roster=${selectedRoster}`);
+      if (!organization?.id) return null;
+      const res = await apiRequest(`/api/analytics?roster=${selectedRoster}&organizationId=${organization.id}`, "GET");
       return res as any;
     },
+    enabled: !!organization?.id,
     // Always attempt; fallback will handle errors
     staleTime: 60_000,
   });
@@ -258,7 +261,7 @@ export default function Analytics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {data.topPlayers.map((player, idx) => (
+            {data.topPlayers.map((player: any, idx: number) => (
               <div
                 key={player.name}
                 className="flex items-center justify-between p-3 rounded-lg bg-card hover-elevate"

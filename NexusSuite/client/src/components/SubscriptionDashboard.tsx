@@ -483,7 +483,7 @@ export const SubscriptionDashboard: React.FC<SubscriptionDashboardProps> = ({
     const end = String(subscription?.currentPeriodEnd || "").trim();
     if (end) return formatDateSafe(end, "MMM dd, yyyy", "N/A");
     const status = String(subscription?.status || "").toLowerCase();
-    const intervalRaw = String(subscription?.billingInterval || (subscription as any)?.interval || "month").toLowerCase();
+    const intervalRaw = String((subscription as any)?.billingInterval || (subscription as any)?.interval || "month").toLowerCase();
     const interval: "month" | "year" = intervalRaw === "year" ? "year" : "month";
     const baseIso = String(
       subscription?.currentPeriodStart ||

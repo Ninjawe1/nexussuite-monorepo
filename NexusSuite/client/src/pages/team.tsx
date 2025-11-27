@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, UserPlus, Copy, Trash2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { User, Invite } from "@shared/schema";
+import type { User, Invite, Staff, Tenant } from "@shared/schema";
 
 import {
   Select,
@@ -36,20 +36,40 @@ import {
 import { formatDateSafe } from "@/lib/date";
 
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Team() {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [inviteUserOpen, setInviteUserOpen] = useState(false);
 
   // Fetch team users
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
-    queryKey: ["/api/team/users"],
-
+    queryKey: ["/api/team/users", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(
+        `/api/team/users?organizationId=${currentOrganization.id}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   // Fetch pending invites
   const { data: invites = [], isLoading: invitesLoading } = useQuery<Invite[]>({
-    queryKey: ["/api/team/invites"],
+    queryKey: ["/api/team/invites", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(
+        `/api/team/invites?organizationId=${currentOrganization.id}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   // Staff management state
@@ -61,11 +81,19 @@ export default function Team() {
   const { data: staffMembers = [], isLoading: staffLoading } = useQuery<
     Staff[]
   >({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(
+        `/api/staff?organizationId=${currentOrganization.id}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
   const { data: tenant } = useQuery<Tenant>({
-    queryKey: ["/api/tenant"],
-
+    queryKey: ["/api/tenant"], // Tenant is usually global/user context, but keeping it as is unless known otherwise
   });
 
   return (
@@ -189,17 +217,22 @@ function UserCard({ user }: { user: User }) {
 
 function InviteCard({ invite }: { invite: Invite }) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/team/invites/${invite.id}`, "DELETE");
+      return await apiRequest(
+        `/api/team/invites/${invite.id}?organizationId=${currentOrganization?.id}`,
+        "DELETE",
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/team/invites"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/team/invites", currentOrganization?.id],
+      });
       toast({
         title: "Success",
         description: "Invite deleted successfully",
-
       });
     },
     onError: (error: any) => {
@@ -265,25 +298,30 @@ function InviteCard({ invite }: { invite: Invite }) {
 
 function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
     role: "staff",
     password: "",
-
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      return await apiRequest("/api/team/users", "POST", data);
+      return await apiRequest(
+        `/api/team/users?organizationId=${currentOrganization?.id}`,
+        "POST",
+        data,
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/team/users"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/team/users", currentOrganization?.id],
+      });
       toast({
         title: "Success",
         description: "User created successfully",
-
       });
       onSuccess();
     },
@@ -412,26 +450,30 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
 
 function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
   const [formData, setFormData] = useState({
     email: "",
     role: "staff",
-
   });
 
   const inviteMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      return await apiRequest("/api/team/invites", "POST", {
-
-        ...data,
-        permissions: [],
-      });
+      return await apiRequest(
+        `/api/team/invites?organizationId=${currentOrganization?.id}`,
+        "POST",
+        {
+          ...data,
+          permissions: [],
+        },
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/team/invites"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/team/invites", currentOrganization?.id],
+      });
       toast({
         title: "Success",
         description: "Invite sent successfully",
-
       });
       onSuccess();
     },

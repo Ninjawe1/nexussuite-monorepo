@@ -20,7 +20,7 @@ import {
   Gamepad2,
   Pencil,
 } from "lucide-react";
-import { Roster } from "@/types/roster";
+import { Roster } from "@/services/rosterService";
 import { normalizeGameTitle } from "@/constants/games";
 import { useRosterContext } from "@/contexts/RosterContext";
 
@@ -163,9 +163,8 @@ export function RosterDetailsDialog({
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Created {formatDate(roster.createdAt)}
+                    Created {formatDate(roster.createdAt.toString())}
                   </span>
-
                 </div>
               </div>
             </CardContent>

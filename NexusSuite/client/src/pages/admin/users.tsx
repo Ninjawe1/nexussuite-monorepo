@@ -154,7 +154,7 @@ export default function AdminUsersPage() {
       id: string;
       data: Partial<User> & { password?: string };
     }) => {
-      return await apiRequest(`/api/admin/users/${id}`, "PATCH", data);
+      return await apiRequest(`/api/admin/users/${id}`, "PUT", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });

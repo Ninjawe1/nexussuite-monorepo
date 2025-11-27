@@ -27,6 +27,7 @@ import Audit from "@/pages/audit";
 import { AdminDashboard } from "@/pages/admin/AdminDashboard";
 import { SubscriptionDashboard } from "@/components/SubscriptionDashboard";
 import Landing from "@/pages/landing";
+import Pricing from "@/pages/pricing";
 import ProfilePage from "@/pages/profile";
 
 // Components
@@ -308,6 +309,11 @@ function App() {
                   {/* Public landing page at root */}
                   <Route path="/">
                     <Landing />
+                  </Route>
+
+                  {/* Pricing page */}
+                  <Route path="/pricing">
+                    <Pricing />
                   </Route>
 
                   {/* 404 */}

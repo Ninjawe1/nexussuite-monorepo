@@ -25,8 +25,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Matches() {
   const [view, setView] = useState<"list" | "calendar">("list");
+  const { currentOrganization } = useOrganization();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchType | undefined>();
@@ -34,8 +37,13 @@ export default function Matches() {
   const queryClient = useQueryClient();
 
   const { data: matches = [], isLoading } = useQuery<MatchType[]>({
-    queryKey: ["/api/matches"],
-
+    queryKey: ["/api/matches", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/matches?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const deleteMutation = useMutation({

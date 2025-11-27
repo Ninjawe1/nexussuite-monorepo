@@ -60,6 +60,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
     isLoading,
     isSwitching,
     selectOrganization,
+    createOrganization,
   } = useOrganization();
 
   const [pendingOrgId, setPendingOrgId] = useState<string | null>(null);
@@ -90,7 +91,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" className={`h-[45px] px-2 py-1.5 ${className}`} disabled>
+          <SidebarMenuButton size="default" className={`h-[45px] px-2 py-1.5 ${className}`} disabled>
             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square h-8 w-8 items-center justify-center rounded-lg">
               <span className="text-[10px]">--</span>
             </div>
@@ -120,7 +121,7 @@ export function OrgSelector({ className = "" }: OrgSelectorProps) {
                   <div className="w-full">
                     {isCollapsed ? (
                       <SidebarMenuButton
-                        size="icon"
+                        size="default"
                         className={`h-[45px] w-full justify-center transition-all data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${className} ${isPending ? "opacity-60" : ""}`}
 
                         disabled={isPending}

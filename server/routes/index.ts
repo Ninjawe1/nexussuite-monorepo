@@ -16,6 +16,37 @@ router.use("/otp", otpRoutes);
 router.use("/organizations", orgRoutes);
 router.use("/subscription", subscriptionRoutes);
 
+// Profile endpoints
+router.get("/profile", requireAuth as any, async (req: any, res: any) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+    
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    
+    return res.json(user);
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: "Failed to fetch profile", message: String(error?.message || "Unknown error") });
+  }
+});
+
+router.post("/profile", requireAuth as any, async (req: any, res: any) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
+    
+    const oldUser = await storage.getUser(userId);
+    if (!oldUser) return res.status(404).json({ success: false, message: "User not found" });
+    
+    const updated = await storage.updateUser(userId, req.body || {});
+    return res.json(updated);
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: "Failed to update profile", message: String(error?.message || "Unknown error") });
+  }
+});
+
+
 // Alias: Support BetterAuth Polar client calling /api/checkout
 router.all("/checkout", async (req: any, res: any) => {
   try {
@@ -350,20 +381,59 @@ router.get("/analytics", requireAuth as any, async (req: any, res: any) => {
   try {
     const orgId = await resolveOrgId(req);
     if (!orgId) return res.status(400).json({ success: false, message: "Organization not found for user" });
+    
+    // Fetch data for analytics
     const staff = await storage.getStaffByTenant(orgId);
     const payroll = await storage.getPayrollByTenant(orgId);
     const matches = await storage.getMatchesByTenant(orgId);
     const campaigns = await storage.getCampaignsByTenant(orgId);
     const auditLogs = await storage.getAuditLogsByTenant(orgId, 20);
+
+    // Calculate match statistics
+    const totalMatches = matches.length;
+    const wins = matches.filter((m: any) => m.result === 'win').length;
+    const losses = matches.filter((m: any) => m.result === 'loss').length;
+    const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+
     return res.json({
       staffCount: staff.length,
       payrollCount: payroll.length,
       matchesCount: matches.length,
       campaignsCount: campaigns.length,
       recentAuditLogCount: auditLogs.length,
+      // Add match statistics for analytics page
+      winRate,
+      totalMatches,
+      wins,
+      losses,
+      avgPlacement: 0, // Placeholder
+      topPlayers: [], // Placeholder
     });
   } catch (error: any) {
     return res.status(500).json({ success: false, error: "Failed to fetch analytics", message: String(error?.message || "Unknown error") });
+  }
+});
+
+router.get("/profile", requireAuth as any, async (req: any, res: any) => {
+  try {
+    const userId = (req as any).user?.id;
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    return res.json(user);
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: "Failed to fetch profile", message: String(error?.message || "Unknown error") });
+  }
+});
+
+router.post("/profile", requireAuth as any, async (req: any, res: any) => {
+  try {
+    const userId = (req as any).user?.id;
+    const oldUser = await storage.getUser(userId);
+    if (!oldUser) return res.status(404).json({ success: false, message: "User not found" });
+    const updated = await storage.updateUser(userId, req.body || {});
+    return res.json(updated);
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: "Failed to update profile", message: String(error?.message || "Unknown error") });
   }
 });
 

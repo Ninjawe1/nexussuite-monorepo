@@ -70,7 +70,7 @@ export function PlayerAddDialog({ open, onOpenChange }: PlayerAddDialogProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",

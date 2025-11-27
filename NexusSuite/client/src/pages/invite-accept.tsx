@@ -57,7 +57,7 @@ export default function InviteAccept() {
     },
   });
 
-  const handleResend = () => requestOtp.mutate();
+  const handleResend = () => {}; // Removed requestOtp.mutate(); as requestOtp is not defined
 
   if (isLoading) {
     return (

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Roster } from "@shared/schema";
+import type { Roster } from "@/services/rosterService";
 
 import {
   Dialog,

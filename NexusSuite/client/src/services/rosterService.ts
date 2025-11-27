@@ -80,10 +80,13 @@ function toRoster(api: any): Roster {
 
 export class RosterService {
   async getRosters(
-    _organizationId: string,
+    organizationId: string,
     _filters?: RosterFilters,
   ): Promise<Roster[]> {
-    const res = await apiRequest("/api/rosters", "GET");
+    const params = new URLSearchParams();
+    if (organizationId) params.append("organizationId", organizationId);
+    
+    const res = await apiRequest(`/api/rosters?${params.toString()}`, "GET");
 
     const json = await res.json();
     return (json as any[]).map(toRoster);

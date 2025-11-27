@@ -9,8 +9,7 @@ export default function StatCardExample() {
         title="Total Revenue"
         value="$142,500"
         icon={DollarSign}
-        trend={12.5}
-        trendLabel="vs last month"
+        change="+12.5% vs last month"
       />
       <StatCard
         title="Active Rosters"
@@ -22,16 +21,14 @@ export default function StatCardExample() {
         title="Win Rate"
         value="68%"
         icon={Trophy}
-        trend={5.2}
-        trendLabel="this season"
+        change="+5.2% this season"
       />
 
       <StatCard
         title="Active Campaigns"
         value="12"
         icon={Megaphone}
-        trend={-2.1}
-        trendLabel="vs last month"
+        change="-2.1% vs last month"
       />
     </div>
   );

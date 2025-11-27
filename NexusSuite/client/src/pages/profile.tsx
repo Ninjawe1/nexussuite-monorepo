@@ -115,7 +115,7 @@ export default function ProfilePage() {
           country: "US",
           location: "",
           bio: "",
-          joinedAt: user?.createdAt || new Date().toISOString(),
+          joinedAt: user?.createdAt?.toString() || new Date().toISOString(),
           stats: { matches: 0, teams: 0, followers: 0, xp: 0 },
           achievements: ["MVP"],
 

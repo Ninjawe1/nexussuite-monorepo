@@ -28,9 +28,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 import { tweakcn } from "@/lib/tweakcn";
+import { formatDateSafe } from "@/lib/date";
 import { TournamentDialog } from "@/components/tournament-dialog";
 import { RoundDialog } from "@/components/round-dialog";
-import { formatDateSafe } from "@/lib/date";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 const formatStatusBadge = (status: string) => {
   const statusColors = {
@@ -76,13 +77,18 @@ function TournamentCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentOrganization } = useOrganization();
 
   const { data: rounds = [], isLoading: loadingRounds } = useQuery<
     TournamentRound[]
   >({
-    queryKey: ["/api/tournaments", tournament.id, "rounds"],
-
-    enabled: isExpanded,
+    queryKey: ["/api/tournaments", tournament.id, "rounds", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/tournaments/${tournament.id}/rounds?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: isExpanded && !!currentOrganization?.id,
   });
 
   const deleteTournamentMutation = useMutation({
@@ -283,11 +289,19 @@ function RoundItem({
   const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentOrganization } = useOrganization();
 
   const { data: matches = [], isLoading: loadingMatches } = useQuery<Match[]>({
-    queryKey: ["/api/rounds", round.id, "matches"],
-
-    enabled: isExpanded,
+    queryKey: ["/api/rounds", round.id, "matches", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(
+        `/api/rounds/${round.id}/matches?organizationId=${currentOrganization.id}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: isExpanded && !!currentOrganization?.id,
   });
 
   const deleteRoundMutation = useMutation({
@@ -362,12 +376,6 @@ function RoundItem({
               {round.name}
             </CardTitle>
           </div>
-          {round.description && (
-            <p className="text-sm text-muted-foreground truncate ml-14">
-              {round.description}
-            </p>
-
-          )}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -419,42 +427,41 @@ function RoundItem({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline">{match.team1}</Badge>
+                      <Badge variant="outline">{match.teamA}</Badge>
                       <span className="text-muted-foreground">vs</span>
-                      <Badge variant="outline">{match.team2}</Badge>
+                      <Badge variant="outline">{match.teamB}</Badge>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    {match.scheduledAt && (
+                    {match.date && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         <span>
                           {formatDateSafe(
-                            match.scheduledAt,
+                            match.date,
                             "MMM d, yyyy h:mm a",
                           )}
                         </span>
 
                       </div>
                     )}
-                    {match.result && (
+                    {match.scoreA !== null && match.scoreB !== null && (
                       <Badge
                         variant="outline"
                         className={tweakcn(
                           "border",
-                          match.result === "team1"
+                          match.scoreA! > match.scoreB!
                             ? "text-green-500 border-green-500/20"
-                            : match.result === "team2"
+                            : match.scoreB! > match.scoreA!
                               ? "text-blue-500 border-blue-500/20"
                               : "text-gray-500 border-gray-500/20",
                         )}
                       >
-                        {match.result === "team1"
-                          ? match.team1
-                          : match.result === "team2"
-                            ? match.team2
+                        {match.scoreA! > match.scoreB!
+                          ? match.teamA
+                          : match.scoreB! > match.scoreA!
+                            ? match.teamB
                             : "draw"}
-
                       </Badge>
                     )}
                   </div>
@@ -469,56 +476,28 @@ function RoundItem({
 }
 
 export default function TournamentsPage() {
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isRoundDialogOpen, setRoundDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { currentOrganization } = useOrganization();
 
   const { data: tournaments = [], isLoading } = useQuery<Tournament[]>({
-    queryKey: ["/api/tournaments"],
+    queryKey: ["/api/tournaments", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(
+        `/api/tournaments?organizationId=${currentOrganization.id}`,
+        "GET",
+      );
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
-
-  const createTournamentMutation = useMutation({
-    mutationFn: async (payload: Omit<Tournament, "id">) => {
-      return await apiRequest("/api/tournaments", "POST", payload);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
-      toast({
-        title: "Success",
-        description: "Tournament created successfully",
-
-      });
-      setDialogOpen(false);
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/login";
-
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create tournament",
-        variant: "destructive",
-
-      });
-    },
-  });
-
-  const handleCreateTournament = async (payload: Omit<Tournament, "id">) => {
-
-    await createTournamentMutation.mutateAsync(payload);
-  };
 
   const handleAddRound = (tournamentId: string) => {
+    setSelectedTournamentId(tournamentId);
     setRoundDialogOpen(true);
   };
 
@@ -567,9 +546,12 @@ export default function TournamentsPage() {
       <TournamentDialog
         open={isDialogOpen}
         onOpenChange={setDialogOpen}
-        onSubmit={handleCreateTournament}
       />
-      <RoundDialog open={isRoundDialogOpen} onOpenChange={setRoundDialogOpen} />
+      <RoundDialog 
+        open={isRoundDialogOpen} 
+        onOpenChange={setRoundDialogOpen} 
+        tournamentId={selectedTournamentId || ""}
+      />
     </div>
   );
 }

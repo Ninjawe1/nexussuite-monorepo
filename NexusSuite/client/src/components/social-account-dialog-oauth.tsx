@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 
 interface OAuthStatus {
@@ -56,6 +57,7 @@ export function SocialAccountOAuthDialog({
   open,
   onOpenChange,
 }: SocialAccountOAuthDialogProps) {
+  const { currentOrganization: organization } = useOrganization();
   const { toast } = useToast();
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(
     null,
@@ -67,16 +69,16 @@ export function SocialAccountOAuthDialog({
     isLoading,
     error,
   } = useQuery<Record<string, OAuthStatus>>({
-    queryKey: ["/api/oauth/status"],
+    queryKey: ["/api/oauth/status", organization?.id],
 
-    enabled: open,
+    enabled: open && !!organization?.id,
   });
 
   const handleConnect = async (platform: string) => {
     try {
       setConnectingPlatform(platform);
 
-      const response = await fetch(`/api/oauth/init/${platform}`, {
+      const response = await fetch(`/api/oauth/init/${platform}?organizationId=${organization?.id}`, {
         credentials: "include",
 
       });

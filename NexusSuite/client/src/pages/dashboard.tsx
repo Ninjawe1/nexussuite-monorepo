@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 import type {
   Staff as StaffType,
@@ -53,37 +54,71 @@ type DashboardContentProps = {
 // Stable child component: contains all queries and unconditional render tree
 function DashboardContent({ user, currentOrganization }: DashboardContentProps) {
   const { data: staff = [] } = useQuery<StaffType[]>({
-    queryKey: ["/api/staff"],
+    queryKey: ["/api/staff", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/staff?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: payroll = [] } = useQuery<PayrollType[]>({
-    queryKey: ["/api/payroll"],
+    queryKey: ["/api/payroll", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/payroll?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: contracts = [] } = useQuery<ContractType[]>({
-    queryKey: ["/api/contracts"],
+    queryKey: ["/api/contracts", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/contracts?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: tournaments = [] } = useQuery<TournamentType[]>({
-    queryKey: ["/api/tournaments"],
+    queryKey: ["/api/tournaments", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/tournaments?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: matches = [] } = useQuery<MatchType[]>({
-    queryKey: ["/api/matches"],
+    queryKey: ["/api/matches", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/matches?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: campaigns = [] } = useQuery<CampaignType[]>({
-    queryKey: ["/api/campaigns"],
+    queryKey: ["/api/campaigns", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/campaigns?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
   const { data: rosters = [] } = useQuery({
-    queryKey: ["/api/rosters"],
-    queryFn: () => rosterService.getRosters(""),
+    queryKey: ["/api/rosters", currentOrganization?.id],
+    queryFn: () => rosterService.getRosters(currentOrganization?.id || ""),
     enabled: !!currentOrganization?.id,
   });
   const { data: auditLogs = [] } = useQuery<AuditLogType[]>({
-    queryKey: ["/api/audit-logs"],
-
+    queryKey: ["/api/audit-logs", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/audit-logs?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
     enabled: !!currentOrganization?.id,
   });
 

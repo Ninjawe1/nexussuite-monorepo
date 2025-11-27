@@ -207,7 +207,7 @@ export default function MembersManagement() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setConfirmId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRemove} variant="destructive">Remove</AlertDialogAction>
+            <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction>
 
           </AlertDialogFooter>
         </AlertDialogContent>

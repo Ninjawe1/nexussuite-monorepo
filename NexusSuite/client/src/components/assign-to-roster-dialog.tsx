@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Staff, Roster } from "@shared/schema";
+import type { Staff } from "@shared/schema";
+import type { Roster } from "@/services/rosterService";
 
 import {
   Dialog,
@@ -75,8 +76,7 @@ export function AssignToRosterDialog({
 
   useEffect(() => {
     if (open) {
-      form.reset({ rosterId: "", role: "" });
-
+      form.reset({ rosterId: "", role: "Player" });
     }
   }, [open]);
 

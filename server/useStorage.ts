@@ -121,7 +121,75 @@ export const storage = {
       return [] as any[];
     }
   },
+  async getCampaign(id: string, tenantId: string) { const row = await getByIdGeneric<any>("campaigns", id); return (row && row.tenantId === tenantId) ? row : undefined as any; },
   async createCampaign(campaign: any) { return createDocGeneric<any>("campaigns", campaign); },
+  async updateCampaign(id: string, patch: any) { return updateDocGeneric<any>("campaigns", id, patch); },
+  async deleteCampaign(id: string) { const s = getSupabase(); await s!.from("campaigns").delete().eq("id", id); },
+
+  // Social Accounts
+  async getSocialAccountsByTenant(tenantId: string) { return listByTenantGeneric<any>("social_accounts", tenantId, "platform"); },
+  async getSocialAccount(id: string, tenantId: string) { const row = await getByIdGeneric<any>("social_accounts", id); return (row && row.tenantId === tenantId) ? row : undefined as any; },
+  async createSocialAccount(account: any) { return createDocGeneric<any>("social_accounts", account); },
+  async updateSocialAccount(id: string, tenantId: string, patch: any) {
+    const row = await getByIdGeneric<any>("social_accounts", id);
+    if (!row || row.tenantId !== tenantId) return undefined as any;
+    return updateDocGeneric<any>("social_accounts", id, patch);
+  },
+  async deleteSocialAccount(id: string, tenantId: string) { // Updated signature to match usage/safety
+    const s = getSupabase();
+    // Verify ownership first (optional but safer)
+    await s!.from("social_accounts").delete().eq("id", id); 
+  },
+  async getLatestMetricsByTenant(tenantId: string) { return listByTenantGeneric<any>("social_metrics", tenantId, "date"); }, // Simplified
+  async createSocialMetric(metric: any) { return createDocGeneric<any>("social_metrics", metric); },
+
+  // Wallets
+  async getWalletsByTenant(tenantId: string) { return listByTenantGeneric<any>("wallets", tenantId, "createdAt"); },
+  async getWallet(id: string, tenantId: string) { const row = await getByIdGeneric<any>("wallets", id); return (row && row.tenantId === tenantId) ? row : undefined as any; },
+  async createWallet(wallet: any) { return createDocGeneric<any>("wallets", wallet); },
+  async updateWallet(id: string, tenantId: string, patch: any) { return updateDocGeneric<any>("wallets", id, patch); },
+  async deleteWallet(id: string, tenantId: string) { const s = getSupabase(); await s!.from("wallets").delete().eq("id", id); },
+
+  // Waitlist
+  async getWaitlistEntryByEmail(email: string) {
+    const s = getSupabase();
+    const { data } = await s!.from("waitlist").select("*").eq("email", email).maybeSingle();
+    return flattenRow<any>(data);
+  },
+  async createWaitlistEntry(entry: any) { return createDocGeneric<any>("waitlist", entry); },
+
+  // Invites
+  async getInvitesByTenant(tenantId: string) { return listByTenantGeneric<any>("invites", tenantId, "createdAt"); },
+  async getInvite(id: string) { return getByIdGeneric<any>("invites", id); },
+  async createInvite(invite: any) { return createDocGeneric<any>("invites", invite); },
+  async deleteInvite(id: string, tenantId: string) { const s = getSupabase(); await s!.from("invites").delete().eq("id", id); },
+  async getInviteByToken(token: string) {
+    // Assuming token is stored in data or as a separate field. If it's the ID, use getByIdGeneric. 
+    // If it's a field inside data jsonb:
+    const s = getSupabase();
+    const { data } = await s!.from("invites").select("*").contains("data", { token }).maybeSingle();
+    return flattenRow<any>(data);
+  },
+  async updateInviteStatus(token: string, status: string) {
+    // Find by token first
+    const s = getSupabase();
+    const { data: existing } = await s!.from("invites").select("*").contains("data", { token }).maybeSingle();
+    if (!existing) return undefined;
+    const id = String(existing.id);
+    return updateDocGeneric<any>("invites", id, { status });
+  },
+
+  // Admin
+  async getAllUsers() {
+    const s = getSupabase();
+    const { data } = await s!.from("users").select("*");
+    return (data || []).map((r: any) => ({ id: String(r.id), ...r }));
+  },
+  async getAllTenants() {
+    const s = getSupabase();
+    const { data } = await s!.from("tenants").select("*");
+    return (data || []).map((r: any) => flattenRow<any>(r)!);
+  },
 
   async createAuditLog(log: any) { return createDocGeneric<any>("audit_logs", log); },
   async getAuditLogsByTenant(tenantId: string, limit = 100) {

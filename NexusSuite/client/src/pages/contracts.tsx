@@ -29,18 +29,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 export default function Contracts() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedContract, setSelectedContract] = useState<
     ContractType | undefined
   >();
+  const { currentOrganization } = useOrganization();
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: contracts = [], isLoading } = useQuery<ContractType[]>({
-    queryKey: ["/api/contracts"],
-
+    queryKey: ["/api/contracts", currentOrganization?.id],
+    queryFn: async () => {
+      if (!currentOrganization?.id) return [];
+      const res = await apiRequest(`/api/contracts?organizationId=${currentOrganization.id}`, "GET");
+      return await res.json();
+    },
+    enabled: !!currentOrganization?.id,
   });
 
   const deleteMutation = useMutation({
@@ -244,6 +252,8 @@ export default function Contracts() {
                 <div className="flex-1">
                   <ContractRow
                     {...contract}
+                    type={contract.type as "Player" | "Staff" | "Sponsor"}
+                    status={contract.status as "active" | "expired" | "expiring"}
                     expirationDate={contract.expirationDate}
                   />
 

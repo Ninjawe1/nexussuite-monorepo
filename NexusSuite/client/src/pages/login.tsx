@@ -55,7 +55,7 @@ export function Login() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
-      await login(data.email, data.password, data.rememberMe);
+      await login(data.email, data.password);
       // Redirect to dashboard on successful login
       setLocation("/dashboard");
     } catch (err) {

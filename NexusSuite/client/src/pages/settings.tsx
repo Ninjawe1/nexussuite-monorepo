@@ -46,6 +46,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import { Users, Building, CreditCard, Settings as SettingsIcon } from "lucide-react";
 import { formatDateSafe } from "@/lib/date";
+import type { Tenant, Invite } from "@shared/schema";
+
+// Extended User type for frontend-specific properties
+interface ExtendedUser {
+  role?: string;
+  name?: string;
+  email?: string;
+  organizationRoles?: Record<string, string>;
+}
 
 
 function InviteManagement() {
@@ -823,9 +832,9 @@ export default function Settings() {
 
           </div>
           <div className="flex items-center gap-2">
-            {user?.role && <Badge variant="outline">{user.role}</Badge>}
-            {currentOrganization?.id && user?.organizationRoles?.[currentOrganization.id] && (
-              <Badge variant="secondary">{user.organizationRoles[currentOrganization.id]}</Badge>
+            {(user as unknown as ExtendedUser)?.role && <Badge variant="outline">{(user as unknown as ExtendedUser).role}</Badge>}
+            {currentOrganization?.id && (user as unknown as ExtendedUser)?.organizationRoles?.[currentOrganization.id] && (
+              <Badge variant="secondary">{(user as unknown as ExtendedUser).organizationRoles![currentOrganization.id]}</Badge>
             )}
           </div>
         </div>
@@ -854,7 +863,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Your Role:</span>
                   <Badge variant="outline">
-                    {user?.organizationRoles?.[currentOrganization.id] || "N/A"}
+                    {(user as unknown as ExtendedUser)?.organizationRoles?.[currentOrganization.id] || "N/A"}
 
                   </Badge>
                 </div>

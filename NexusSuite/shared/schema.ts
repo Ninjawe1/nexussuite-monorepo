@@ -76,7 +76,20 @@ export const insertTenantSchema = createInsertSchema(tenants).omit({
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type Tenant = typeof tenants.$inferSelect;
 
-// Staff members (players, managers, analysts, etc.)
+// Waitlist table
+export const waitlist = pgTable("waitlist", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertWaitlistSchema = createInsertSchema(waitlist).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertWaitlist = z.infer<typeof insertWaitlistSchema>;
+export type WaitlistEntry = typeof waitlist.$inferSelect;
+
 export const staff = pgTable("staff", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tenantId: varchar("tenant_id").notNull(),

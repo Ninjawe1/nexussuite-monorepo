@@ -19,6 +19,8 @@ import {
   Swords,
 } from "lucide-react";
 
+import { WaitlistForm } from "@/components/WaitlistForm";
+
 export default function Landing() {
   // Enforce dark/atomic theme for the landing page
   useEffect(() => {
@@ -76,156 +78,179 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
       </div>
 
-      {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <Gamepad2 className="w-5 h-5 text-primary" />
+      {/* Floating Pill Navigation */}
+      <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
+        <nav className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex items-center gap-8 shadow-2xl">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/20 flex items-center justify-center">
+              <Gamepad2 className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-heading text-xl font-bold tracking-tight">
+            <span className="font-heading font-bold tracking-tight text-lg">
               Nexus<span className="text-primary">Suite</span>
             </span>
           </div>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden md:flex hover:bg-primary/10 hover:text-primary"
-              onClick={() => (window.location.href = "/login")}
-            >
-              Login
-            </Button>
-            <Button
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => (window.location.href = "/register")}
-            >
-              Get Started <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <a href="#features" className="hover:text-primary transition-colors">Features</a>
+            <a href="/pricing" className="hover:text-primary transition-colors">Pricing</a>
+            <a href="#enterprise" className="hover:text-primary transition-colors">Enterprise</a>
+            <a href="#about" className="hover:text-primary transition-colors">About</a>
           </div>
-        </div>
-      </nav>
+
+          <div className="flex items-center gap-3">
+             <Button 
+               variant="ghost" 
+               size="sm" 
+               className="hidden sm:flex hover:bg-white/5 hover:text-white rounded-full px-4"
+               onClick={() => window.location.href = "/login"}
+             >
+               Login
+             </Button>
+             <Button 
+               size="sm" 
+               className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-5 shadow-lg shadow-primary/20"
+               onClick={() => window.location.href = "/register"}
+             >
+               Get Started
+             </Button>
+          </div>
+        </nav>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-20 pb-32 overflow-hidden">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit">
-                <Zap className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-medium text-primary uppercase tracking-wider">
-                  The OS for Esports
-                </span>
-              </div>
-              
-              <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tighter leading-none">
-                Power Your <br />
-                <span className="text-primary">
-                  Esports Empire
-                </span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-                The all-in-one platform to manage rosters, streamline operations, 
-                and scale your organization. Built for champions.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  className="text-lg px-8 h-12 bg-primary hover:bg-primary/90"
-                  onClick={() => (window.location.href = "/register")}
-                >
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Start Winning
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8 h-12 border-primary/20 hover:bg-primary/5"
-                >
-                  View Demo
-                </Button>
-              </div>
+      <section className="relative z-10 pt-40 pb-32 overflow-hidden flex flex-col items-center justify-center text-center">
+        <div className="container mx-auto px-4 relative">
+          
+          {/* Ambient Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 blur-[120px] rounded-full pointer-events-none opacity-50"></div>
 
-              <div className="flex items-center gap-6 text-sm text-muted-foreground pt-4">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <span>Enterprise Security</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span>AI-Powered</span>
-                </div>
-              </div>
+          <div className="flex flex-col items-center gap-8 max-w-4xl mx-auto relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit backdrop-blur-sm">
+              <Zap className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-primary uppercase tracking-wider">
+                The OS for Esports
+              </span>
+            </div>
+            
+            <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/50">
+              Power Your <br />
+              <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary">
+                Esports Empire
+              </span>
+            </h1>
+            
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+              The all-in-one platform to manage rosters, streamline operations, 
+              and scale your organization. <span className="text-white">Built for champions.</span>
+            </p>
+            
+            {/* Waitlist Integration */}
+            <div className="w-full max-w-md bg-black/40 backdrop-blur-xl border border-white/10 p-2 rounded-full shadow-2xl flex items-center gap-2 pl-4 pr-2 py-2 mt-4">
+               <WaitlistForm variant="minimal" />
             </div>
 
-            {/* Hero Visual / Dashboard Preview */}
-            <div className="relative">
-              <div className="relative glass rounded-2xl border border-white/10 p-2 shadow-2xl">
+            <div className="flex items-center gap-8 text-sm text-muted-foreground pt-4">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span>Enterprise Security</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span>AI-Powered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                <span>Real-time Sync</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Visual / Dashboard Preview */}
+          <div className="relative mt-20 perspective-1000">
+             <div className="relative glass rounded-2xl border border-white/10 p-2 shadow-2xl transform rotate-x-12 scale-95 opacity-90 hover:scale-100 hover:rotate-0 transition-all duration-700 ease-out">
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-20 pointer-events-none h-1/2 bottom-0"></div>
+                
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/5 to-transparent rounded-2xl pointer-events-none"></div>
                 
                 {/* Fake UI Header */}
-                <div className="h-8 bg-black/40 rounded-t-xl flex items-center px-4 gap-2 mb-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                <div className="h-10 bg-black/60 rounded-t-xl flex items-center px-4 gap-2 mb-2 border-b border-white/5">
+                  <div className="flex gap-2">
+                     <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                     <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                     <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                  </div>
+                  <div className="ml-4 h-6 w-64 bg-white/5 rounded-md"></div>
                 </div>
 
-                {/* Grid Layout inside the card */}
-                <div className="grid grid-cols-2 gap-4 p-4">
+                {/* Grid Layout inside the card - Keeping original content but centering visual */}
+                <div className="grid grid-cols-2 gap-4 p-4 min-h-[400px]">
                   {/* Card 1 */}
-                  <div className="col-span-2 bg-black/40 rounded-xl p-4 border border-white/5">
-                    <div className="flex justify-between items-start mb-4">
+                  <div className="col-span-2 bg-black/40 rounded-xl p-6 border border-white/5">
+                    <div className="flex justify-between items-start mb-6">
                       <div>
-                        <p className="text-xs text-muted-foreground uppercase">Total Revenue</p>
-                        <h3 className="text-2xl font-mono font-bold">$1,240,500</h3>
+                        <p className="text-xs text-muted-foreground uppercase mb-1">Total Revenue</p>
+                        <h3 className="text-3xl font-mono font-bold">$1,240,500</h3>
                       </div>
-                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                      <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 px-3 py-1">
                         +12.5%
                       </Badge>
                     </div>
-                    <div className="h-16 flex items-end gap-1">
-                      {[40, 60, 45, 70, 65, 80, 75].map((h, i) => (
-                        <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors rounded-sm"></div>
+                    <div className="h-32 flex items-end gap-2">
+                      {[40, 60, 45, 70, 65, 80, 75, 60, 55, 85, 90, 70].map((h, i) => (
+                        <div key={i} style={{ height: `${h}%` }} className="flex-1 bg-primary/20 hover:bg-primary/50 transition-colors rounded-sm cursor-pointer group relative">
+                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10">
+                              ${h}k
+                           </div>
+                        </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Card 2 */}
-                  <div className="bg-black/40 rounded-xl p-4 border border-white/5 flex flex-col justify-between">
-                    <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-black/40 rounded-xl p-6 border border-white/5 flex flex-col justify-between">
+                    <div className="flex items-center gap-3 mb-4">
                       <Swords className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Next Match</span>
                     </div>
                     <div>
-                      <div className="text-xs text-muted-foreground mb-1">VS Cloud9</div>
-                      <div className="text-lg font-mono font-bold">18:00 CET</div>
+                      <div className="flex items-center justify-between mb-2">
+                         <div className="text-2xl font-bold">NX</div>
+                         <div className="text-sm text-muted-foreground">vs</div>
+                         <div className="text-2xl font-bold">C9</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Starts in</div>
+                      <div className="text-xl font-mono font-bold text-primary">02:45:12</div>
                     </div>
                   </div>
 
                   {/* Card 3 */}
-                  <div className="bg-black/40 rounded-xl p-4 border border-white/5 flex flex-col justify-between">
-                     <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-black/40 rounded-xl p-6 border border-white/5 flex flex-col justify-between">
+                     <div className="flex items-center gap-3 mb-4">
                       <Users className="w-5 h-5 text-primary" />
                       <span className="text-sm font-medium">Active Roster</span>
                     </div>
-                    <div className="flex -space-x-2">
-                      {[1,2,3].map((i) => (
-                        <div key={i} className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-900 flex items-center justify-center text-xs">
-                          P{i}
-                        </div>
-                      ))}
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-900 flex items-center justify-center text-xs">
-                        +2
-                      </div>
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P1</div>
+                          <div className="text-sm">Simple</div>
+                          <div className="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P2</div>
+                          <div className="text-sm">Zywoo</div>
+                          <div className="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">P3</div>
+                          <div className="text-sm">Niko</div>
+                          <div className="ml-auto w-2 h-2 rounded-full bg-yellow-500"></div>
+                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </section>
 
@@ -320,27 +345,15 @@ export default function Landing() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
             
             <h2 className="text-4xl md:text-6xl font-bold font-heading mb-6 tracking-tight">
-              Ready to Level Up?
+              Join the Closed Beta
             </h2>
             <p className="text-xl text-muted-foreground mb-10">
-              Join the world's best organizations running on NexusSuite.
+              Be among the first to experience the future of esports management.
+              Sign up now to secure your spot.
             </p>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                size="lg"
-                className="text-lg px-10 h-14 bg-primary hover:bg-primary/90"
-                onClick={() => (window.location.href = "/register")}
-              >
-                Get Started Now
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-10 h-14"
-              >
-                Contact Sales
-              </Button>
+            <div className="flex justify-center w-full">
+               <WaitlistForm />
             </div>
           </div>
         </div>
@@ -363,7 +376,7 @@ export default function Landing() {
               <h4 className="font-bold mb-4 text-white">Platform</h4>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="hover:text-primary cursor-pointer">Features</li>
-                <li className="hover:text-primary cursor-pointer">Pricing</li>
+                <li className="hover:text-primary cursor-pointer" onClick={() => window.location.href = "/pricing"}>Pricing</li>
                 <li className="hover:text-primary cursor-pointer">Enterprise</li>
                 <li className="hover:text-primary cursor-pointer">Changelog</li>
               </ul>

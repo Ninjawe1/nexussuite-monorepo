@@ -34,6 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useLocation } from "wouter";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 
 const platformIcons: Record<string, any> = {
@@ -46,6 +47,7 @@ const platformIcons: Record<string, any> = {
 };
 
 export default function Marcom() {
+  const { currentOrganization: organization } = useOrganization();
   const [campaignDialogOpen, setCampaignDialogOpen] = useState(false);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<
@@ -74,8 +76,8 @@ export default function Marcom() {
       window.history.replaceState({}, "", newUrl);
 
       // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts", organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics", organization?.id] });
     } else if (oauthError) {
       toast({
         title: "Connection failed",
@@ -88,31 +90,48 @@ export default function Marcom() {
       const newUrl = newSearch ? `/marcom?${newSearch}` : "/marcom";
       window.history.replaceState({}, "", newUrl);
     }
-  }, [toast, queryClient]);
+  }, [toast, queryClient, organization?.id]);
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useQuery<
     CampaignType[]
   >({
-    queryKey: ["/api/campaigns"],
+    queryKey: ["/api/campaigns", organization?.id],
+    queryFn: async () => {
+        if (!organization?.id) return [];
+        const res = await apiRequest(`/api/campaigns?organizationId=${organization.id}`, "GET");
+        return res.json();
+    },
+    enabled: !!organization?.id,
   });
 
   const { data: socialAccounts = [], isLoading: accountsLoading } = useQuery<
     SocialAccount[]
   >({
-    queryKey: ["/api/social/accounts"],
+    queryKey: ["/api/social/accounts", organization?.id],
+    queryFn: async () => {
+        if (!organization?.id) return [];
+        const res = await apiRequest(`/api/social/accounts?organizationId=${organization.id}`, "GET");
+        return res.json();
+    },
+    enabled: !!organization?.id,
   });
 
   const { data: socialAnalytics, isLoading: analyticsLoading } = useQuery<any>({
-    queryKey: ["/api/social/analytics"],
-
+    queryKey: ["/api/social/analytics", organization?.id],
+    queryFn: async () => {
+        if (!organization?.id) return null;
+        const res = await apiRequest(`/api/social/analytics?organizationId=${organization.id}`, "GET");
+        return res.json();
+    },
+    enabled: !!organization?.id,
   });
 
   const deleteCampaignMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/campaigns/${id}`, "DELETE");
+      return await apiRequest(`/api/campaigns/${id}?organizationId=${organization?.id}`, "DELETE");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/campaigns", organization?.id] });
       toast({
         title: "Success",
         description: "Campaign deleted successfully",
@@ -136,18 +155,17 @@ export default function Marcom() {
         title: "Error",
         description: error.message || "Failed to delete campaign",
         variant: "destructive",
-
       });
     },
   });
 
   const deleteAccountMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/social/accounts/${id}`, "DELETE");
+      return await apiRequest(`/api/social/accounts/${id}?organizationId=${organization?.id}`, "DELETE");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts", organization?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics", organization?.id] });
       toast({
         title: "Success",
         description: "Social account disconnected",
@@ -171,17 +189,16 @@ export default function Marcom() {
         title: "Error",
         description: error.message || "Failed to disconnect account",
         variant: "destructive",
-
       });
     },
   });
 
   const syncAccountMutation = useMutation({
     mutationFn: async (accountId: string) => {
-      return await apiRequest(`/api/social/sync/${accountId}`, "POST");
+      return await apiRequest(`/api/social/sync/${accountId}?organizationId=${organization?.id}`, "POST");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics", organization?.id] });
       toast({
         title: "Success",
         description: "Analytics synced successfully",

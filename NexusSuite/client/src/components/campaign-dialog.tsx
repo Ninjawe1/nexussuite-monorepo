@@ -34,6 +34,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import { formatDateSafe, toDateSafe } from '@/lib/date';
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface CampaignDialogProps {
   open: boolean;
@@ -51,6 +52,7 @@ const platformOptions = [
 ];
 
 export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogProps) {
+  const { currentOrganization: organization } = useOrganization();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -90,10 +92,13 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest('/api/campaigns', 'POST', data);
+      return await apiRequest(`/api/campaigns?organizationId=${organization?.id}`, 'POST', {
+          ...data,
+          organizationId: organization?.id
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns', organization?.id] });
       toast({
         title: 'Success',
         description: 'Campaign created successfully',
@@ -123,10 +128,10 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
 
   const updateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest(`/api/campaigns/${campaign?.id}`, 'PATCH', data);
+      return await apiRequest(`/api/campaigns/${campaign?.id}?organizationId=${organization?.id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/campaigns', organization?.id] });
       toast({
         title: 'Success',
         description: 'Campaign updated successfully',

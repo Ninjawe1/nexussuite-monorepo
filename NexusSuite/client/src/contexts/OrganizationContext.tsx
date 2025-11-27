@@ -26,6 +26,8 @@ export interface Organization {
     website?: string;
     industry?: string;
   };
+  plan?: string;
+  memberCount?: number;
 }
 
 export interface OrganizationMembership {
@@ -116,54 +118,61 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
    * Fetch user's organizations
    */
   const fetchOrganizations = useCallback(async (): Promise<Organization[]> => {
-    try {
-      const response = await apiRequest("/api/auth/user", "GET");
+    let attempts = 0;
+    const maxAttempts = 3;
 
-      const data = await response.json();
+    while (attempts < maxAttempts) {
+      try {
+        const response = await apiRequest("/api/auth/user", "GET");
+        const data = await response.json();
 
-      // Prefer explicit organizations array if provided
-      const userOrgs = data?.organizations || data?.user?.organizations || [];
-      if (Array.isArray(userOrgs) && userOrgs.length > 0) {
-        return userOrgs.map((org: any) => ({
-          id: org.organizationId || org.id,
-          name: org.organization?.name || org.name || "Unknown Organization",
-          slug: (org.organization?.slug || org.slug || org.organizationId || org.id || "").toString(),
+        // Prefer explicit organizations array if provided
+        const userOrgs = data?.organizations || data?.user?.organizations || [];
+        if (Array.isArray(userOrgs) && userOrgs.length > 0) {
+          return userOrgs.map((org: any) => ({
+            id: org.organizationId || org.id,
+            name: org.organization?.name || org.name || "Unknown Organization",
+            slug: (org.organization?.slug || org.slug || org.organizationId || org.id || "").toString(),
+            createdAt: org.createdAt || new Date().toISOString(),
+            updatedAt: org.updatedAt || new Date().toISOString(),
+            metadata: org.organization?.metadata || org.metadata || {},
+          }));
+        }
 
-          createdAt: org.createdAt || new Date().toISOString(),
-          updatedAt: org.updatedAt || new Date().toISOString(),
-          metadata: org.organization?.metadata || org.metadata || {},
-        }));
+        // Fallback: derive a single org from tenantId on the user
+        const tenantId = data?.tenantId || data?.user?.tenantId;
+        if (tenantId) {
+          const derivedName =
+            data?.tenant?.name ||
+            data?.clubName ||
+            (data?.firstName ? `${data.firstName}'s Club` : data?.email || "My Club");
+
+          return [
+            {
+              id: String(tenantId),
+              name: String(derivedName),
+              slug: String(tenantId),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              metadata: {},
+            },
+          ];
+        }
+
+        // No organizations available
+        return [];
+      } catch (error) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          // Gracefully handle missing endpoints on public landing page
+          console.warn("Failed to fetch organizations (non-blocking):", error);
+          return [];
+        }
+        // Exponential backoff
+        await new Promise((resolve) => setTimeout(resolve, 500 * Math.pow(2, attempts - 1)));
       }
-
-      // Fallback: derive a single org from tenantId on the user
-      const tenantId = data?.tenantId || data?.user?.tenantId;
-      if (tenantId) {
-        const derivedName =
-          data?.tenant?.name ||
-          data?.clubName ||
-          (data?.firstName ? `${data.firstName}'s Club` : data?.email || "My Club");
-
-
-        return [
-          {
-            id: String(tenantId),
-            name: String(derivedName),
-            slug: String(tenantId),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            metadata: {},
-          },
-        ];
-      }
-
-      // No organizations available
-      return [];
-    } 
-    catch (error) {
-      // Gracefully handle missing endpoints on public landing page
-      console.warn("Failed to fetch organizations (non-blocking):", error);
-      return [];
     }
+    return [];
   }, []);
   
 

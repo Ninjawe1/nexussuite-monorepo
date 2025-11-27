@@ -185,11 +185,7 @@ class FirestoreStorage implements IStorage {
   async createPayroll(data: InsertPayroll): Promise<Payroll> {
     return await createDoc<Payroll>("payroll", data);
   }
-<<<<<<< HEAD
-  async updatePayroll(id: string, _tenantId: string, patch: Partial<Payroll>): Promise<Payroll> {
-=======
   async updatePayroll(id: string, _tenantId: string, patch: Partial<InsertPayroll>): Promise<Payroll> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<Payroll>("payroll", id, patch);
   }
   async deletePayroll(id: string, _tenantId: string): Promise<void> {
@@ -228,11 +224,7 @@ class FirestoreStorage implements IStorage {
   async createTournament(data: InsertTournament): Promise<Tournament> {
     return await createDoc<Tournament>("tournaments", data);
   }
-<<<<<<< HEAD
-  async updateTournament(id: string, _tenantId: string, patch: Partial<Tournament>): Promise<Tournament> {
-=======
   async updateTournament(id: string, _tenantId: string, patch: Partial<InsertTournament>): Promise<Tournament> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<Tournament>("tournaments", id, patch);
   }
   async deleteTournament(id: string, _tenantId: string): Promise<void> {
@@ -242,11 +234,7 @@ class FirestoreStorage implements IStorage {
   // Rounds
   async getRoundsByTournament(tournamentId: string): Promise<TournamentRound[]> {
     const snap = await col("tournamentRounds").where("tournamentId", "==", tournamentId).orderBy("createdAt", "desc").get();
-<<<<<<< HEAD
-    return snap.docs.map(d => { const data = d.data() as Omit<TournamentRound, "id">; return { id: d.id, ...data }; });
-=======
     return snap.docs.map((d: any) => { const data = d.data() as Omit<TournamentRound, "id">; return { id: d.id, ...data }; });
->>>>>>> e6da67b (feat(repo): initial clean upload)
   }
   async getRound(id: string, tournamentId: string): Promise<TournamentRound | undefined> {
     const s = await getById<TournamentRound>("tournamentRounds", id);
@@ -255,11 +243,7 @@ class FirestoreStorage implements IStorage {
   async createRound(data: InsertTournamentRound): Promise<TournamentRound> {
     return await createDoc<TournamentRound>("tournamentRounds", data);
   }
-<<<<<<< HEAD
   async updateRound(id: string, _tournamentId: string, patch: Partial<TournamentRound>): Promise<TournamentRound> {
-=======
-  async updateRound(id: string, _tournamentId: string, patch: Partial<InsertTournamentRound>): Promise<TournamentRound> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<TournamentRound>("tournamentRounds", id, patch);
   }
   async deleteRound(id: string, _tournamentId: string): Promise<void> {
@@ -272,19 +256,11 @@ class FirestoreStorage implements IStorage {
   }
   async getMatchesByTournament(tournamentId: string): Promise<Match[]> {
     try {
-<<<<<<< HEAD
       const snap = await col("matches")
         .where("tournamentId", "==", tournamentId)
         .orderBy("matchNumber")
         .get();
       return snap.docs.map(d => {
-=======
-    const snap = await col("matches")
-      .where("tournamentId", "==", tournamentId)
-      .orderBy("matchNumber")
-      .get();
-      return snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as Match;
@@ -292,11 +268,7 @@ class FirestoreStorage implements IStorage {
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("matches").where("tournamentId", "==", tournamentId).get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as Match;
@@ -313,19 +285,11 @@ class FirestoreStorage implements IStorage {
   }
   async getMatchesByRound(roundId: string): Promise<Match[]> {
     try {
-<<<<<<< HEAD
       const snap = await col("matches")
         .where("roundId", "==", roundId)
         .orderBy("matchNumber")
         .get();
       return snap.docs.map(d => {
-=======
-    const snap = await col("matches")
-      .where("roundId", "==", roundId)
-      .orderBy("matchNumber")
-      .get();
-      return snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as Match;
@@ -333,11 +297,7 @@ class FirestoreStorage implements IStorage {
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("matches").where("roundId", "==", roundId).get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as Match;
@@ -359,11 +319,7 @@ class FirestoreStorage implements IStorage {
   async createMatch(data: InsertMatch): Promise<Match> {
     return await createDoc<Match>("matches", data);
   }
-<<<<<<< HEAD
   async updateMatch(id: string, _tenantId: string, patch: Partial<Match>): Promise<Match> {
-=======
-  async updateMatch(id: string, _tenantId: string, patch: Partial<InsertMatch>): Promise<Match> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<Match>("matches", id, patch);
   }
   async deleteMatch(id: string, _tenantId: string): Promise<void> {
@@ -384,11 +340,7 @@ class FirestoreStorage implements IStorage {
   async createCampaign(data: InsertCampaign): Promise<Campaign> {
     return await createDoc<Campaign>("campaigns", data);
   }
-<<<<<<< HEAD
   async updateCampaign(id: string, _tenantId: string, patch: Partial<Campaign>): Promise<Campaign> {
-=======
-  async updateCampaign(id: string, _tenantId: string, patch: Partial<InsertCampaign>): Promise<Campaign> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<Campaign>("campaigns", id, patch);
   }
   async deleteCampaign(id: string, _tenantId: string): Promise<void> {
@@ -409,11 +361,7 @@ class FirestoreStorage implements IStorage {
   async createContract(data: InsertContract): Promise<Contract> {
     return await createDoc<Contract>("contracts", data);
   }
-<<<<<<< HEAD
   async updateContract(id: string, _tenantId: string, patch: Partial<Contract>): Promise<Contract> {
-=======
-  async updateContract(id: string, _tenantId: string, patch: Partial<InsertContract>): Promise<Contract> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     return await updateDoc<Contract>("contracts", id, patch);
   }
   async deleteContract(id: string, _tenantId: string): Promise<void> {
@@ -430,11 +378,7 @@ class FirestoreStorage implements IStorage {
         .where("contractId", "==", contractId)
         .orderBy("createdAt", "desc")
         .get();
-<<<<<<< HEAD
       return snap.docs.map(d => {
-=======
-      return snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
         const data = d.data() as any;
         const { id: _id, ...rest } = data;
         return { id: d.id, ...rest };
@@ -444,11 +388,7 @@ class FirestoreStorage implements IStorage {
         const snap = await col("contractFiles")
           .where("contractId", "==", contractId)
           .get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const data = d.data() as any;
           const { id: _id, ...rest } = data;
           return { id: d.id, ...rest };
@@ -495,21 +435,13 @@ class FirestoreStorage implements IStorage {
         .orderBy("createdAt", "desc")
         .limit(limit)
         .get();
-<<<<<<< HEAD
       return snap.docs.map(d => { const data = d.data() as Omit<AuditLog, "id">; return { id: d.id, ...data }; });
-=======
-      return snap.docs.map((d: any) => { const data = d.data() as Omit<AuditLog, "id">; return { id: d.id, ...data }; });
->>>>>>> e6da67b (feat(repo): initial clean upload)
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("auditLogs")
           .where("tenantId", "==", tenantId)
           .get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const data = d.data() as Omit<AuditLog, "id">;
           return { id: d.id, ...data };
         });
@@ -527,11 +459,7 @@ class FirestoreStorage implements IStorage {
   }
   async getAllAuditLogs(limit = 1000): Promise<AuditLog[]> {
     const snap = await col("auditLogs").orderBy("createdAt", "desc").limit(limit).get();
-<<<<<<< HEAD
     return snap.docs.map(d => {
-=======
-    return snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
       const data = d.data() as Omit<AuditLog, "id">;
       return { id: d.id, ...data };
     });
@@ -595,29 +523,17 @@ class FirestoreStorage implements IStorage {
         .orderBy("date", "desc")
         .limit(limit)
         .get();
-<<<<<<< HEAD
       return snap.docs.map(d => {
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as SocialMetric;
       });
-=======
-    return snap.docs.map((d: any) => {
-      const raw = d.data() as any;
-      const { id: _id, ...rest } = raw;
-      return { id: d.id, ...rest } as SocialMetric;
-    });
->>>>>>> e6da67b (feat(repo): initial clean upload)
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("socialMetrics")
           .where("tenantId", "==", tenantId)
           .get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as SocialMetric;
@@ -642,29 +558,17 @@ class FirestoreStorage implements IStorage {
         .orderBy("date", "desc")
         .limit(limit)
         .get();
-<<<<<<< HEAD
       return snap.docs.map(d => {
         const raw = d.data() as any;
         const { id: _id, ...rest } = raw;
         return { id: d.id, ...rest } as SocialMetric;
       });
-=======
-    return snap.docs.map((d: any) => {
-      const raw = d.data() as any;
-      const { id: _id, ...rest } = raw;
-      return { id: d.id, ...rest } as SocialMetric;
-    });
->>>>>>> e6da67b (feat(repo): initial clean upload)
     } catch (err: any) {
       if (err?.code === 9 || String(err?.message).includes("FAILED_PRECONDITION")) {
         const snap = await col("socialMetrics")
           .where("accountId", "==", accountId)
           .get();
-<<<<<<< HEAD
         const items = snap.docs.map(d => {
-=======
-        const items = snap.docs.map((d: any) => {
->>>>>>> e6da67b (feat(repo): initial clean upload)
           const raw = d.data() as any;
           const { id: _id, ...rest } = raw;
           return { id: d.id, ...rest } as SocialMetric;
@@ -729,11 +633,7 @@ class FirestoreStorage implements IStorage {
     }
     return tx;
   }
-<<<<<<< HEAD
   async updateTransaction(id: string, _tenantId: string, patch: Partial<Transaction>): Promise<Transaction> {
-=======
-  async updateTransaction(id: string, _tenantId: string, patch: Partial<InsertTransaction>): Promise<Transaction> {
->>>>>>> e6da67b (feat(repo): initial clean upload)
     const old = await this.getTransaction(id, _tenantId);
     const updated = await updateDoc<Transaction>("transactions", id, patch);
 
