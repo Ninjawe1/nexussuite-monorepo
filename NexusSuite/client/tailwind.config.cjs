@@ -1,12 +1,3 @@
-const withOpacity = (variable) => {
-  return ({ opacityValue }) => {
-    if (opacityValue !== undefined) {
-      return `color-mix(in srgb, var(${variable}), transparent ${100 - opacityValue * 100}%)`;
-    }
-    return `var(${variable})`;
-  };
-};
-
 module.exports = {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
@@ -18,62 +9,68 @@ module.exports = {
         sm: ".1875rem", // 3px
       },
       colors: {
-        // Use CSS variables with opacity support via color-mix
-        background: withOpacity("--background"),
-        foreground: withOpacity("--foreground"),
-        border: withOpacity("--border"),
-        input: withOpacity("--input"),
-        ring: withOpacity("--ring"),
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
         card: {
-          DEFAULT: withOpacity("--card"),
-          foreground: withOpacity("--card-foreground"),
-          border: withOpacity("--border"),
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+          border: "hsl(var(--card-border))",
         },
         popover: {
-          DEFAULT: withOpacity("--popover"),
-          foreground: withOpacity("--popover-foreground"),
-          border: withOpacity("--border"),
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+          border: "hsl(var(--popover-border))",
         },
         primary: {
-          DEFAULT: withOpacity("--primary"),
-          foreground: withOpacity("--primary-foreground"),
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+          border: "hsl(var(--primary-border))",
         },
         secondary: {
-          DEFAULT: withOpacity("--secondary"),
-          foreground: withOpacity("--secondary-foreground"),
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+          border: "hsl(var(--secondary-border))",
         },
         muted: {
-          DEFAULT: withOpacity("--muted"),
-          foreground: withOpacity("--muted-foreground"),
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+          border: "hsl(var(--muted-border))",
         },
         accent: {
-          DEFAULT: withOpacity("--accent"),
-          foreground: withOpacity("--accent-foreground"),
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+          border: "hsl(var(--accent-border))",
         },
         destructive: {
-          DEFAULT: withOpacity("--destructive"),
-          foreground: withOpacity("--destructive-foreground"),
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+          border: "hsl(var(--destructive-border))",
         },
+        ring: "hsl(var(--ring))",
         chart: {
-          1: withOpacity("--chart-1"),
-          2: withOpacity("--chart-2"),
-          3: withOpacity("--chart-3"),
-          4: withOpacity("--chart-4"),
-          5: withOpacity("--chart-5"),
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
         },
         sidebar: {
-          ring: withOpacity("--sidebar-ring"),
-          DEFAULT: withOpacity("--sidebar"),
-          foreground: withOpacity("--sidebar-foreground"),
-          border: withOpacity("--sidebar-border"),
+          ring: "hsl(var(--sidebar-ring))",
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          border: "hsl(var(--sidebar-border))",
         },
         "sidebar-primary": {
-          DEFAULT: withOpacity("--sidebar-primary"),
-          foreground: withOpacity("--sidebar-primary-foreground"),
+          DEFAULT: "hsl(var(--sidebar-primary))",
+          foreground: "hsl(var(--sidebar-primary-foreground))",
+          border: "hsl(var(--sidebar-primary-border))",
         },
         "sidebar-accent": {
-          DEFAULT: withOpacity("--sidebar-accent"),
-          foreground: withOpacity("--sidebar-accent-foreground"),
+          DEFAULT: "hsl(var(--sidebar-accent))",
+          foreground: "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-accent-border))",
         },
         status: {
           online: "rgb(34 197 94)",
