@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "vite",
-  "buildCommand": "cd NexusSuite/client && npm ci && npm run build",
+  "buildCommand": "cd NexusSuite/client && npm ci --include=dev && npm run build",
   "outputDirectory": "NexusSuite/client/dist",
   "env": {
     "VITE_API_URL": "https://api.nexus-suite.app"
