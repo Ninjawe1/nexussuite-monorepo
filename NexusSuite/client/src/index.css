@@ -36,27 +36,6 @@
 }
 
 /* 3️⃣ Optional: utility layer for simple fixes and animations */
-/* Landing Page Overrides - High Specificity */
-#landing-page-root {
-  /* Atomic Theme Colors (Deep Teal) */
-  --primary: 166 72% 45%;
-  --primary-foreground: 0 0% 98%;
-  --ring: 166 72% 45%;
-  --accent: 170 30% 22%;
-  --accent-foreground: 0 0% 92%;
-  --muted: 170 30% 15%;
-  --muted-foreground: 166 20% 70%;
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
-  
-  /* Force these colors on the root element itself */
-  background-color: hsl(0 0% 4%) !important;
-  color: hsl(0 0% 98%) !important;
-}
-
-/* Keep variables as raw HSL components for Tailwind (hsl(var(--...))) */
-/* Duplicate declarations removed to prevent invalid hsl(hsl(...)) resolution */
-
 @layer utilities {
   /* Ensure heading utility maps to Geist Mono globally */
   .font-heading {
@@ -137,27 +116,22 @@
 
   /* Esports / Glassmorphism Utilities */
   .glass {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.01) 100%
-    ) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+    background: rgba(13, 13, 13, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .border-glow {
     position: relative;
-    border: 1px solid color-mix(in srgb, var(--primary), transparent 70%);
-    box-shadow: 0 0 15px -5px color-mix(in srgb, var(--primary), transparent 70%);
+    border: 1px solid hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 15px -5px hsl(var(--primary) / 0.3);
     transition: all 0.3s ease;
   }
 
   .border-glow:hover {
-    border-color: color-mix(in srgb, var(--primary), transparent 40%);
-    box-shadow: 0 0 20px -5px color-mix(in srgb, var(--primary), transparent 50%);
+    border-color: hsl(var(--primary) / 0.6);
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
   }
 
   .scanline {
