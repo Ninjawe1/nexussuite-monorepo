@@ -3,7 +3,6 @@
   "framework": "vite",
   "buildCommand": "cd NexusSuite/client && npm ci && npm run build",
   "outputDirectory": "NexusSuite/client/dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD || exit 0",
   "env": {
     "VITE_API_URL": "https://api.nexus-suite.app"
   }
