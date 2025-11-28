@@ -3,6 +3,9 @@
   "framework": "vite",
   "buildCommand": "cd NexusSuite/client && npm ci --include=dev && npm run build",
   "outputDirectory": "NexusSuite/client/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
   "env": {
     "VITE_API_URL": "https://api.nexus-suite.app"
   }
