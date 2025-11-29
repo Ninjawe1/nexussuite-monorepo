@@ -1,10 +1,13 @@
 {
   "version": 2,
-  "framework": "vite",
-  "buildCommand": "cd NexusSuite/client && npm ci --include=dev && npm run build",
-  "outputDirectory": "NexusSuite/client/dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD || exit 0",
-  "env": {
-    "VITE_API_URL": "https://api.nexus-suite.app"
-  }
+  "buildCommand": "cd NexusSuite && npm ci --include=dev && npm run build",
+  "outputDirectory": "NexusSuite/public",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/manifest(.*)", "destination": "/manifest$1" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
