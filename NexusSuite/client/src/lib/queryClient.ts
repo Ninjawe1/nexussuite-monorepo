@@ -36,6 +36,19 @@ function ensureJsonResponse(res: Response) {
   }
 }
 
+const API_BASE = (import.meta as any).env?.VITE_API_URL?.trim();
+
+function resolveUrl(u: string): string {
+  if (API_BASE) {
+    try {
+      return new URL(u, API_BASE).toString();
+    } catch {
+      return u;
+    }
+  }
+  return u;
+}
+
 export async function apiRequest(
   url: string,
   method: string,
@@ -43,7 +56,7 @@ export async function apiRequest(
   options?: { headers?: Record<string, string> },
 
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const res = await fetch(resolveUrl(url), {
     method,
     headers: {
       ...(options?.headers || {}),
@@ -68,7 +81,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const url = resolveUrl(queryKey.join("/") as string);
+    const res = await fetch(url, {
       credentials: "include",
       // Avoid 304 and ensure fresh data for user/session queries
       cache: "no-store",

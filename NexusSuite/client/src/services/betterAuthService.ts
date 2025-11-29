@@ -39,7 +39,15 @@ export async function refreshUser() {
 }
 
 class BetterAuthService {
-  private apiUrl = "/api/auth"; // ✅ correct route
+  private apiUrl = (() => {
+    const base = (import.meta as any).env?.VITE_API_URL?.trim();
+    if (base) {
+      try {
+        return new URL("/api/auth", base).toString();
+      } catch {}
+    }
+    return "/api/auth";
+  })();
 
 
   /**
