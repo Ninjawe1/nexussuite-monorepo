@@ -94,6 +94,32 @@ async function buildHandler() {
     res.status(503).json({ ok: false, message: "Server initializing" });
   });
 
+  app.get("/api/diagnostics", (req, res) => {
+    (async () => {
+      const origin = process.env.ALLOWED_ORIGIN || process.env.VITE_APP_URL || "http://localhost:5173";
+      const haveUrl = Boolean(process.env.SUPABASE_URL);
+      const haveAnon = Boolean(process.env.SUPABASE_ANON_KEY);
+      const haveService = Boolean(process.env.SUPABASE_SERVICE_KEY);
+      let canQuery = false;
+      let rows = 0;
+      try {
+        const admin = createClient(String(process.env.SUPABASE_URL), String(process.env.SUPABASE_SERVICE_KEY), { auth: { autoRefreshToken: false, persistSession: false } });
+        const { data } = await admin.from("wallets").select("id", { count: "exact", head: true });
+        canQuery = true;
+        rows = Number((data as any)?.length || 0);
+      } catch {}
+      const raw = String(req.headers?.cookie || "");
+      const hasAccessCookie = /sb-access-token=/.test(raw);
+      res.status(200).json({
+        ok: true,
+        env: { haveUrl, haveAnon, haveService, allowedOrigin: origin },
+        cookies: { hasAccessCookie },
+        supabase: { canQuery, sampleCount: rows },
+        request: { host: req.headers.host, proto: String(req.headers["x-forwarded-proto"] || "http") }
+      });
+    })();
+  });
+
   app.post("/api/auth/login", (req, res) => {
     (async () => {
       try {
@@ -101,8 +127,10 @@ async function buildHandler() {
         const email = String(body.email || "");
         const password = String(body.password || "");
         if (!email || !password) { res.status(400).json({ success: false, message: "Missing email or password" }); return; }
-        const supabaseAuthKey = String(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_KEY);
-        const supabase = createClient(String(process.env.SUPABASE_URL), supabaseAuthKey, { auth: { autoRefreshToken: false, persistSession: false } });
+        const url = String(process.env.SUPABASE_URL || "");
+        const supabaseAuthKey = String(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_KEY || "");
+        if (!url || !supabaseAuthKey) { res.status(500).json({ success: false, message: "Supabase env not configured" }); return; }
+        const supabase = createClient(url, supabaseAuthKey, { auth: { autoRefreshToken: false, persistSession: false } });
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error || !data?.session || !data?.user) { res.status(401).json({ success: false, message: String(error?.message || "Invalid credentials") }); return; }
         const accessToken = data.session.access_token;
@@ -120,6 +148,11 @@ async function buildHandler() {
         res.status(500).json({ success: false, message: String(e?.message || "Login failed") });
       }
     })();
+  });
+
+  app.all("/api/auth/login", (req, res, next) => {
+    if (req.method === "POST") return next();
+    res.status(405).json({ message: "Method Not Allowed" });
   });
 
   app.get("/api/auth/user", (req, res) => {
@@ -141,26 +174,39 @@ async function buildHandler() {
   });
 
   app.post("/api/auth/session/refresh", (req, res) => {
-    const raw = String(req.headers?.cookie || "");
-    const m = raw.match(/(?:better_auth_session|better-auth\.session|authToken)=([^;]+)/);
-    const token = m ? m[1] : null;
-    if (!token) {
-      res.status(401).json({ success: false, message: "Unauthorized" });
-      return;
-    }
-    const tokenStr = Buffer.from(token, "base64").toString("utf8");
-    const email = tokenStr.split(":")[0] || "user@example.com";
-    const user = { id: email, email, name: String(email).split("@")[0] };
-    const maxAge = 7 * 24 * 60 * 60;
-    const isSecure = String(req.headers["x-forwarded-proto"] || "https").includes("https");
-    const cookieBase = `Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}` + (isSecure ? "; Secure" : "");
-    res.setHeader("Set-Cookie", [
-      `better_auth_session=${token}; ${cookieBase}`,
-      `better-auth.session=${token}; ${cookieBase}`,
-      `authToken=${token}; ${cookieBase}`
-    ]);
-    res.status(200).json({ success: true, user, session: { token, expiresAt: new Date(Date.now() + maxAge * 1000).toISOString() } });
-    return;
+    (async () => {
+      try {
+        const raw = String(req.headers?.cookie || "");
+        const m = raw.match(/sb-refresh-token=([^;]+)/);
+        const refresh = m ? m[1] : null;
+        if (!refresh) { res.status(401).json({ success: false, message: "Unauthorized" }); return; }
+        const url = String(process.env.SUPABASE_URL || "");
+        const anon = String(process.env.SUPABASE_ANON_KEY || "");
+        if (!url || !anon) { res.status(500).json({ success: false, message: "Supabase env not configured" }); return; }
+        const endpoint = `${url.replace(/\/$/, "")}/auth/v1/token?grant_type=refresh_token`;
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: anon, Authorization: `Bearer ${anon}` },
+          body: JSON.stringify({ refresh_token: refresh })
+        });
+        if (!r.ok) { res.status(r.status).json({ success: false, message: await r.text() }); return; }
+        const out: any = await r.json();
+        const accessToken = out?.access_token;
+        const newRefresh = out?.refresh_token || refresh;
+        if (!accessToken) { res.status(500).json({ success: false, message: "Failed to refresh session" }); return; }
+        const expMs = out?.expires_in ? Date.now() + Number(out.expires_in) * 1000 : Date.now() + 3600 * 1000;
+        const maxAge = Math.max(60, Math.floor((expMs - Date.now()) / 1000));
+        const isSecure = String(req.headers["x-forwarded-proto"] || "https").includes("https");
+        const cookieBase = `Path=/; HttpOnly; SameSite=None; Max-Age=${maxAge}` + (isSecure ? "; Secure" : "");
+        res.setHeader("Set-Cookie", [
+          `sb-access-token=${accessToken}; ${cookieBase}`,
+          `sb-refresh-token=${newRefresh}; ${cookieBase}`
+        ]);
+        res.status(200).json({ success: true, session: { token: accessToken, expiresAt: new Date(expMs).toISOString() } });
+      } catch (e: any) {
+        res.status(500).json({ success: false, message: String(e?.message || "Refresh failed") });
+      }
+    })();
   });
 
   app.post("/api/auth/logout", (req, res) => {
@@ -465,28 +511,3 @@ export default async function handler(req: any, res: any) {
   }
   return cachedHandler(req, res);
 }
-  app.get("/api/diagnostics", (req, res) => {
-    (async () => {
-      const origin = process.env.ALLOWED_ORIGIN || process.env.VITE_APP_URL || "http://localhost:5173";
-      const haveUrl = Boolean(process.env.SUPABASE_URL);
-      const haveAnon = Boolean(process.env.SUPABASE_ANON_KEY);
-      const haveService = Boolean(process.env.SUPABASE_SERVICE_KEY);
-      let canQuery = false;
-      let rows = 0;
-      try {
-        const admin = createClient(String(process.env.SUPABASE_URL), String(process.env.SUPABASE_SERVICE_KEY), { auth: { autoRefreshToken: false, persistSession: false } });
-        const { data } = await admin.from("wallets").select("id", { count: "exact", head: true });
-        canQuery = true;
-        rows = Number((data as any)?.length || 0);
-      } catch {}
-      const raw = String(req.headers?.cookie || "");
-      const hasAccessCookie = /sb-access-token=/.test(raw);
-      res.status(200).json({
-        ok: true,
-        env: { haveUrl, haveAnon, haveService, allowedOrigin: origin },
-        cookies: { hasAccessCookie },
-        supabase: { canQuery, sampleCount: rows },
-        request: { host: req.headers.host, proto: String(req.headers["x-forwarded-proto"] || "http") }
-      });
-    })();
-  });
