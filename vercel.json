@@ -2,13 +2,8 @@
   "version": 2,
   "buildCommand": "cd NexusSuite/client && npm ci --include=dev && npm run build",
   "outputDirectory": "NexusSuite/client/dist",
-  "builds": [
-    { "src": "NexusSuite/api/[...route].ts", "use": "@vercel/node" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "NexusSuite/api/[...route].ts" }
-  ],
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://api.nexus-suite.app/$1" },
     { "source": "/assets/(.*)", "destination": "/assets/$1" },
     { "source": "/favicon.ico", "destination": "/favicon.ico" },
     { "source": "/manifest(.*)", "destination": "/manifest$1" },
