@@ -3,7 +3,7 @@
   "buildCommand": "cd NexusSuite/client && npm ci --include=dev && npm run build",
   "outputDirectory": "NexusSuite/client/dist",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://api.nexus-suite.app/$1" },
+    { "source": "/api/(.*)", "destination": "https://xjmusqhnapememvfszzj.supabase.co/functions/v1/api/$1" },
     { "source": "/assets/(.*)", "destination": "/assets/$1" },
     { "source": "/favicon.ico", "destination": "/favicon.ico" },
     { "source": "/manifest(.*)", "destination": "/manifest$1" },
