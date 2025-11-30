@@ -163,7 +163,10 @@ async function buildHandler() {
       if (!access) { res.status(401).json({ success: false, message: "Unauthorized" }); return; }
       try {
         const url = `${String(process.env.SUPABASE_URL).replace(/\/$/, "")}/auth/v1/user`;
-        const r = await fetch(url, { headers: { Authorization: `Bearer ${access}` } });
+        const anon = String(process.env.SUPABASE_ANON_KEY || "");
+        const headers: Record<string, string> = { Authorization: `Bearer ${access}` };
+        if (anon) headers["apikey"] = anon;
+        const r = await fetch(url, { headers });
         if (!r.ok) { res.status(r.status).json({ success: false, message: await r.text() }); return; }
         const u = await r.json();
         res.status(200).json({ success: true, user: { id: u.id, email: u.email, name: u.user_metadata?.name || u.email } });
