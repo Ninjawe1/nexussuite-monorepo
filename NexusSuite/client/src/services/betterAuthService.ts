@@ -45,11 +45,13 @@ class BetterAuthService {
    * Login with email and password
    */
   async login(email: string, password: string): Promise<AuthResponse> {
+    const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
     const response = await fetch(`${this.apiUrl}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : {}),
       },
       credentials: 'include', // Essential for cookie-based sessions
 
@@ -68,18 +70,25 @@ class BetterAuthService {
       throw new Error(msg);
     }
 
-    return response.json();
+    const data = await response.json();
+    if (data?.access_token && data?.refresh_token){
+      localStorage.setItem('sb-access-token', data.access_token);
+      localStorage.setItem('sb-refresh-token', data.refresh_token);
+    }
+    return data;
   }
 
   /**
    * Register new user with optional organization
    */
   async register(email: string, password: string, orgName?: string): Promise<AuthResponse> {
+    const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
     const response = await fetch(`${this.apiUrl}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...(anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : {}),
       },
       credentials: 'include',
 
@@ -107,9 +116,11 @@ class BetterAuthService {
   async getCurrentUser(): Promise<User | null> {
     try {
       // Server implements GET /api/auth/user
+      const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
+      const access = localStorage.getItem('sb-access-token') ?? undefined;
       const response = await fetch(`${this.apiUrl}/user`, {
         method: 'GET',
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', ...(access ? { Authorization: `Bearer ${access}`, apikey: anon } : (anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : {})) },
         credentials: 'include',
         cache: 'no-store',
       });
@@ -135,15 +146,18 @@ class BetterAuthService {
    */
   async logout(): Promise<void> {
     try {
+      const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
       const response = await fetch(`${this.apiUrl}/logout`, {
         method: 'POST',
-        headers: { Accept: 'application/json' },
+        headers: { Accept: 'application/json', ...(anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : {}) },
         credentials: 'include',
       });
 
       if (!response.ok) {
         console.warn('Logout request failed, but continuing with client-side cleanup');
       }
+      localStorage.removeItem('sb-access-token');
+      localStorage.removeItem('sb-refresh-token');
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -154,9 +168,12 @@ class BetterAuthService {
    */
   async refreshSession(): Promise<User | null> {
     try {
+      const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
+      const rt = localStorage.getItem('sb-refresh-token') ?? undefined;
       const response = await fetch(`${this.apiUrl}/session/refresh`, {
         method: 'POST',
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...(anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : {}) },
+        body: JSON.stringify({ refresh_token: rt }),
         credentials: 'include',
       });
 
@@ -165,6 +182,10 @@ class BetterAuthService {
       }
 
       const data = await response.json();
+      if (data?.access_token && data?.refresh_token){
+        localStorage.setItem('sb-access-token', data.access_token);
+        localStorage.setItem('sb-refresh-token', data.refresh_token);
+      }
       return data.user || data;
     } catch (error) {
       console.error('Error refreshing session:', error);

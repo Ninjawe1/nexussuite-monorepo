@@ -67,10 +67,13 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const url = queryKey.join('/') as string;
+    const anon = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
+    const access = typeof window !== 'undefined' ? localStorage.getItem('sb-access-token') ?? undefined : undefined;
     const res = await fetch(url, {
-      credentials: 'include',
+      credentials: "include",
       // Avoid 304 and ensure fresh data for user/session queries
-      cache: 'no-store',
+      cache: "no-store",
+      headers: access ? { Authorization: `Bearer ${access}`, apikey: anon } : (anon ? { Authorization: `Bearer ${anon}`, apikey: anon } : undefined),
     });
 
     if (unauthorizedBehavior === 'returnNull' && res.status === 401) {
