@@ -1,12 +1,9 @@
-import { createAuthClient } from "better-auth/react";
-import { polarClient } from "@polar-sh/better-auth";
-import { organizationClient } from "better-auth/client/plugins";
-
-const apiBase = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
-
+import { createAuthClient } from 'better-auth/react';
+import { polarClient } from '@polar-sh/better-auth';
+import { organizationClient } from 'better-auth/client/plugins';
 
 export const authClient = createAuthClient({
-  baseURL: `${apiBase}/api`,
+  baseURL: '/api',
   fetcher: async (url: string, options: any = {}) => {
     return fetch(url, {
       ...options,
@@ -18,4 +15,3 @@ export const authClient = createAuthClient({
 });
 
 // Side-effect checkout on import removed; trigger checkout from UI actions only
-

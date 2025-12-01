@@ -1,5 +1,19 @@
-# Exclude legacy server folders and archives only
+# Exclude legacy server folders and archives
 NexusSuite/server/**
 server/archive/**
 
-# Keep everything else (including api/**) for deployment
+# Exclude large local and backup artifacts
+.local/**
+.firebase/**
+revert_backup_*/**
+NexusSuite/ui_backup_*/**
+
+# Exclude generated and dependencies
+**/node_modules/**
+NexusSuite/client/dist/**
+
+# Exclude large binary cache files
+**/*.bin
+structure222.txt
+
+# Do NOT ignore client source; it is required for Vercel builds

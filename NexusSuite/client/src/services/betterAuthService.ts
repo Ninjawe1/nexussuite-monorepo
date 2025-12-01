@@ -39,40 +39,31 @@ export async function refreshUser() {
 }
 
 class BetterAuthService {
-  private apiUrl = (() => {
-    const base = (import.meta as any).env?.VITE_API_URL?.trim();
-    if (base) {
-      try {
-        return new URL("/api/auth", base).toString();
-      } catch {}
-    }
-    return "/api/auth";
-  })();
-
+  private apiUrl = '/api/auth';
 
   /**
    * Login with email and password
    */
   async login(email: string, password: string): Promise<AuthResponse> {
     const response = await fetch(`${this.apiUrl}/login`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      credentials: "include", // Essential for cookie-based sessions
+      credentials: 'include', // Essential for cookie-based sessions
 
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-      let msg = "Login failed";
+      let msg = 'Login failed';
 
       try {
         const err = await response.json();
         msg = String(err?.message || msg);
       } catch {}
-      if (response.status === 401) msg = "Invalid email or password";
+      if (response.status === 401) msg = 'Invalid email or password';
 
       throw new Error(msg);
     }
@@ -83,30 +74,26 @@ class BetterAuthService {
   /**
    * Register new user with optional organization
    */
-  async register(
-    email: string,
-    password: string,
-    orgName?: string,
-  ): Promise<AuthResponse> {
+  async register(email: string, password: string, orgName?: string): Promise<AuthResponse> {
     const response = await fetch(`${this.apiUrl}/register`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      credentials: "include",
+      credentials: 'include',
 
       body: JSON.stringify({ email, password, orgName }),
     });
 
     if (!response.ok) {
-      let msg = "Registration failed";
+      let msg = 'Registration failed';
 
       try {
         const err = await response.json();
         msg = String(err?.message || msg);
       } catch {}
-      if (response.status === 400 && /exist/i.test(msg)) msg = "Email already exists";
+      if (response.status === 400 && /exist/i.test(msg)) msg = 'Email already exists';
 
       throw new Error(msg);
     }
@@ -121,25 +108,23 @@ class BetterAuthService {
     try {
       // Server implements GET /api/auth/user
       const response = await fetch(`${this.apiUrl}/user`, {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        credentials: "include",
-        cache: "no-store",
-
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
+        cache: 'no-store',
       });
 
       if (!response.ok) {
         if (response.status === 401) {
           return null; // Not authenticated
         }
-        throw new Error("Failed to get current user");
-
+        throw new Error('Failed to get current user');
       }
 
       const data = await response.json();
       return data.user || data; // Handle both response formats
     } catch (error) {
-      console.error("Error getting current user:", error);
+      console.error('Error getting current user:', error);
 
       return null;
     }
@@ -151,19 +136,16 @@ class BetterAuthService {
   async logout(): Promise<void> {
     try {
       const response = await fetch(`${this.apiUrl}/logout`, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        credentials: "include",
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
       });
 
       if (!response.ok) {
-        console.warn(
-          "Logout request failed, but continuing with client-side cleanup",
-        );
+        console.warn('Logout request failed, but continuing with client-side cleanup');
       }
     } catch (error) {
-      console.error("Error during logout:", error);
-
+      console.error('Error during logout:', error);
     }
   }
 
@@ -173,10 +155,9 @@ class BetterAuthService {
   async refreshSession(): Promise<User | null> {
     try {
       const response = await fetch(`${this.apiUrl}/session/refresh`, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        credentials: "include",
-
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -186,7 +167,7 @@ class BetterAuthService {
       const data = await response.json();
       return data.user || data;
     } catch (error) {
-      console.error("Error refreshing session:", error);
+      console.error('Error refreshing session:', error);
 
       return null;
     }
@@ -203,12 +184,7 @@ class BetterAuthService {
   /**
    * Check if user has specific permission in organization
    */
-  hasPermission(
-    user: User,
-    organizationId: string,
-    permission: string,
-  ): boolean {
-
+  hasPermission(user: User, organizationId: string, permission: string): boolean {
     if (!user.permissions) return false;
     const orgPermissions = user.permissions[organizationId] || [];
     return orgPermissions.includes(permission);
@@ -217,33 +193,19 @@ class BetterAuthService {
   /**
    * Check if user has any of the specified permissions
    */
-  hasAnyPermission(
-    user: User,
-    organizationId: string,
-    permissions: string[],
-  ): boolean {
+  hasAnyPermission(user: User, organizationId: string, permissions: string[]): boolean {
     if (!user.permissions) return false;
     const orgPermissions = user.permissions[organizationId] || [];
-    return permissions.some((permission) =>
-      orgPermissions.includes(permission),
-    );
-
+    return permissions.some(permission => orgPermissions.includes(permission));
   }
 
   /**
    * Check if user has all specified permissions
    */
-  hasAllPermissions(
-    user: User,
-    organizationId: string,
-    permissions: string[],
-  ): boolean {
+  hasAllPermissions(user: User, organizationId: string, permissions: string[]): boolean {
     if (!user.permissions) return false;
     const orgPermissions = user.permissions[organizationId] || [];
-    return permissions.every((permission) =>
-      orgPermissions.includes(permission),
-    );
-
+    return permissions.every(permission => orgPermissions.includes(permission));
   }
 
   /**
@@ -265,9 +227,7 @@ class BetterAuthService {
    */
   isOrganizationAdmin(user: User, organizationId: string): boolean {
     return (
-      this.hasRole(user, organizationId, "admin") ||
-      this.hasRole(user, organizationId, "owner")
-
+      this.hasRole(user, organizationId, 'admin') || this.hasRole(user, organizationId, 'owner')
     );
   }
 

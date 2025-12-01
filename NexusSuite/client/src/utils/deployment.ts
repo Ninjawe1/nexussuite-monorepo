@@ -5,24 +5,22 @@ export const DEPLOYMENT_CONFIG = {
   isProduction: import.meta.env.PROD,
 
   // API Configuration
-  apiUrl: import.meta.env.VITE_API_URL || "http://localhost:3000",
-
+  apiUrl: '/',
 
   // Authentication
   betterAuthSecret: import.meta.env.VITE_BETTER_AUTH_SECRET,
 
   // Polar Configuration
   polarAccessToken: import.meta.env.VITE_POLAR_ACCESS_TOKEN,
-  polarMockMode: import.meta.env.VITE_POLAR_MOCK_MODE === "true",
+  polarMockMode: import.meta.env.VITE_POLAR_MOCK_MODE === 'true',
 
   // Application
-  appName: import.meta.env.VITE_APP_NAME || "NexusSuite",
-  appUrl: import.meta.env.VITE_APP_URL || "http://localhost:5173",
+  appName: import.meta.env.VITE_APP_NAME || 'NexusSuite',
+  appUrl: import.meta.env.VITE_APP_URL || 'http://localhost:5173',
 
   // Features
-  enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === "true",
-  enableErrorReporting: import.meta.env.VITE_ENABLE_ERROR_REPORTING === "true",
-
+  enableAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
+  enableErrorReporting: import.meta.env.VITE_ENABLE_ERROR_REPORTING === 'true',
 
   // Monitoring
   sentryDsn: import.meta.env.VITE_SENTRY_DSN,
@@ -31,15 +29,12 @@ export const DEPLOYMENT_CONFIG = {
 
 // Validate required environment variables
 export function validateEnvironment(): void {
-  const requiredEnvVars = ["VITE_API_URL", "VITE_BETTER_AUTH_SECRET"];
+  const requiredEnvVars = ['VITE_BETTER_AUTH_SECRET'];
 
-  const missing = requiredEnvVars.filter((envVar) => !import.meta.env[envVar]);
+  const missing = requiredEnvVars.filter(envVar => !import.meta.env[envVar]);
 
   if (missing.length > 0 && DEPLOYMENT_CONFIG.isProduction) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(", ")}`,
-    );
-
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
 }
 
@@ -68,9 +63,9 @@ export const SECURITY_CONFIG = {
     defaultSrc: ["'self'"],
     scriptSrc: ["'self'", "'unsafe-inline'"],
     styleSrc: ["'self'", "'unsafe-inline'"],
-    imgSrc: ["'self'", "data:", "https:"],
+    imgSrc: ["'self'", 'data:', 'https:'],
 
-    connectSrc: ["'self'", DEPLOYMENT_CONFIG.apiUrl],
+    connectSrc: ["'self'"],
     fontSrc: ["'self'"],
     objectSrc: ["'none'"],
     mediaSrc: ["'self'"],
@@ -107,11 +102,11 @@ export const PERFORMANCE_CONFIG = {
 } as const;
 
 // Deployment helpers
-export function getApiUrl(path: string = ""): string {
-  const baseUrl = DEPLOYMENT_CONFIG.apiUrl.replace(/\/$/, "");
-  const cleanPath = path.replace(/^\//, "");
-
-  return cleanPath ? `${baseUrl}/${cleanPath}` : baseUrl;
+export function getApiUrl(path: string = ''): string {
+  const baseUrl = DEPLOYMENT_CONFIG.apiUrl.replace(/\/$/, '');
+  const cleanPath = path.replace(/^\//, '');
+  const prefix = baseUrl ? baseUrl + '/' : '/';
+  return cleanPath ? `${prefix}${cleanPath}` : baseUrl || '/';
 }
 
 export function isMockModeEnabled(): boolean {
@@ -126,8 +121,7 @@ export function getErrorReportingConfig() {
   return {
     enabled: DEPLOYMENT_CONFIG.enableErrorReporting,
     dsn: DEPLOYMENT_CONFIG.sentryDsn,
-    environment: DEPLOYMENT_CONFIG.isProduction ? "production" : "development",
-
+    environment: DEPLOYMENT_CONFIG.isProduction ? 'production' : 'development',
   };
 }
 
