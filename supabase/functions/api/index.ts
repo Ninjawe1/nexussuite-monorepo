@@ -111,20 +111,20 @@ Deno.serve(async (req)=>{
     if (path === 'auth/login' && req.method === 'POST'){
       const body = await req.json().catch(()=>null);
       if (!body || !body.email || !body.password) return json({ message: 'email and password required' }, 400);
-      const resp = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ email: body.email, password: body.password })
-      });
-      const data = await resp.json();
-      if (!resp.ok) return json({ message: data?.error || data?.message || 'invalid credentials' }, resp.status);
-      return json({ success: true, access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at, refresh_expires_at: data.refresh_expires_at });
+      const { data, error } = await supabaseAnon.auth.signInWithPassword({ email: body.email, password: body.password });
+      if (error) return json({ message: error.message || 'invalid credentials' }, 400);
+      const session = (data as any)?.session;
+      if (!session) return json({ message: 'no session returned' }, 500);
+      return json({ success: true, access_token: session.access_token, refresh_token: session.refresh_token, expires_at: session.expires_at, refresh_expires_at: session.refresh_expires_at });
     }
 
     // GET /auth/user
     if (path === 'auth/user' && req.method === 'GET'){
-      if (!accessToken) return json({ message: 'missing access token' }, 401);
-      const resp = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: `Bearer ${accessToken}`, apikey: SUPABASE_ANON_KEY } });
+      const headerAuth = req.headers.get('authorization') || '';
+      const bearerMatch = /bearer\s+(.+)/i.exec(headerAuth || '');
+      const token = (bearerMatch && bearerMatch[1]) || accessToken;
+      if (!token) return json({ message: 'missing access token' }, 401);
+      const resp = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: { Authorization: `Bearer ${token}`, apikey: SUPABASE_ANON_KEY } });
       const user = await resp.json();
       if (!resp.ok) return json({ message: user?.message || 'failed to fetch user' }, resp.status);
       const out = { id: user.id, email: user.email, name: user.user_metadata?.full_name || user.user_metadata?.name || null };
