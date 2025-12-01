@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   rosterService,
@@ -7,9 +7,8 @@ import {
   RosterPlayer,
   CreateRosterData,
   PlayerAssignment,
-} from "@/services/rosterService";
-import { useToast } from "@/hooks/use-toast";
-
+} from '@/services/rosterService';
+import { useToast } from '@/hooks/use-toast';
 
 interface RosterContextType {
   // State
@@ -22,10 +21,7 @@ interface RosterContextType {
   createRoster: (data: CreateRosterData) => Promise<void>;
   updateRoster: (rosterId: string, data: Partial<Roster>) => Promise<void>;
   deleteRoster: (rosterId: string) => Promise<void>;
-  assignPlayersToRoster: (
-    rosterId: string,
-    players: PlayerAssignment[],
-  ) => Promise<void>;
+  assignPlayersToRoster: (rosterId: string, players: PlayerAssignment[]) => Promise<void>;
 
   removePlayerFromRoster: (rosterId: string, playerId: string) => Promise<void>;
 
@@ -45,11 +41,7 @@ interface RosterProviderProps {
   organizationId: string;
 }
 
-export function RosterProvider({
-  children,
-  organizationId,
-}: RosterProviderProps) {
-
+export function RosterProvider({ children, organizationId }: RosterProviderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [selectedRoster, setSelectedRoster] = useState<Roster | null>(null);
@@ -62,7 +54,7 @@ export function RosterProvider({
     isLoading: isLoadingRosters,
     refetch: refetchRosters,
   } = useQuery({
-    queryKey: ["rosters", organizationId],
+    queryKey: ['rosters', organizationId],
 
     queryFn: () => rosterService.getRosters(organizationId),
     enabled: !!organizationId,
@@ -74,9 +66,8 @@ export function RosterProvider({
     isLoading: isLoadingPlayers,
     refetch: refetchRosterPlayers,
   } = useQuery({
-    queryKey: ["rosterPlayers", selectedRoster?.id],
-    queryFn: () =>
-      selectedRoster ? rosterService.getRosterPlayers(selectedRoster.id) : [],
+    queryKey: ['rosterPlayers', selectedRoster?.id],
+    queryFn: () => (selectedRoster ? rosterService.getRosterPlayers(selectedRoster.id) : []),
 
     enabled: !!selectedRoster?.id,
   });
@@ -85,103 +76,80 @@ export function RosterProvider({
   const createRosterMutation = useMutation({
     mutationFn: (data: CreateRosterData) => rosterService.createRoster(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rosters", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['rosters', organizationId] });
       toast({
-        title: "Success",
-        description: "Roster created successfully",
+        title: 'Success',
+        description: 'Roster created successfully',
       });
       setIsCreatingRoster(false);
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to create roster: ${error.message}`,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
     },
   });
 
   // Update roster mutation
   const updateRosterMutation = useMutation({
-    mutationFn: ({
-      rosterId,
-      data,
-    }: {
-      rosterId: string;
-      data: Partial<Roster>;
-    }) => rosterService.updateRoster(rosterId, data),
+    mutationFn: ({ rosterId, data }: { rosterId: string; data: Partial<Roster> }) =>
+      rosterService.updateRoster(rosterId, data),
     // Optimistically update rosters list so UI reflects changes immediately (e.g., name)
     onMutate: async ({ rosterId, data }) => {
       await queryClient.cancelQueries({
-        queryKey: ["rosters", organizationId],
+        queryKey: ['rosters', organizationId],
       });
-      const previous = queryClient.getQueryData<Roster[]>([
-        "rosters",
-        organizationId,
-      ]);
+      const previous = queryClient.getQueryData<Roster[]>(['rosters', organizationId]);
       queryClient.setQueriesData<Roster[] | undefined>(
-        { queryKey: ["rosters", organizationId] },
-        (existing) => {
+        { queryKey: ['rosters', organizationId] },
+        existing => {
           if (!existing) return existing;
-          return existing.map((r) => {
+          return existing.map(r => {
             if (r.id !== rosterId) return r;
             return {
               ...r,
-              name:
-                typeof data.name !== "undefined"
-                  ? (data.name ?? r.name)
-                  : r.name,
+              name: typeof data.name !== 'undefined' ? (data.name ?? r.name) : r.name,
               description:
-                typeof data.description !== "undefined"
+                typeof data.description !== 'undefined'
                   ? (data.description ?? r.description)
                   : r.description,
-              type:
-                typeof data.type !== "undefined"
-                  ? (data.type as Roster["type"])
-                  : r.type,
+              type: typeof data.type !== 'undefined' ? (data.type as Roster['type']) : r.type,
               maxPlayers:
-                typeof data.maxPlayers !== "undefined"
+                typeof data.maxPlayers !== 'undefined'
                   ? (data.maxPlayers ?? r.maxPlayers)
                   : r.maxPlayers,
-              game:
-                typeof data.game !== "undefined"
-                  ? (data.game ?? r.game)
-                  : r.game,
+              game: typeof data.game !== 'undefined' ? (data.game ?? r.game) : r.game,
               isActive:
-                typeof data.isActive !== "undefined"
-                  ? (data.isActive ?? r.isActive)
-                  : r.isActive,
+                typeof data.isActive !== 'undefined' ? (data.isActive ?? r.isActive) : r.isActive,
               updatedAt: new Date(),
             } as Roster;
           });
-        },
-
+        }
       );
       return { previous };
     },
     onSuccess: () => {
       // Re-fetch to get canonical data from server/storage
-      queryClient.invalidateQueries({ queryKey: ["rosters", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['rosters', organizationId] });
       queryClient.invalidateQueries({
-        queryKey: ["rosterPlayers", selectedRoster?.id],
+        queryKey: ['rosterPlayers', selectedRoster?.id],
       });
       toast({
-        title: "Success",
-        description: "Roster updated successfully",
-
+        title: 'Success',
+        description: 'Roster updated successfully',
       });
     },
     onError: (error, _variables, context) => {
       // Roll back optimistic update if server rejects
       if (context?.previous) {
-        queryClient.setQueryData(["rosters", organizationId], context.previous);
+        queryClient.setQueryData(['rosters', organizationId], context.previous);
       }
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to update roster: ${error.message}`,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
     },
   });
@@ -190,35 +158,29 @@ export function RosterProvider({
   const deleteRosterMutation = useMutation({
     mutationFn: (rosterId: string) => rosterService.deleteRoster(rosterId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rosters", organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['rosters', organizationId] });
 
       if (selectedRoster?.id) {
         setSelectedRoster(null);
       }
       toast({
-        title: "Success",
-        description: "Roster deleted successfully",
+        title: 'Success',
+        description: 'Roster deleted successfully',
       });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to delete roster: ${error.message}`,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
     },
   });
 
   // Assign players mutation
   const assignPlayersMutation = useMutation({
-    mutationFn: ({
-      rosterId,
-      players,
-    }: {
-      rosterId: string;
-      players: PlayerAssignment[];
-    }) => rosterService.assignPlayersToRoster(rosterId, players),
+    mutationFn: ({ rosterId, players }: { rosterId: string; players: PlayerAssignment[] }) =>
+      rosterService.assignPlayersToRoster(rosterId, players),
 
     onSuccess: (_data, variables) => {
       // Optimistically update playerCount for the affected roster so tiles reflect changes immediately
@@ -229,19 +191,15 @@ export function RosterProvider({
         };
         if (rosterId && Array.isArray(players)) {
           queryClient.setQueriesData<Roster[] | undefined>(
-            { queryKey: ["rosters", organizationId] },
-            (existing) => {
+            { queryKey: ['rosters', organizationId] },
+            existing => {
               if (!existing) return existing;
-              return existing.map((r) => {
+              return existing.map(r => {
                 if (r.id !== rosterId) return r;
-                const nextCount = Math.max(
-                  0,
-                  (r.playerCount ?? 0) + players.length,
-                );
+                const nextCount = Math.max(0, (r.playerCount ?? 0) + players.length);
                 return { ...r, playerCount: nextCount } as Roster;
               });
-            },
-
+            }
           );
         }
       } catch {
@@ -250,33 +208,27 @@ export function RosterProvider({
 
       // Invalidate queries to fetch canonical data
       queryClient.invalidateQueries({
-        queryKey: ["rosterPlayers", selectedRoster?.id],
+        queryKey: ['rosterPlayers', selectedRoster?.id],
       });
       toast({
-        title: "Success",
-        description: "Players assigned successfully",
+        title: 'Success',
+        description: 'Players assigned successfully',
       });
       setIsAssigningPlayers(false);
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to assign players: ${error.message}`,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
     },
   });
 
   // Remove player mutation
   const removePlayerMutation = useMutation({
-    mutationFn: ({
-      rosterId,
-      playerId,
-    }: {
-      rosterId: string;
-      playerId: string;
-    }) => rosterService.removePlayerFromRoster(rosterId, playerId),
+    mutationFn: ({ rosterId, playerId }: { rosterId: string; playerId: string }) =>
+      rosterService.removePlayerFromRoster(rosterId, playerId),
 
     onSuccess: (_data, variables) => {
       // Optimistically decrement playerCount for the affected roster
@@ -284,17 +236,15 @@ export function RosterProvider({
         const { rosterId } = (variables || {}) as { rosterId?: string };
         if (rosterId) {
           queryClient.setQueriesData<Roster[] | undefined>(
-            { queryKey: ["rosters", organizationId] },
-            (existing) => {
+            { queryKey: ['rosters', organizationId] },
+            existing => {
               if (!existing) return existing;
-              return existing.map((r) => {
-
+              return existing.map(r => {
                 if (r.id !== rosterId) return r;
                 const nextCount = Math.max(0, (r.playerCount ?? 0) - 1);
                 return { ...r, playerCount: nextCount } as Roster;
               });
-            },
-
+            }
           );
         }
       } catch {
@@ -302,19 +252,18 @@ export function RosterProvider({
       }
 
       queryClient.invalidateQueries({
-        queryKey: ["rosterPlayers", selectedRoster?.id],
+        queryKey: ['rosterPlayers', selectedRoster?.id],
       });
       toast({
-        title: "Success",
-        description: "Player removed successfully",
+        title: 'Success',
+        description: 'Player removed successfully',
       });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to remove player: ${error.message}`,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
     },
   });
@@ -328,11 +277,7 @@ export function RosterProvider({
     }
   };
 
-  const handleUpdateRoster = async (
-    rosterId: string,
-    data: Partial<Roster>,
-  ) => {
-
+  const handleUpdateRoster = async (rosterId: string, data: Partial<Roster>) => {
     await updateRosterMutation.mutateAsync({ rosterId, data });
   };
 
@@ -340,11 +285,7 @@ export function RosterProvider({
     await deleteRosterMutation.mutateAsync(rosterId);
   };
 
-  const handleAssignPlayers = async (
-    rosterId: string,
-    players: PlayerAssignment[],
-  ) => {
-
+  const handleAssignPlayers = async (rosterId: string, players: PlayerAssignment[]) => {
     setIsAssigningPlayers(true);
     try {
       await assignPlayersMutation.mutateAsync({ rosterId, players });
@@ -364,14 +305,11 @@ export function RosterProvider({
     if (!selectedRoster?.id) return;
     const count = rosterPlayers.length;
     queryClient.setQueriesData<Roster[] | undefined>(
-      { queryKey: ["rosters", organizationId] },
-      (existing) => {
+      { queryKey: ['rosters', organizationId] },
+      existing => {
         if (!existing) return existing;
-        return existing.map((r) =>
-          r.id === selectedRoster.id ? { ...r, playerCount: count } : r,
-        );
-      },
-
+        return existing.map(r => (r.id === selectedRoster.id ? { ...r, playerCount: count } : r));
+      }
     );
   }, [selectedRoster?.id, rosterPlayers.length]);
 
@@ -393,18 +331,14 @@ export function RosterProvider({
     refetchRosterPlayers,
   };
 
-  return (
-    <RosterContext.Provider value={value}>{children}</RosterContext.Provider>
-  );
-
+  return <RosterContext.Provider value={value}>{children}</RosterContext.Provider>;
 }
 
 export const useRosterContext = useRoster;
 export function useRoster() {
   const context = useContext(RosterContext);
   if (context === undefined) {
-    throw new Error("useRoster must be used within a RosterProvider");
-
+    throw new Error('useRoster must be used within a RosterProvider');
   }
   return context;
 }

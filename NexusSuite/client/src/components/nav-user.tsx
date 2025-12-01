@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Bell, ChevronsUpDown, CreditCard, LogOut, User } from "lucide-react";
+import { Bell, ChevronsUpDown, CreditCard, LogOut, User } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import {
   DropdownMenu,
@@ -12,17 +12,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
-
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'wouter';
 
 export function NavUser({
   user,
@@ -42,10 +41,7 @@ export function NavUser({
       console.log(`[NavUser] navigate: ${path}`);
       setLocation(path);
     } catch (e) {
-      console.warn(
-        "[NavUser] navigation failed, falling back to window.location",
-        e,
-      );
+      console.warn('[NavUser] navigation failed, falling back to window.location', e);
 
       window.location.assign(path);
     }
@@ -53,11 +49,10 @@ export function NavUser({
 
   async function handleLogout() {
     try {
-      console.log("[NavUser] Logout clicked");
+      console.log('[NavUser] Logout clicked');
       await logout();
     } catch (e) {
-      console.error("[NavUser] Logout failed", e);
-
+      console.error('[NavUser] Logout failed', e);
     }
   }
 
@@ -88,9 +83,8 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="z-[9999] w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg border border-sidebar-border/60 max-h-[100vh] opacity-100"
-            side={isMobile ? "bottom" : "right"}
-            align={isMobile ? "end" : "start"}
-
+            side={isMobile ? 'bottom' : 'right'}
+            align={isMobile ? 'end' : 'start'}
             sideOffset={6}
             collisionPadding={8}
           >
@@ -112,24 +106,22 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onSelect={() => {
-                  console.log("[NavUser] Profile clicked");
-                  go("/profile");
-
+                  console.log('[NavUser] Profile clicked');
+                  go('/profile');
                 }}
               >
                 <User />
                 Profile
               </DropdownMenuItem>
-              {(user as any)?.role === "owner" ||
-              (user as any)?.role === "club_owner" ||
-              ((user as any)?.permissions ?? []).includes("finance") ||
-              ((user as any)?.permissions ?? []).includes("billing") ? (
+              {(user as any)?.role === 'owner' ||
+              (user as any)?.role === 'club_owner' ||
+              ((user as any)?.permissions ?? []).includes('finance') ||
+              ((user as any)?.permissions ?? []).includes('billing') ? (
                 <DropdownMenuItem
                   onSelect={() => {
-                    console.log("[NavUser] Billing clicked");
+                    console.log('[NavUser] Billing clicked');
                     // Navigate to organization-scoped Billing page
-                    go("/dashboard/org/billing");
-
+                    go('/dashboard/org/billing');
                   }}
                 >
                   <CreditCard />
@@ -138,10 +130,9 @@ export function NavUser({
               ) : null}
               <DropdownMenuItem
                 onSelect={() => {
-                  console.log("[NavUser] Notifications clicked");
+                  console.log('[NavUser] Notifications clicked');
                   // Route to Settings as a placeholder for notifications management
-                  go("/settings");
-
+                  go('/settings');
                 }}
               >
                 <Bell />
@@ -159,12 +150,9 @@ export function NavUser({
     </SidebarMenu>
   );
 }
-  function getInitials(name: string, email: string): string {
-    const base = (name && name.trim()) || (email || "user").split("@")[0];
-    const parts = base.split(/\s+|_/).filter(Boolean);
-    const initials = parts.length >= 2
-      ? `${parts[0][0]}${parts[1][0]}`
-      : `${base[0] ?? "U"}`;
-    return initials.toUpperCase();
-  }
-
+function getInitials(name: string, email: string): string {
+  const base = (name && name.trim()) || (email || 'user').split('@')[0];
+  const parts = base.split(/\s+|_/).filter(Boolean);
+  const initials = parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : `${base[0] ?? 'U'}`;
+  return initials.toUpperCase();
+}

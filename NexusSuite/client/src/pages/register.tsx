@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import {
   Card,
@@ -15,36 +15,32 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Mail, Lock, User, Eye, EyeOff, Building } from "lucide-react";
-
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, Building } from 'lucide-react';
 
 // Validation schema
 const registerSchema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Please enter a valid email address'),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number'),
     confirmPassword: z.string(),
-    organizationName: z
-      .string()
-      .min(2, "Organization name must be at least 2 characters"),
-    acceptTerms: z.boolean().refine((val) => val === true, {
-      message: "You must accept the terms and conditions",
+    organizationName: z.string().min(2, 'Organization name must be at least 2 characters'),
+    acceptTerms: z.boolean().refine(val => val === true, {
+      message: 'You must accept the terms and conditions',
     }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine(data => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
-
+    path: ['confirmPassword'],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -65,11 +61,11 @@ export function Register() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      organizationName: "",
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      organizationName: '',
 
       acceptTerms: false,
     },
@@ -78,26 +74,19 @@ export function Register() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
-      await registerUser(
-        data.email,
-        data.password,
-        data.organizationName || undefined,
-      );
-      setLocation("/dashboard");
+      await registerUser(data.email, data.password, data.organizationName || undefined);
+      setLocation('/dashboard');
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Registration failed. Please try again.";
+        err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(errorMessage);
 
-      if (errorMessage.toLowerCase().includes("email")) {
-        setFormError("email", { message: errorMessage });
-      } else if (errorMessage.toLowerCase().includes("password")) {
-        setFormError("password", { message: errorMessage });
-      } else if (errorMessage.toLowerCase().includes("organization")) {
-        setFormError("organizationName", { message: errorMessage });
-
+      if (errorMessage.toLowerCase().includes('email')) {
+        setFormError('email', { message: errorMessage });
+      } else if (errorMessage.toLowerCase().includes('password')) {
+        setFormError('password', { message: errorMessage });
+      } else if (errorMessage.toLowerCase().includes('organization')) {
+        setFormError('organizationName', { message: errorMessage });
       }
     }
   };
@@ -109,14 +98,10 @@ export function Register() {
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">
-                  NS
-                </span>
+                <span className="text-primary-foreground font-bold text-xl">NS</span>
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">
-              Create your account
-            </CardTitle>
+            <CardTitle className="text-2xl text-center">Create your account</CardTitle>
 
             <CardDescription className="text-center">
               Get started with NexusSuite today
@@ -136,8 +121,7 @@ export function Register() {
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("name")}
-
+                    {...register('name')}
                     id="name"
                     type="text"
                     placeholder="John Doe"
@@ -145,12 +129,7 @@ export function Register() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.name && (
-                  <p className="text-sm text-destructive">
-                    {errors.name.message}
-                  </p>
-                )}
-
+                {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -158,8 +137,7 @@ export function Register() {
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("email")}
-
+                    {...register('email')}
                     id="email"
                     type="email"
                     placeholder="you@example.com"
@@ -167,12 +145,7 @@ export function Register() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-
+                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -180,10 +153,9 @@ export function Register() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("password")}
+                    {...register('password')}
                     id="password"
-                    type={showPassword ? "text" : "password"}
-
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Create a strong password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -193,18 +165,11 @@ export function Register() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive">
-                    {errors.password.message}
-                  </p>
-
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
                 )}
               </div>
 
@@ -213,10 +178,9 @@ export function Register() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("confirmPassword")}
+                    {...register('confirmPassword')}
                     id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-
+                    type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm your password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -234,10 +198,7 @@ export function Register() {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {errors.confirmPassword.message}
-                  </p>
-
+                  <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
                 )}
               </div>
 
@@ -246,8 +207,7 @@ export function Register() {
                 <div className="relative">
                   <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("organizationName")}
-
+                    {...register('organizationName')}
                     id="organizationName"
                     type="text"
                     placeholder="Your Company Inc."
@@ -256,10 +216,7 @@ export function Register() {
                   />
                 </div>
                 {errors.organizationName && (
-                  <p className="text-sm text-destructive">
-                    {errors.organizationName.message}
-                  </p>
-
+                  <p className="text-sm text-destructive">{errors.organizationName.message}</p>
                 )}
               </div>
 
@@ -271,8 +228,7 @@ export function Register() {
                     <Checkbox
                       id="acceptTerms"
                       checked={!!field.value}
-                      onCheckedChange={(checked) => field.onChange(!!checked)}
-
+                      onCheckedChange={checked => field.onChange(!!checked)}
                       disabled={isLoading}
                     />
                   )}
@@ -287,10 +243,7 @@ export function Register() {
                 </div>
               </div>
               {errors.acceptTerms && (
-                <p className="text-sm text-destructive">
-                  {errors.acceptTerms.message}
-                </p>
-
+                <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
               )}
             </CardContent>
 
@@ -302,20 +255,18 @@ export function Register() {
                     Creating account...
                   </>
                 ) : (
-                  "Create Account"
-
+                  'Create Account'
                 )}
               </Button>
 
               <Separator />
 
               <div className="text-sm text-muted-foreground text-center">
-                Already have an account?{" "}
+                Already have an account?{' '}
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => setLocation("/login")}
-
+                  onClick={() => setLocation('/login')}
                   className="text-sm p-0 h-auto"
                   disabled={isLoading}
                 >
@@ -328,11 +279,7 @@ export function Register() {
 
         {/* Demo info */}
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          <p>
-            By registering, you'll create both a user account and your first
-            organization
-          </p>
-
+          <p>By registering, you'll create both a user account and your first organization</p>
         </div>
       </div>
     </div>

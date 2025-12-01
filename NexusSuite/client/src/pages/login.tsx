@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useLocation } from "wouter";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useLocation } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import {
   Card,
@@ -15,16 +15,16 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 // Validation schema
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 
   rememberMe: z.boolean().optional().default(false),
 });
@@ -45,8 +45,8 @@ export function Login() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
 
       rememberMe: false,
     },
@@ -57,18 +57,16 @@ export function Login() {
       setError(null);
       await login(data.email, data.password);
       // Redirect to dashboard on successful login
-      setLocation("/dashboard");
+      setLocation('/dashboard');
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Login failed. Please try again.";
+      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
       setError(errorMessage);
 
       // Set field-specific errors if applicable
-      if (errorMessage.toLowerCase().includes("email")) {
-        setFormError("email", { message: errorMessage });
-      } else if (errorMessage.toLowerCase().includes("password")) {
-        setFormError("password", { message: errorMessage });
-
+      if (errorMessage.toLowerCase().includes('email')) {
+        setFormError('email', { message: errorMessage });
+      } else if (errorMessage.toLowerCase().includes('password')) {
+        setFormError('password', { message: errorMessage });
       }
     }
   };
@@ -80,10 +78,7 @@ export function Login() {
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-4">
               <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">
-                  NS
-                </span>
-
+                <span className="text-primary-foreground font-bold text-xl">NS</span>
               </div>
             </div>
             <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
@@ -105,8 +100,7 @@ export function Login() {
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("email")}
-
+                    {...register('email')}
                     id="email"
                     type="email"
                     placeholder="you@example.com"
@@ -114,12 +108,7 @@ export function Login() {
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-destructive">
-                    {errors.email.message}
-                  </p>
-                )}
-
+                {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -127,10 +116,9 @@ export function Login() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    {...register("password")}
+                    {...register('password')}
                     id="password"
-                    type={showPassword ? "text" : "password"}
-
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     className="pl-10 pr-10"
                     disabled={isLoading}
@@ -140,27 +128,16 @@ export function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-destructive">
-                    {errors.password.message}
-                  </p>
-
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
                 )}
               </div>
 
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  {...register("rememberMe")}
-                  id="rememberMe"
-                  disabled={isLoading}
-                />
+                <Checkbox {...register('rememberMe')} id="rememberMe" disabled={isLoading} />
 
                 <Label htmlFor="rememberMe" className="text-sm font-normal">
                   Remember me for 30 days
@@ -176,8 +153,7 @@ export function Login() {
                     Signing in...
                   </>
                 ) : (
-                  "Sign In"
-
+                  'Sign In'
                 )}
               </Button>
 
@@ -187,8 +163,7 @@ export function Login() {
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => setLocation("/forgot-password")}
-
+                  onClick={() => setLocation('/forgot-password')}
                   className="text-sm"
                   disabled={isLoading}
                 >
@@ -196,12 +171,11 @@ export function Login() {
                 </Button>
 
                 <div className="text-sm text-muted-foreground">
-                  Don't have an account?{" "}
+                  Don't have an account?{' '}
                   <Button
                     variant="link"
                     size="sm"
-                    onClick={() => setLocation("/register")}
-
+                    onClick={() => setLocation('/register')}
                     className="text-sm p-0 h-auto"
                     disabled={isLoading}
                   >

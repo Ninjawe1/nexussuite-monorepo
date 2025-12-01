@@ -1,15 +1,9 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import {
   Dialog,
@@ -18,13 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Mail, UserPlus, Copy, Trash2 } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { User, Invite, Staff, Tenant } from "@shared/schema";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Mail, UserPlus, Copy, Trash2 } from 'lucide-react';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import type { User, Invite, Staff, Tenant } from '@shared/schema';
 
 import {
   Select,
@@ -32,11 +26,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { formatDateSafe } from "@/lib/date";
+} from '@/components/ui/select';
+import { formatDateSafe } from '@/lib/date';
 
-
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function Team() {
   const { toast } = useToast();
@@ -46,12 +39,12 @@ export default function Team() {
 
   // Fetch team users
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
-    queryKey: ["/api/team/users", currentOrganization?.id],
+    queryKey: ['/api/team/users', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
       const res = await apiRequest(
         `/api/team/users?organizationId=${currentOrganization.id}`,
-        "GET",
+        'GET'
       );
       return await res.json();
     },
@@ -60,12 +53,12 @@ export default function Team() {
 
   // Fetch pending invites
   const { data: invites = [], isLoading: invitesLoading } = useQuery<Invite[]>({
-    queryKey: ["/api/team/invites", currentOrganization?.id],
+    queryKey: ['/api/team/invites', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
       const res = await apiRequest(
         `/api/team/invites?organizationId=${currentOrganization.id}`,
-        "GET",
+        'GET'
       );
       return await res.json();
     },
@@ -73,27 +66,22 @@ export default function Team() {
   });
 
   // Staff management state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [staffDialogOpen, setStaffDialogOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | undefined>();
 
-  const { data: staffMembers = [], isLoading: staffLoading } = useQuery<
-    Staff[]
-  >({
-    queryKey: ["/api/staff", currentOrganization?.id],
+  const { data: staffMembers = [], isLoading: staffLoading } = useQuery<Staff[]>({
+    queryKey: ['/api/staff', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(
-        `/api/staff?organizationId=${currentOrganization.id}`,
-        "GET",
-      );
+      const res = await apiRequest(`/api/staff?organizationId=${currentOrganization.id}`, 'GET');
       return await res.json();
     },
     enabled: !!currentOrganization?.id,
   });
   const { data: tenant } = useQuery<Tenant>({
-    queryKey: ["/api/tenant"], // Tenant is usually global/user context, but keeping it as is unless known otherwise
+    queryKey: ['/api/tenant'], // Tenant is usually global/user context, but keeping it as is unless known otherwise
   });
 
   return (
@@ -103,10 +91,7 @@ export default function Team() {
           <h1 className="text-3xl font-bold" data-testid="heading-team">
             Team
           </h1>
-          <p className="text-muted-foreground">
-            Manage team members and invitations
-          </p>
-
+          <p className="text-muted-foreground">Manage team members and invitations</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={inviteUserOpen} onOpenChange={setInviteUserOpen}>
@@ -156,15 +141,12 @@ export default function Team() {
           ) : users.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No team members yet. Create a user or send an invite to get
-                started.
-
+                No team members yet. Create a user or send an invite to get started.
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4">
-              {users.map((user) => (
-
+              {users.map(user => (
                 <UserCard key={user.id} user={user} />
               ))}
             </div>
@@ -184,8 +166,7 @@ export default function Team() {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {invites.map((invite) => (
-
+              {invites.map(invite => (
                 <InviteCard key={invite.id} invite={invite} />
               ))}
             </div>
@@ -204,10 +185,7 @@ function UserCard({ user }: { user: User }) {
           <CardTitle className="text-base" data-testid={`user-name-${user.id}`}>
             {user.firstName} {user.lastName}
           </CardTitle>
-          <CardDescription data-testid={`user-email-${user.id}`}>
-            {user.email}
-          </CardDescription>
-
+          <CardDescription data-testid={`user-email-${user.id}`}>{user.email}</CardDescription>
         </div>
         <Badge data-testid={`user-role-${user.id}`}>{user.role}</Badge>
       </CardHeader>
@@ -223,24 +201,23 @@ function InviteCard({ invite }: { invite: Invite }) {
     mutationFn: async () => {
       return await apiRequest(
         `/api/team/invites/${invite.id}?organizationId=${currentOrganization?.id}`,
-        "DELETE",
+        'DELETE'
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/team/invites", currentOrganization?.id],
+        queryKey: ['/api/team/invites', currentOrganization?.id],
       });
       toast({
-        title: "Success",
-        description: "Invite deleted successfully",
+        title: 'Success',
+        description: 'Invite deleted successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to delete invite",
-
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to delete invite',
       });
     },
   });
@@ -249,9 +226,8 @@ function InviteCard({ invite }: { invite: Invite }) {
     const link = `${window.location.origin}/invite/${invite.token}`;
     navigator.clipboard.writeText(link);
     toast({
-      title: "Copied!",
-      description: "Invite link copied to clipboard",
-
+      title: 'Copied!',
+      description: 'Invite link copied to clipboard',
     });
   };
 
@@ -259,16 +235,12 @@ function InviteCard({ invite }: { invite: Invite }) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex-1">
-          <CardTitle
-            className="text-base"
-            data-testid={`invite-email-${invite.id}`}
-          >
+          <CardTitle className="text-base" data-testid={`invite-email-${invite.id}`}>
             {invite.email}
           </CardTitle>
           <CardDescription>
-            Invited by {invite.inviterName} • Expires{" "}
-            {formatDateSafe(invite.expiresAt, "MMM dd, yyyy")}
-
+            Invited by {invite.inviterName} • Expires{' '}
+            {formatDateSafe(invite.expiresAt, 'MMM dd, yyyy')}
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -300,37 +272,36 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
   const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-    role: "staff",
-    password: "",
+    email: '',
+    firstName: '',
+    lastName: '',
+    role: 'staff',
+    password: '',
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       return await apiRequest(
         `/api/team/users?organizationId=${currentOrganization?.id}`,
-        "POST",
-        data,
+        'POST',
+        data
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/team/users", currentOrganization?.id],
+        queryKey: ['/api/team/users', currentOrganization?.id],
       });
       toast({
-        title: "Success",
-        description: "User created successfully",
+        title: 'Success',
+        description: 'User created successfully',
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to create user",
-
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to create user',
       });
     },
   });
@@ -355,10 +326,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             id="email"
             type="email"
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
             required
             data-testid="input-create-email"
           />
@@ -370,10 +338,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             <Input
               id="firstName"
               value={formData.firstName}
-              onChange={(e) =>
-                setFormData({ ...formData, firstName: e.target.value })
-              }
-
+              onChange={e => setFormData({ ...formData, firstName: e.target.value })}
               required
               data-testid="input-create-firstname"
             />
@@ -384,10 +349,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             <Input
               id="lastName"
               value={formData.lastName}
-              onChange={(e) =>
-                setFormData({ ...formData, lastName: e.target.value })
-              }
-
+              onChange={e => setFormData({ ...formData, lastName: e.target.value })}
               required
               data-testid="input-create-lastname"
             />
@@ -398,8 +360,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
           <Label htmlFor="role">Role</Label>
           <Select
             value={formData.role}
-            onValueChange={(value) => setFormData({ ...formData, role: value })}
-
+            onValueChange={value => setFormData({ ...formData, role: value })}
           >
             <SelectTrigger data-testid="select-create-role">
               <SelectValue />
@@ -422,10 +383,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
             id="password"
             type="password"
             value={formData.password}
-            onChange={(e) =>
-              setFormData({ ...formData, password: e.target.value })
-            }
-
+            onChange={e => setFormData({ ...formData, password: e.target.value })}
             placeholder="Leave empty for default: Welcome123!"
             data-testid="input-create-password"
           />
@@ -440,8 +398,7 @@ function CreateUserForm({ onSuccess }: { onSuccess: () => void }) {
           disabled={createMutation.isPending}
           data-testid="button-submit-create"
         >
-          {createMutation.isPending ? "Creating..." : "Create User"}
-
+          {createMutation.isPending ? 'Creating...' : 'Create User'}
         </Button>
       </form>
     </>
@@ -452,37 +409,36 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
   const { currentOrganization } = useOrganization();
   const [formData, setFormData] = useState({
-    email: "",
-    role: "staff",
+    email: '',
+    role: 'staff',
   });
 
   const inviteMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       return await apiRequest(
         `/api/team/invites?organizationId=${currentOrganization?.id}`,
-        "POST",
+        'POST',
         {
           ...data,
           permissions: [],
-        },
+        }
       );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/team/invites", currentOrganization?.id],
+        queryKey: ['/api/team/invites', currentOrganization?.id],
       });
       toast({
-        title: "Success",
-        description: "Invite sent successfully",
+        title: 'Success',
+        description: 'Invite sent successfully',
       });
       onSuccess();
     },
     onError: (error: any) => {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to send invite",
-
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to send invite',
       });
     },
   });
@@ -497,9 +453,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
       <DialogHeader>
         <DialogTitle>Send Invite</DialogTitle>
         <DialogDescription>
-          Send an invitation link to a new team member. They'll create their own
-          account.
-
+          Send an invitation link to a new team member. They'll create their own account.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -509,10 +463,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
             id="invite-email"
             type="email"
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
             required
             data-testid="input-invite-email"
           />
@@ -522,8 +473,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
           <Label htmlFor="invite-role">Role</Label>
           <Select
             value={formData.role}
-            onValueChange={(value) => setFormData({ ...formData, role: value })}
-
+            onValueChange={value => setFormData({ ...formData, role: value })}
           >
             <SelectTrigger data-testid="select-invite-role">
               <SelectValue />
@@ -546,8 +496,7 @@ function InviteUserForm({ onSuccess }: { onSuccess: () => void }) {
           disabled={inviteMutation.isPending}
           data-testid="button-submit-invite"
         >
-          {inviteMutation.isPending ? "Sending..." : "Send Invite"}
-
+          {inviteMutation.isPending ? 'Sending...' : 'Send Invite'}
         </Button>
       </form>
     </>

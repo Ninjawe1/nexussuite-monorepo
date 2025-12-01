@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 import {
   Form,
@@ -18,8 +18,8 @@ import {
   FormLabel,
   FormMessage,
   FormControl,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 
 import {
   Select,
@@ -27,10 +27,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import type { Staff } from "@shared/schema";
-import { TEAM_ROLES } from "@/constants/teamRoles";
-
+} from '@/components/ui/select';
+import type { Staff } from '@shared/schema';
+import { TEAM_ROLES } from '@/constants/teamRoles';
 
 interface PlayerRoleEditDialogProps {
   open: boolean;
@@ -41,14 +40,13 @@ interface PlayerRoleEditDialogProps {
   onSubmit: (nextRole: string) => Promise<void> | void;
 }
 
-const roleEnumValues = TEAM_ROLES.map((r) => r.value) as [
-  (typeof TEAM_ROLES)[number]["value"],
-  ...(typeof TEAM_ROLES)[number]["value"][],
+const roleEnumValues = TEAM_ROLES.map(r => r.value) as [
+  (typeof TEAM_ROLES)[number]['value'],
+  ...(typeof TEAM_ROLES)[number]['value'][],
 ];
 
 const schema = z.object({
-  role: z.enum(roleEnumValues).default("Player"),
-
+  role: z.enum(roleEnumValues).default('Player'),
 });
 
 export function PlayerRoleEditDialog({
@@ -56,16 +54,15 @@ export function PlayerRoleEditDialog({
   onOpenChange,
   player,
   rosterName,
-  currentRole = "Player",
+  currentRole = 'Player',
 
   onSubmit,
 }: PlayerRoleEditDialogProps) {
   const [isSaving, setIsSaving] = useState(false);
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: { role: (currentRole as any) || "Player" },
-    values: { role: (currentRole as any) || "Player" },
-
+    defaultValues: { role: (currentRole as any) || 'Player' },
+    values: { role: (currentRole as any) || 'Player' },
   });
 
   const handleSubmit = async (values: z.infer<typeof schema>) => {
@@ -82,18 +79,13 @@ export function PlayerRoleEditDialog({
           <DialogTitle>Edit Player Role</DialogTitle>
           <DialogDescription>
             {player
-              ? `Update ${player.name}'s role${rosterName ? ` for ${rosterName}` : ""}`
-              : "Update player role"}
-
+              ? `Update ${player.name}'s role${rosterName ? ` for ${rosterName}` : ''}`
+              : 'Update player role'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="role"
@@ -107,8 +99,7 @@ export function PlayerRoleEditDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {TEAM_ROLES.map((r) => (
-
+                      {TEAM_ROLES.map(r => (
                         <SelectItem key={r.value} value={r.value}>
                           {r.label}
                         </SelectItem>
@@ -124,22 +115,16 @@ export function PlayerRoleEditDialog({
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Preview:</span>
               <span className="px-2 py-0.5 rounded border border-orange-500 bg-orange-500/10 text-orange-400 transition-colors">
-                {form.getValues("role")}
-
+                {form.getValues('role')}
               </span>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save"}
-
+                {isSaving ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </form>

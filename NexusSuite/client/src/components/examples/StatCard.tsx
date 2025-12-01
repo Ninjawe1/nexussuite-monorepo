@@ -1,6 +1,5 @@
-import { StatCard } from "../stat-card";
-import { DollarSign, Users, Trophy, Megaphone } from "lucide-react";
-
+import { StatCard } from '../stat-card';
+import { DollarSign, Users, Trophy, Megaphone } from 'lucide-react';
 
 export default function StatCardExample() {
   return (
@@ -11,25 +10,10 @@ export default function StatCardExample() {
         icon={DollarSign}
         change="+12.5% vs last month"
       />
-      <StatCard
-        title="Active Rosters"
-        value="6"
-        icon={Users}
-        subtitle="Across 4 game titles"
-      />
-      <StatCard
-        title="Win Rate"
-        value="68%"
-        icon={Trophy}
-        change="+5.2% this season"
-      />
+      <StatCard title="Active Rosters" value="6" icon={Users} subtitle="Across 4 game titles" />
+      <StatCard title="Win Rate" value="68%" icon={Trophy} change="+5.2% this season" />
 
-      <StatCard
-        title="Active Campaigns"
-        value="12"
-        icon={Megaphone}
-        change="-2.1% vs last month"
-      />
+      <StatCard title="Active Campaigns" value="12" icon={Megaphone} change="-2.1% vs last month" />
     </div>
   );
 }

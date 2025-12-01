@@ -47,8 +47,8 @@ import {
   wallets,            // <-- add
   type Wallet,        // <-- add
   type InsertWallet,  // <-- add
-} from "../shared/schema.js";
-import { db } from "./db.js";
+} from "../shared/schema";
+import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {

@@ -1,83 +1,79 @@
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Check, X, Gamepad2, ArrowRight } from "lucide-react";
-import { WaitlistForm } from "@/components/WaitlistForm";
+import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Check, X, Gamepad2, ArrowRight } from 'lucide-react';
+import { WaitlistForm } from '@/components/WaitlistForm';
 
 export default function Pricing() {
   // Enforce dark/atomic theme
   useEffect(() => {
     try {
-      localStorage.setItem("design:theme", "atomic");
-      document.documentElement.classList.remove("nova", "aqua");
-      document.documentElement.classList.add("atomic", "dark");
+      localStorage.setItem('design:theme', 'atomic');
+      document.documentElement.classList.remove('nova', 'aqua');
+      document.documentElement.classList.add('atomic', 'dark');
     } catch (_) {}
   }, []);
 
   const tiers = [
     {
-      name: "Starter",
-      price: "$0",
-      description: "Perfect for amateur teams and community tournaments.",
+      name: 'Starter',
+      price: '$0',
+      description: 'Perfect for amateur teams and community tournaments.',
       features: [
-        "Up to 2 Rosters",
-        "Basic Scrim Scheduling",
-        "Community Support",
-        "Public Profile",
-        "1GB Asset Storage",
+        'Up to 2 Rosters',
+        'Basic Scrim Scheduling',
+        'Community Support',
+        'Public Profile',
+        '1GB Asset Storage',
       ],
       notIncluded: [
-        "Automated Payroll",
-        "Smart Contracts",
-        "Advanced Analytics",
-        "Custom Domain",
-        "Priority Support",
+        'Automated Payroll',
+        'Smart Contracts',
+        'Advanced Analytics',
+        'Custom Domain',
+        'Priority Support',
       ],
-      cta: "Start for Free",
-      variant: "outline",
+      cta: 'Start for Free',
+      variant: 'outline',
     },
     {
-      name: "Pro",
-      price: "$29",
-      period: "/month",
-      description: "For growing organizations that need professional tools.",
+      name: 'Pro',
+      price: '$29',
+      period: '/month',
+      description: 'For growing organizations that need professional tools.',
       popular: true,
       features: [
-        "Unlimited Rosters",
-        "Advanced Scheduling & Calendar",
-        "Automated Payroll (Basic)",
-        "Smart Contracts (5/mo)",
-        "Performance Analytics",
-        "10GB Asset Storage",
-        "Priority Email Support",
+        'Unlimited Rosters',
+        'Advanced Scheduling & Calendar',
+        'Automated Payroll (Basic)',
+        'Smart Contracts (5/mo)',
+        'Performance Analytics',
+        '10GB Asset Storage',
+        'Priority Email Support',
       ],
-      notIncluded: [
-        "Custom API Access",
-        "White-labeling",
-        "Dedicated Account Manager",
-      ],
-      cta: "Start Free Trial",
-      variant: "default",
+      notIncluded: ['Custom API Access', 'White-labeling', 'Dedicated Account Manager'],
+      cta: 'Start Free Trial',
+      variant: 'default',
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      description: "Full-scale operating system for elite esports organizations.",
+      name: 'Enterprise',
+      price: 'Custom',
+      description: 'Full-scale operating system for elite esports organizations.',
       features: [
-        "Unlimited Everything",
-        "Automated Payroll (Global)",
-        "Unlimited Smart Contracts",
-        "Deep Analytics & Insights",
-        "Custom API Integration",
-        "White-label Portal",
-        "Dedicated Account Manager",
-        "SLA Guarantee",
+        'Unlimited Everything',
+        'Automated Payroll (Global)',
+        'Unlimited Smart Contracts',
+        'Deep Analytics & Insights',
+        'Custom API Integration',
+        'White-label Portal',
+        'Dedicated Account Manager',
+        'SLA Guarantee',
       ],
       notIncluded: [],
-      cta: "Contact Sales",
-      variant: "outline",
+      cta: 'Contact Sales',
+      variant: 'outline',
     },
   ];
 
@@ -92,7 +88,10 @@ export default function Pricing() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.href = "/"}>
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => (window.location.href = '/')}
+          >
             <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
               <Gamepad2 className="w-5 h-5 text-primary" />
             </div>
@@ -105,14 +104,14 @@ export default function Pricing() {
               variant="ghost"
               size="sm"
               className="hidden md:flex hover:bg-primary/10 hover:text-primary"
-              onClick={() => (window.location.href = "/login")}
+              onClick={() => (window.location.href = '/login')}
             >
               Login
             </Button>
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => (window.location.href = "/register")}
+              onClick={() => (window.location.href = '/register')}
             >
               Get Started <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
@@ -137,10 +136,12 @@ export default function Pricing() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {tiers.map((tier, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className={`relative p-8 glass border-white/5 flex flex-col ${
-                  tier.popular ? "border-primary/50 shadow-lg shadow-primary/10 scale-105 z-10" : "hover:border-primary/20"
+                  tier.popular
+                    ? 'border-primary/50 shadow-lg shadow-primary/10 scale-105 z-10'
+                    : 'hover:border-primary/20'
                 }`}
               >
                 {tier.popular && (
@@ -150,7 +151,7 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-                
+
                 <div className="mb-8">
                   <h3 className="text-xl font-bold font-heading mb-2">{tier.name}</h3>
                   <div className="flex items-baseline gap-1 mb-4">
@@ -172,7 +173,10 @@ export default function Pricing() {
                     </div>
                   ))}
                   {tier.notIncluded.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-3 text-sm text-muted-foreground/50">
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 text-sm text-muted-foreground/50"
+                    >
                       <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center shrink-0">
                         <X className="w-3 h-3" />
                       </div>
@@ -181,10 +185,10 @@ export default function Pricing() {
                   ))}
                 </div>
 
-                <Button 
-                  variant={tier.variant === "default" ? "default" : "outline"}
-                  className={`w-full ${tier.variant === "default" ? "bg-primary hover:bg-primary/90" : ""}`}
-                  onClick={() => window.location.href = "/register"}
+                <Button
+                  variant={tier.variant === 'default' ? 'default' : 'outline'}
+                  className={`w-full ${tier.variant === 'default' ? 'bg-primary hover:bg-primary/90' : ''}`}
+                  onClick={() => (window.location.href = '/register')}
                 >
                   {tier.cta}
                 </Button>
@@ -197,21 +201,32 @@ export default function Pricing() {
       {/* FAQ Section */}
       <section className="py-24 bg-black/20 border-y border-white/5">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold font-heading text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold font-heading text-center mb-12">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-bold mb-2">Can I switch plans later?</h3>
-              <p className="text-muted-foreground">Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.</p>
+              <p className="text-muted-foreground">
+                Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected
+                in your next billing cycle.
+              </p>
             </div>
             <Separator className="bg-white/5" />
             <div>
               <h3 className="text-lg font-bold mb-2">Do you offer discounts for non-profits?</h3>
-              <p className="text-muted-foreground">We support collegiate and non-profit esports organizations. Contact our sales team for special pricing.</p>
+              <p className="text-muted-foreground">
+                We support collegiate and non-profit esports organizations. Contact our sales team
+                for special pricing.
+              </p>
             </div>
             <Separator className="bg-white/5" />
             <div>
               <h3 className="text-lg font-bold mb-2">What payment methods do you accept?</h3>
-              <p className="text-muted-foreground">We accept all major credit cards (Visa, Mastercard, Amex) and PayPal. For Enterprise plans, we support wire transfers.</p>
+              <p className="text-muted-foreground">
+                We accept all major credit cards (Visa, Mastercard, Amex) and PayPal. For Enterprise
+                plans, we support wire transfers.
+              </p>
             </div>
           </div>
         </div>
@@ -225,10 +240,11 @@ export default function Pricing() {
               Not ready to commit?
             </h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join our closed beta waitlist to get early access to new features and community updates.
+              Join our closed beta waitlist to get early access to new features and community
+              updates.
             </p>
             <div className="flex justify-center w-full">
-               <WaitlistForm />
+              <WaitlistForm />
             </div>
           </div>
         </div>
@@ -250,7 +266,12 @@ export default function Pricing() {
             <div>
               <h4 className="font-bold mb-4 text-white">Platform</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li className="hover:text-primary cursor-pointer" onClick={() => window.location.href = "/"}>Home</li>
+                <li
+                  className="hover:text-primary cursor-pointer"
+                  onClick={() => (window.location.href = '/')}
+                >
+                  Home
+                </li>
                 <li className="hover:text-primary cursor-pointer text-primary">Pricing</li>
                 <li className="hover:text-primary cursor-pointer">Enterprise</li>
               </ul>

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import {
   Dialog,
@@ -10,14 +10,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 import {
   Form,
@@ -27,7 +27,7 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 import {
   Select,
@@ -35,14 +35,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Search, Users, AlertCircle } from "lucide-react";
-import {
-  TEAM_ROLES,
-  type TeamRole,
-  formatRoleBadge,
-} from "@/constants/teamRoles";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+} from '@/components/ui/select';
+import { Search, Users, AlertCircle } from 'lucide-react';
+import { TEAM_ROLES, type TeamRole, formatRoleBadge } from '@/constants/teamRoles';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // onSubmit will receive a payload { rosterId, playerIds: string[], role: string }
 
@@ -54,24 +50,23 @@ interface Player {
   role: string;
   game: string;
   avatar?: string;
-  status: "active" | "inactive";
+  status: 'active' | 'inactive';
 }
 
 const assignmentFormSchema = z.object({
-  playerIds: z.array(z.string()).min(1, "Please select at least one player"),
+  playerIds: z.array(z.string()).min(1, 'Please select at least one player'),
   role: z
-    .enum([
-      "Captain",
-      "Coach",
-      "Player",
-      "Analyst",
-      "Manager",
-      "Substitute",
-    ] as [TeamRole, TeamRole, TeamRole, TeamRole, TeamRole, TeamRole])
-    .default("Player"),
+    .enum(['Captain', 'Coach', 'Player', 'Analyst', 'Manager', 'Substitute'] as [
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+    ])
+    .default('Player'),
   // Only required when the roster has no game set yet; optional here and validated in handleSubmit
-  game: z.string().optional().default(""),
-
+  game: z.string().optional().default(''),
 });
 
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
@@ -107,11 +102,11 @@ export function PlayerAssignmentDialog({
   currentPlayers,
   allPlayers,
   isLoading = false,
-  game = "Unknown Game",
+  game = 'Unknown Game',
 }: PlayerAssignmentDialogProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
 
@@ -119,9 +114,8 @@ export function PlayerAssignmentDialog({
     resolver: zodResolver(assignmentFormSchema),
     defaultValues: {
       playerIds: [],
-      role: "Player",
-      game: "",
-
+      role: 'Player',
+      game: '',
     },
   });
 
@@ -129,40 +123,37 @@ export function PlayerAssignmentDialog({
     if (open) {
       form.reset({
         playerIds: [],
-        role: "Player",
-        game: "",
+        role: 'Player',
+        game: '',
       });
       setSelectedPlayers([]);
-      setSearchTerm("");
-      setRoleFilter("all");
-      setStatusFilter("all");
+      setSearchTerm('');
+      setRoleFilter('all');
+      setStatusFilter('all');
     }
   }, [open, form]);
 
-  const filteredPlayers = allPlayers.filter((player) => {
+  const filteredPlayers = allPlayers.filter(player => {
     const matchesSearch =
       player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       player.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "all" || player.role === roleFilter;
-    const matchesStatus =
-      statusFilter === "all" || player.status === statusFilter;
+    const matchesRole = roleFilter === 'all' || player.role === roleFilter;
+    const matchesStatus = statusFilter === 'all' || player.status === statusFilter;
 
     // Removed game filtering to allow cross-game assignments from the Players tab
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const currentPlayerIds = currentPlayers.map((p) => p.playerId);
-  const availablePlayers = filteredPlayers.filter(
-    (player) => !currentPlayerIds.includes(player.id),
-  );
+  const currentPlayerIds = currentPlayers.map(p => p.playerId);
+  const availablePlayers = filteredPlayers.filter(player => !currentPlayerIds.includes(player.id));
 
   const handlePlayerToggle = (playerId: string) => {
-    setSelectedPlayers((prev) => {
+    setSelectedPlayers(prev => {
       const newSelection = prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
+        ? prev.filter(id => id !== playerId)
         : [...prev, playerId];
 
-      form.setValue("playerIds", newSelection, { shouldValidate: true });
+      form.setValue('playerIds', newSelection, { shouldValidate: true });
 
       return newSelection;
     });
@@ -171,15 +162,12 @@ export function PlayerAssignmentDialog({
   const handleSubmit = async (values: AssignmentFormValues) => {
     try {
       // Determine which game to send: use the roster's game if known, otherwise require user-provided value
-      const gameToUse =
-        game && game !== "Unknown Game" ? game : (values.game || "").trim();
+      const gameToUse = game && game !== 'Unknown Game' ? game : (values.game || '').trim();
       if (!gameToUse) {
         // Surface a form error so users know they must set the roster's game first
-        form.setError("game" as any, {
-          type: "manual",
-          message:
-            "Please select or enter a game for this roster before assigning players.",
-
+        form.setError('game' as any, {
+          type: 'manual',
+          message: 'Please select or enter a game for this roster before assigning players.',
         });
         return;
       }
@@ -193,8 +181,7 @@ export function PlayerAssignmentDialog({
       form.reset();
       onOpenChange(false);
     } catch (error) {
-      console.error("Error assigning players:", error);
-
+      console.error('Error assigning players:', error);
     }
   };
 
@@ -208,9 +195,7 @@ export function PlayerAssignmentDialog({
         <DialogHeader>
           <DialogTitle>Assign Players to {rosterName}</DialogTitle>
           <DialogDescription>
-            Select players to add to this roster. You can add up to{" "}
-            {availableSlots} more players.
-
+            Select players to add to this roster. You can add up to {availableSlots} more players.
           </DialogDescription>
         </DialogHeader>
 
@@ -225,8 +210,7 @@ export function PlayerAssignmentDialog({
                     Current: {currentPlayerCount} / {maxPlayers}
                   </span>
                 </div>
-                <Badge variant={availableSlots > 0 ? "default" : "destructive"}>
-
+                <Badge variant={availableSlots > 0 ? 'default' : 'destructive'}>
                   {availableSlots} slots available
                 </Badge>
               </div>
@@ -240,26 +224,19 @@ export function PlayerAssignmentDialog({
               <Input
                 placeholder="Search players..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10"
                 disabled={isLoading}
               />
             </div>
 
-            <Select
-              value={roleFilter}
-              onValueChange={setRoleFilter}
-              disabled={isLoading}
-            >
-
+            <Select value={roleFilter} onValueChange={setRoleFilter} disabled={isLoading}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Roles</SelectItem>
-                {TEAM_ROLES.map((r) => (
-
+                {TEAM_ROLES.map(r => (
                   <SelectItem key={r.value} value={r.value}>
                     {r.label}
                   </SelectItem>
@@ -267,12 +244,7 @@ export function PlayerAssignmentDialog({
               </SelectContent>
             </Select>
 
-            <Select
-              value={statusFilter}
-              onValueChange={setStatusFilter}
-              disabled={isLoading}
-            >
-
+            <Select value={statusFilter} onValueChange={setStatusFilter} disabled={isLoading}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -289,22 +261,17 @@ export function PlayerAssignmentDialog({
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You've selected {selectedPlayers.length} players but only{" "}
-                {availableSlots} slots are available.
-
+                You've selected {selectedPlayers.length} players but only {availableSlots} slots are
+                available.
               </AlertDescription>
             </Alert>
           )}
 
           {/* Player List */}
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               {/* If roster has no game, ask for it here so we can set it before assignment */}
-              {(!game || game === "Unknown Game") && (
-
+              {(!game || game === 'Unknown Game') && (
                 <FormField
                   control={form.control}
                   name="game"
@@ -319,9 +286,8 @@ export function PlayerAssignmentDialog({
                         />
                       </FormControl>
                       <FormDescription>
-                        This roster doesn't have a game yet. Set it once and
-                        we'll remember it for future assignments.
-
+                        This roster doesn't have a game yet. Set it once and we'll remember it for
+                        future assignments.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -334,20 +300,14 @@ export function PlayerAssignmentDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Team Role</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isLoading}
-                    >
-
+                    <Select value={field.value} onValueChange={field.onChange} disabled={isLoading}>
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {TEAM_ROLES.map((r) => (
-
+                        {TEAM_ROLES.map(r => (
                           <SelectItem key={r.value} value={r.value}>
                             {r.label}
                           </SelectItem>
@@ -368,20 +328,16 @@ export function PlayerAssignmentDialog({
                     <div className="text-center py-8 text-muted-foreground">
                       <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p>No available players found</p>
-                      <p className="text-sm">
-                        Try adjusting your filters or search terms
-                      </p>
+                      <p className="text-sm">Try adjusting your filters or search terms</p>
                     </div>
                   ) : (
-                    availablePlayers.map((player) => (
-
+                    availablePlayers.map(player => (
                       <div
                         key={player.id}
                         className={`flex items-center space-x-3 p-3 rounded-lg border transition-colors ${
                           selectedPlayers.includes(player.id)
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:bg-accent/50"
-
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:bg-accent/50'
                         }`}
                       >
                         <Checkbox
@@ -389,9 +345,7 @@ export function PlayerAssignmentDialog({
                           onCheckedChange={() => handlePlayerToggle(player.id)}
                           disabled={
                             isLoading ||
-                            (!selectedPlayers.includes(player.id) &&
-                              !canAddMorePlayers)
-
+                            (!selectedPlayers.includes(player.id) && !canAddMorePlayers)
                           }
                         />
 
@@ -399,21 +353,17 @@ export function PlayerAssignmentDialog({
                           <AvatarImage src={player.avatar} alt={player.name} />
                           <AvatarFallback>
                             {player.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
+                              .split(' ')
+                              .map(n => n[0])
+                              .join('')
 
                               .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
 
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {player.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {player.email}
-                          </p>
+                          <p className="text-sm font-medium truncate">{player.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{player.email}</p>
 
                           <div className="flex items-center gap-2 mt-1">
                             <Badge
@@ -423,12 +373,7 @@ export function PlayerAssignmentDialog({
                               {formatRoleBadge(player.role)}
                             </Badge>
                             <Badge
-                              variant={
-                                player.status === "active"
-                                  ? "default"
-                                  : "secondary"
-                              }
-
+                              variant={player.status === 'active' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
                               {player.status}
@@ -462,12 +407,7 @@ export function PlayerAssignmentDialog({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={
-                    isLoading ||
-                    selectedPlayers.length === 0 ||
-                    !canAddMorePlayers
-                  }
-
+                  disabled={isLoading || selectedPlayers.length === 0 || !canAddMorePlayers}
                 >
                   {isLoading ? (
                     <>

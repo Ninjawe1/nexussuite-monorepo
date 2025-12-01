@@ -1,8 +1,7 @@
-import React from "react";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { OrganizationSelector } from "@/components/OrganizationSelector";
-
+import React from 'react';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import { OrganizationSelector } from '@/components/OrganizationSelector';
 
 /**
  * DashboardLayout
@@ -22,14 +21,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </div>
           {/* Content area: add balanced horizontal padding and max width */}
           <div className="min-h-[calc(100vh-3rem)] bg-background">
-            <div className="container mx-auto px-6 md:px-8 py-6">
-              {children}
-            </div>
-
+            <div className="container mx-auto px-6 md:px-8 py-6">{children}</div>
           </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
   );
 };
-

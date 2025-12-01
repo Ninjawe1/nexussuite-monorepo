@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 import {
   AlertDialog,
@@ -14,24 +14,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useOrganization } from "@/contexts/OrganizationContext";
-import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
-
+} from '@/components/ui/alert-dialog';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 export default function OrgSettings() {
   const { currentOrganization, updateOrganization, deleteOrganization } = useOrganization();
   const { toast } = useToast();
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    setName(currentOrganization?.name || "");
-
+    setName(currentOrganization?.name || '');
   }, [currentOrganization]);
 
   if (!currentOrganization) {
@@ -55,20 +53,18 @@ export default function OrgSettings() {
     try {
       await updateOrganization(currentOrganization.id, { name: name.trim() });
     } catch (error: any) {
-      console.error("OrgSettings save error:", {
-
+      console.error('OrgSettings save error:', {
         orgId: currentOrganization.id,
         payload: { name: name.trim() },
         error,
       });
       toast({
-        title: "Save failed",
+        title: 'Save failed',
         description:
-          typeof error?.message === "string"
+          typeof error?.message === 'string'
             ? error.message
-            : "Unable to save organization settings",
-        variant: "destructive",
-
+            : 'Unable to save organization settings',
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
@@ -80,21 +76,17 @@ export default function OrgSettings() {
     try {
       await deleteOrganization(currentOrganization.id);
       // After deletion, navigate to dashboard
-      setLocation("/dashboard");
+      setLocation('/dashboard');
     } catch (error: any) {
-      console.error("OrgSettings delete error:", {
-
+      console.error('OrgSettings delete error:', {
         orgId: currentOrganization.id,
         error,
       });
       toast({
-        title: "Deletion failed",
+        title: 'Deletion failed',
         description:
-          typeof error?.message === "string"
-            ? error.message
-            : "Unable to delete organization",
-        variant: "destructive",
-
+          typeof error?.message === 'string' ? error.message : 'Unable to delete organization',
+        variant: 'destructive',
       });
     } finally {
       setDeleting(false);
@@ -109,28 +101,32 @@ export default function OrgSettings() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-2">
-            <label htmlFor="org-name" className="text-sm font-medium">Organization Name</label>
+            <label htmlFor="org-name" className="text-sm font-medium">
+              Organization Name
+            </label>
             <Input
               id="org-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-
+              onChange={e => setName(e.target.value)}
               placeholder="Your organization name"
               disabled={saving}
             />
           </div>
 
           <div className="grid gap-2">
-            <label htmlFor="org-id" className="text-sm font-medium">Organization ID</label>
+            <label htmlFor="org-id" className="text-sm font-medium">
+              Organization ID
+            </label>
             <Input id="org-id" value={currentOrganization.id} readOnly />
-            <p className="text-xs text-muted-foreground">This ID is read-only for Org Owners. Changes can only be performed by Super Admins in the site-wide admin interface.</p>
-
+            <p className="text-xs text-muted-foreground">
+              This ID is read-only for Org Owners. Changes can only be performed by Super Admins in
+              the site-wide admin interface.
+            </p>
           </div>
 
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={saving || !name.trim()}>
-              {saving ? "Saving…" : "Save Changes"}
-
+              {saving ? 'Saving…' : 'Save Changes'}
             </Button>
           </div>
 
@@ -139,8 +135,9 @@ export default function OrgSettings() {
           <div className="space-y-3">
             <div>
               <h3 className="text-lg font-semibold">Delete Organization</h3>
-              <p className="text-sm text-muted-foreground">Deleting an organization is permanent. This action cannot be undone.</p>
-
+              <p className="text-sm text-muted-foreground">
+                Deleting an organization is permanent. This action cannot be undone.
+              </p>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -150,15 +147,14 @@ export default function OrgSettings() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete your organization and all related data. This action cannot be undone.
-
+                    This will permanently delete your organization and all related data. This action
+                    cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete} disabled={deleting}>
-                    {deleting ? "Deleting…" : "Delete"}
-
+                    {deleting ? 'Deleting…' : 'Delete'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -169,4 +165,3 @@ export default function OrgSettings() {
     </div>
   );
 }
-

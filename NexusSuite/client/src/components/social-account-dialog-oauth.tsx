@@ -4,25 +4,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  SiInstagram,
-  SiX,
-  SiFacebook,
-  SiTiktok,
-  SiYoutube,
-  SiTwitch,
-} from "react-icons/si";
-import { Link as LinkIcon, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useOrganization } from "@/contexts/OrganizationContext";
-
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { SiInstagram, SiX, SiFacebook, SiTiktok, SiYoutube, SiTwitch } from 'react-icons/si';
+import { Link as LinkIcon, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface OAuthStatus {
   configured: boolean;
@@ -45,31 +37,25 @@ const platformIcons: Record<string, any> = {
 };
 
 const platformColors: Record<string, string> = {
-  instagram: "bg-gradient-to-br from-orange-500 to-red-500",
-  twitter: "bg-black",
-  facebook: "bg-blue-600",
-  tiktok: "bg-black",
-  youtube: "bg-red-600",
-  twitch: "bg-zinc-800",
+  instagram: 'bg-gradient-to-br from-orange-500 to-red-500',
+  twitter: 'bg-black',
+  facebook: 'bg-blue-600',
+  tiktok: 'bg-black',
+  youtube: 'bg-red-600',
+  twitch: 'bg-zinc-800',
 };
 
-export function SocialAccountOAuthDialog({
-  open,
-  onOpenChange,
-}: SocialAccountOAuthDialogProps) {
+export function SocialAccountOAuthDialog({ open, onOpenChange }: SocialAccountOAuthDialogProps) {
   const { currentOrganization: organization } = useOrganization();
   const { toast } = useToast();
-  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(
-    null,
-  );
-
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
 
   const {
     data: oauthStatus = {},
     isLoading,
     error,
   } = useQuery<Record<string, OAuthStatus>>({
-    queryKey: ["/api/oauth/status", organization?.id],
+    queryKey: ['/api/oauth/status', organization?.id],
 
     enabled: open && !!organization?.id,
   });
@@ -78,15 +64,16 @@ export function SocialAccountOAuthDialog({
     try {
       setConnectingPlatform(platform);
 
-      const response = await fetch(`/api/oauth/init/${platform}?organizationId=${organization?.id}`, {
-        credentials: "include",
-
-      });
+      const response = await fetch(
+        `/api/oauth/init/${platform}?organizationId=${organization?.id}`,
+        {
+          credentials: 'include',
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to initiate OAuth");
-
+        throw new Error(error.message || 'Failed to initiate OAuth');
       }
 
       const { authUrl } = await response.json();
@@ -96,18 +83,14 @@ export function SocialAccountOAuthDialog({
     } catch (error: any) {
       setConnectingPlatform(null);
       toast({
-        title: "Connection failed",
-        description: error.message || "Failed to connect social account",
-        variant: "destructive",
-
+        title: 'Connection failed',
+        description: error.message || 'Failed to connect social account',
+        variant: 'destructive',
       });
     }
   };
 
-  const anyConfigured = Object.values(oauthStatus).some(
-    (status) => status.configured,
-  );
-
+  const anyConfigured = Object.values(oauthStatus).some(status => status.configured);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,9 +98,7 @@ export function SocialAccountOAuthDialog({
         <DialogHeader>
           <DialogTitle>Connect Social Media Account</DialogTitle>
           <DialogDescription>
-            Connect your social media accounts using OAuth to track analytics
-            and engagement.
-
+            Connect your social media accounts using OAuth to track analytics and engagement.
           </DialogDescription>
         </DialogHeader>
 
@@ -130,10 +111,7 @@ export function SocialAccountOAuthDialog({
         {error && (
           <Alert variant="destructive" data-testid="alert-error">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load OAuth platforms. Please try again.
-            </AlertDescription>
-
+            <AlertDescription>Failed to load OAuth platforms. Please try again.</AlertDescription>
           </Alert>
         )}
 
@@ -143,10 +121,8 @@ export function SocialAccountOAuthDialog({
             <AlertDescription>
               <strong>OAuth Not Configured</strong>
               <p className="mt-2 text-sm">
-                To enable social media connections, you need to register
-                developer apps on each platform and configure the API
-                credentials as environment variables.
-
+                To enable social media connections, you need to register developer apps on each
+                platform and configure the API credentials as environment variables.
               </p>
               <p className="mt-2 text-sm font-mono text-xs">
                 Example: INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET
@@ -195,29 +171,24 @@ export function SocialAccountOAuthDialog({
                         )}
                       </div>
                       {status.note && (
-                        <p className="text-xs text-muted-foreground mb-3">
-                          {status.note}
-                        </p>
+                        <p className="text-xs text-muted-foreground mb-3">{status.note}</p>
                       )}
                       {!status.configured && (
                         <p className="text-xs text-muted-foreground mb-3 font-mono">
-                          Needs: {platform.toUpperCase()}_CLIENT_ID,{" "}
-                          {platform.toUpperCase()}_CLIENT_SECRET
-
+                          Needs: {platform.toUpperCase()}_CLIENT_ID, {platform.toUpperCase()}
+                          _CLIENT_SECRET
                         </p>
                       )}
                       <Button
                         size="sm"
-                        variant={status.configured ? "default" : "outline"}
-
+                        variant={status.configured ? 'default' : 'outline'}
                         disabled={!status.configured || isConnecting}
                         onClick={() => handleConnect(platform)}
                         className="w-full"
                         data-testid={`button-connect-${platform}`}
                       >
                         {isConnecting ? (
-                          "Connecting..."
-
+                          'Connecting...'
                         ) : (
                           <>
                             <LinkIcon className="h-3 w-3 mr-2" />
@@ -236,10 +207,9 @@ export function SocialAccountOAuthDialog({
         <Alert className="mt-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            <strong>Setup Required:</strong> Each platform requires you to
-            register a developer application and obtain OAuth credentials.
-            Contact your administrator to configure these integrations.
-
+            <strong>Setup Required:</strong> Each platform requires you to register a developer
+            application and obtain OAuth credentials. Contact your administrator to configure these
+            integrations.
           </AlertDescription>
         </Alert>
       </DialogContent>

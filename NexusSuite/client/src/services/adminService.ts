@@ -3,8 +3,7 @@
  * Handles admin-specific operations and system management
  */
 
-import { apiRequest } from "@/lib/queryClient";
-
+import { apiRequest } from '@/lib/queryClient';
 
 export interface SystemMetrics {
   totalUsers: number;
@@ -17,7 +16,7 @@ export interface SystemMetrics {
     revenue: number;
   };
   systemHealth: {
-    status: "healthy" | "degraded" | "down";
+    status: 'healthy' | 'degraded' | 'down';
 
     uptime: number;
     responseTime: number;
@@ -37,15 +36,14 @@ export interface UserAnalytics {
     role: string;
     joinedAt: string;
   }>;
-  subscriptionStatus: "active" | "canceled" | "trialing" | "none";
+  subscriptionStatus: 'active' | 'canceled' | 'trialing' | 'none';
 
   usage: {
     apiCalls: number;
     storage: number;
     lastActivity: string;
   };
-  status: "active" | "suspended" | "deleted";
-
+  status: 'active' | 'suspended' | 'deleted';
 }
 
 export interface OrganizationAnalytics {
@@ -61,7 +59,7 @@ export interface OrganizationAnalytics {
   members: number;
   subscription: {
     plan: string;
-    status: "active" | "canceled" | "trialing" | "none";
+    status: 'active' | 'canceled' | 'trialing' | 'none';
 
     currentPeriodEnd: string;
     cancelAtPeriodEnd: boolean;
@@ -86,8 +84,7 @@ export interface AuditLog {
   ipAddress: string;
   userAgent: string;
   createdAt: string;
-  severity: "info" | "warning" | "error" | "critical";
-
+  severity: 'info' | 'warning' | 'error' | 'critical';
 }
 
 export interface SupportTicket {
@@ -98,8 +95,8 @@ export interface SupportTicket {
   organizationName?: string;
   subject: string;
   description: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high" | "urgent";
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
 
   assignedTo?: string;
   tags: string[];
@@ -113,7 +110,7 @@ export interface AdminUserUpdate {
   email?: string;
   name?: string;
   role?: string;
-  status?: "active" | "suspended" | "deleted";
+  status?: 'active' | 'suspended' | 'deleted';
 
   metadata?: Record<string, any>;
 }
@@ -121,7 +118,7 @@ export interface AdminUserUpdate {
 export interface AdminOrganizationUpdate {
   name?: string;
   slug?: string;
-  status?: "active" | "suspended";
+  status?: 'active' | 'suspended';
 
   metadata?: Record<string, any>;
 }
@@ -132,13 +129,12 @@ class AdminService {
    */
   async getSystemMetrics(): Promise<SystemMetrics> {
     try {
-      const response = await apiRequest("/api/admin/metrics", "GET");
+      const response = await apiRequest('/api/admin/metrics', 'GET');
       const data = await response.json();
       return data.data || data.metrics;
     } catch (error) {
-      console.error("Failed to fetch system metrics:", error);
-      throw new Error("Unable to load system metrics");
-
+      console.error('Failed to fetch system metrics:', error);
+      throw new Error('Unable to load system metrics');
     }
   }
 
@@ -153,9 +149,8 @@ class AdminService {
       status?: string;
       subscriptionStatus?: string;
       sortBy?: string;
-      sortOrder?: "asc" | "desc";
-    } = {},
-
+      sortOrder?: 'asc' | 'desc';
+    } = {}
   ): Promise<{
     users: UserAnalytics[];
     total: number;
@@ -172,15 +167,13 @@ class AdminService {
 
       const response = await apiRequest(
         `/api/admin/users/analytics?${queryParams.toString()}`,
-        "GET",
-
+        'GET'
       );
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to fetch user analytics:", error);
-      throw new Error("Unable to load user analytics");
-
+      console.error('Failed to fetch user analytics:', error);
+      throw new Error('Unable to load user analytics');
     }
   }
 
@@ -195,9 +188,8 @@ class AdminService {
       status?: string;
       subscriptionStatus?: string;
       sortBy?: string;
-      sortOrder?: "asc" | "desc";
-    } = {},
-
+      sortOrder?: 'asc' | 'desc';
+    } = {}
   ): Promise<{
     organizations: OrganizationAnalytics[];
     total: number;
@@ -214,39 +206,28 @@ class AdminService {
 
       const response = await apiRequest(
         `/api/admin/organizations/analytics?${queryParams.toString()}`,
-        "GET",
-
+        'GET'
       );
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to fetch organization analytics:", error);
-      throw new Error("Unable to load organization analytics");
-
+      console.error('Failed to fetch organization analytics:', error);
+      throw new Error('Unable to load organization analytics');
     }
   }
 
   /**
    * Update user as admin
    */
-  async updateUser(
-    userId: string,
-    updates: AdminUserUpdate,
-  ): Promise<UserAnalytics> {
+  async updateUser(userId: string, updates: AdminUserUpdate): Promise<UserAnalytics> {
     try {
-      const response = await apiRequest(
-        `/api/admin/users/${userId}`,
-        "PUT",
-        updates,
-      );
-
+      const response = await apiRequest(`/api/admin/users/${userId}`, 'PUT', updates);
 
       const data = await response.json();
       return data.user;
     } catch (error) {
-      console.error("Failed to update user:", error);
-      throw new Error("Unable to update user");
-
+      console.error('Failed to update user:', error);
+      throw new Error('Unable to update user');
     }
   }
 
@@ -255,15 +236,10 @@ class AdminService {
    */
   async suspendUser(userId: string, reason?: string): Promise<void> {
     try {
-      await apiRequest(
-        `/api/admin/users/${userId}/suspend`,
-        "POST",
-        { reason },
-      );
+      await apiRequest(`/api/admin/users/${userId}/suspend`, 'POST', { reason });
     } catch (error) {
-      console.error("Failed to suspend user:", error);
-      throw new Error("Unable to suspend user");
-
+      console.error('Failed to suspend user:', error);
+      throw new Error('Unable to suspend user');
     }
   }
 
@@ -272,11 +248,10 @@ class AdminService {
    */
   async reactivateUser(userId: string): Promise<void> {
     try {
-      await apiRequest(`/api/admin/users/${userId}/reactivate`, "POST");
+      await apiRequest(`/api/admin/users/${userId}/reactivate`, 'POST');
     } catch (error) {
-      console.error("Failed to reactivate user:", error);
-      throw new Error("Unable to reactivate user");
-
+      console.error('Failed to reactivate user:', error);
+      throw new Error('Unable to reactivate user');
     }
   }
 
@@ -285,22 +260,16 @@ class AdminService {
    */
   async updateOrganization(
     orgId: string,
-    updates: AdminOrganizationUpdate,
+    updates: AdminOrganizationUpdate
   ): Promise<OrganizationAnalytics> {
     try {
-      const response = await apiRequest(
-        `/api/admin/organizations/${orgId}`,
-        "PUT",
-        updates,
-      );
-
+      const response = await apiRequest(`/api/admin/organizations/${orgId}`, 'PUT', updates);
 
       const data = await response.json();
       return data.organization;
     } catch (error) {
-      console.error("Failed to update organization:", error);
-      throw new Error("Unable to update organization");
-
+      console.error('Failed to update organization:', error);
+      throw new Error('Unable to update organization');
     }
   }
 
@@ -309,15 +278,10 @@ class AdminService {
    */
   async suspendOrganization(orgId: string, reason?: string): Promise<void> {
     try {
-      await apiRequest(
-        `/api/admin/organizations/${orgId}/suspend`,
-        "POST",
-        { reason },
-      );
+      await apiRequest(`/api/admin/organizations/${orgId}/suspend`, 'POST', { reason });
     } catch (error) {
-      console.error("Failed to suspend organization:", error);
-      throw new Error("Unable to suspend organization");
-
+      console.error('Failed to suspend organization:', error);
+      throw new Error('Unable to suspend organization');
     }
   }
 
@@ -336,9 +300,8 @@ class AdminService {
       startDate?: string;
       endDate?: string;
       sortBy?: string;
-      sortOrder?: "asc" | "desc";
-    } = {},
-
+      sortOrder?: 'asc' | 'desc';
+    } = {}
   ): Promise<{
     logs: AuditLog[];
     total: number;
@@ -353,16 +316,12 @@ class AdminService {
         }
       });
 
-      const response = await apiRequest(
-        `/api/admin/audit-logs?${queryParams.toString()}`,
-        "GET",
-      );
+      const response = await apiRequest(`/api/admin/audit-logs?${queryParams.toString()}`, 'GET');
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to fetch audit logs:", error);
-      throw new Error("Unable to load audit logs");
-
+      console.error('Failed to fetch audit logs:', error);
+      throw new Error('Unable to load audit logs');
     }
   }
 
@@ -380,9 +339,8 @@ class AdminService {
       organizationId?: string;
       search?: string;
       sortBy?: string;
-      sortOrder?: "asc" | "desc";
-    } = {},
-
+      sortOrder?: 'asc' | 'desc';
+    } = {}
   ): Promise<{
     tickets: SupportTicket[];
     total: number;
@@ -399,15 +357,13 @@ class AdminService {
 
       const response = await apiRequest(
         `/api/admin/support-tickets?${queryParams.toString()}`,
-        "GET",
-
+        'GET'
       );
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Failed to fetch support tickets:", error);
-      throw new Error("Unable to load support tickets");
-
+      console.error('Failed to fetch support tickets:', error);
+      throw new Error('Unable to load support tickets');
     }
   }
 
@@ -422,22 +378,16 @@ class AdminService {
       assignedTo?: string;
       tags?: string[];
       notes?: string;
-    },
+    }
   ): Promise<SupportTicket> {
     try {
-      const response = await apiRequest(
-        `/api/admin/support-tickets/${ticketId}`,
-        "PUT",
-        updates,
-      );
-
+      const response = await apiRequest(`/api/admin/support-tickets/${ticketId}`, 'PUT', updates);
 
       const data = await response.json();
       return data.ticket;
     } catch (error) {
-      console.error("Failed to update support ticket:", error);
-      throw new Error("Unable to update support ticket");
-
+      console.error('Failed to update support ticket:', error);
+      throw new Error('Unable to update support ticket');
     }
   }
 
@@ -446,13 +396,12 @@ class AdminService {
    */
   async getSystemConfig(): Promise<Record<string, any>> {
     try {
-      const response = await apiRequest("/api/admin/system-settings", "GET");
+      const response = await apiRequest('/api/admin/system-settings', 'GET');
       const data = await response.json();
       return data.data || data.config;
     } catch (error) {
-      console.error("Failed to fetch system config:", error);
-      throw new Error("Unable to load system configuration");
-
+      console.error('Failed to fetch system config:', error);
+      throw new Error('Unable to load system configuration');
     }
   }
 
@@ -461,11 +410,10 @@ class AdminService {
    */
   async updateSystemConfig(config: Record<string, any>): Promise<void> {
     try {
-      await apiRequest("/api/admin/system-settings", "PUT", config);
+      await apiRequest('/api/admin/system-settings', 'PUT', config);
     } catch (error) {
-      console.error("Failed to update system config:", error);
-      throw new Error("Unable to update system configuration");
-
+      console.error('Failed to update system config:', error);
+      throw new Error('Unable to update system configuration');
     }
   }
 
@@ -473,10 +421,10 @@ class AdminService {
    * Get system health status
    */
   async getSystemHealth(): Promise<{
-    status: "healthy" | "degraded" | "down";
+    status: 'healthy' | 'degraded' | 'down';
     checks: Array<{
       name: string;
-      status: "pass" | "warn" | "fail";
+      status: 'pass' | 'warn' | 'fail';
 
       message?: string;
       lastCheck: string;
@@ -484,14 +432,14 @@ class AdminService {
     lastCheck: string;
   }> {
     try {
-      const response = await apiRequest("/api/admin/metrics", "GET");
+      const response = await apiRequest('/api/admin/metrics', 'GET');
       const data = await response.json();
       return {
-        status: (data?.data?.systemHealth?.status || "healthy") as any,
+        status: (data?.data?.systemHealth?.status || 'healthy') as any,
         checks: [
           {
-            name: "api",
-            status: "pass",
+            name: 'api',
+            status: 'pass',
 
             lastCheck: new Date().toISOString(),
           },
@@ -499,9 +447,8 @@ class AdminService {
         lastCheck: new Date().toISOString(),
       };
     } catch (error) {
-      console.error("Failed to fetch system health:", error);
-      throw new Error("Unable to load system health");
-
+      console.error('Failed to fetch system health:', error);
+      throw new Error('Unable to load system health');
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Plus,
@@ -9,58 +9,50 @@ import {
   Calendar,
   Users,
   Target,
-} from "lucide-react";
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Tournament, TournamentRound, Match } from "@shared/schema";
-import { Skeleton } from "@/components/ui/skeleton";
+} from 'lucide-react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import type { Tournament, TournamentRound, Match } from '@shared/schema';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-import { tweakcn } from "@/lib/tweakcn";
-import { formatDateSafe } from "@/lib/date";
-import { TournamentDialog } from "@/components/tournament-dialog";
-import { RoundDialog } from "@/components/round-dialog";
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { tweakcn } from '@/lib/tweakcn';
+import { formatDateSafe } from '@/lib/date';
+import { TournamentDialog } from '@/components/tournament-dialog';
+import { RoundDialog } from '@/components/round-dialog';
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 const formatStatusBadge = (status: string) => {
   const statusColors = {
-    upcoming: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-    ongoing: "bg-green-500/10 text-green-500 border-green-500/20",
-    completed: "bg-gray-500/10 text-gray-500 border-gray-500/20",
-    cancelled: "bg-red-500/10 text-red-500 border-red-500/20",
+    upcoming: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    ongoing: 'bg-green-500/10 text-green-500 border-green-500/20',
+    completed: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',
   };
-  return (
-    statusColors[status as keyof typeof statusColors] || statusColors.upcoming
-  );
-
+  return statusColors[status as keyof typeof statusColors] || statusColors.upcoming;
 };
 
 const formatFormatBadge = (formatType: string) => {
   const formatColors = {
-    "single-elimination":
-      "bg-primary/10 text-primary border-primary/20",
-    "double-elimination":
-      "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-    "round-robin": "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
-    league: "bg-teal-500/10 text-teal-500 border-teal-500/20",
-    swiss: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-    custom: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+    'single-elimination': 'bg-primary/10 text-primary border-primary/20',
+    'double-elimination': 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+    'round-robin': 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
+    league: 'bg-teal-500/10 text-teal-500 border-teal-500/20',
+    swiss: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    custom: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
   };
-  return (
-    formatColors[formatType as keyof typeof formatColors] || formatColors.custom
-  );
-
+  return formatColors[formatType as keyof typeof formatColors] || formatColors.custom;
 };
 
 function TournamentCard({
@@ -79,13 +71,14 @@ function TournamentCard({
   const queryClient = useQueryClient();
   const { currentOrganization } = useOrganization();
 
-  const { data: rounds = [], isLoading: loadingRounds } = useQuery<
-    TournamentRound[]
-  >({
-    queryKey: ["/api/tournaments", tournament.id, "rounds", currentOrganization?.id],
+  const { data: rounds = [], isLoading: loadingRounds } = useQuery<TournamentRound[]>({
+    queryKey: ['/api/tournaments', tournament.id, 'rounds', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(`/api/tournaments/${tournament.id}/rounds?organizationId=${currentOrganization.id}`, "GET");
+      const res = await apiRequest(
+        `/api/tournaments/${tournament.id}/rounds?organizationId=${currentOrganization.id}`,
+        'GET'
+      );
       return await res.json();
     },
     enabled: isExpanded && !!currentOrganization?.id,
@@ -93,45 +86,37 @@ function TournamentCard({
 
   const deleteTournamentMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/tournaments/${id}`, "DELETE");
+      return await apiRequest(`/api/tournaments/${id}`, 'DELETE');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
       toast({
-        title: "Success",
-        description: "Tournament deleted successfully",
-
+        title: 'Success',
+        description: 'Tournament deleted successfully',
       });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete tournament",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to delete tournament',
+        variant: 'destructive',
       });
     },
   });
 
   const handleDelete = async (id: string) => {
-    if (
-      confirm(
-        "Are you sure? This will delete the tournament and all its rounds and matches.",
-      )
-    ) {
-
+    if (confirm('Are you sure? This will delete the tournament and all its rounds and matches.')) {
       await deleteTournamentMutation.mutateAsync(id);
     }
   };
@@ -163,10 +148,7 @@ function TournamentCard({
             </CardTitle>
           </div>
           {tournament.description && (
-            <p className="text-sm text-muted-foreground truncate ml-14">
-              {tournament.description}
-            </p>
-
+            <p className="text-sm text-muted-foreground truncate ml-14">{tournament.description}</p>
           )}
         </div>
         <DropdownMenu>
@@ -207,17 +189,15 @@ function TournamentCard({
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <Badge
             variant="outline"
-            className={tweakcn("border", formatStatusBadge(tournament.status))}
-
+            className={tweakcn('border', formatStatusBadge(tournament.status))}
           >
             {tournament.status}
           </Badge>
           <Badge
             variant="outline"
-            className={tweakcn("border", formatFormatBadge(tournament.format))}
+            className={tweakcn('border', formatFormatBadge(tournament.format))}
           >
-            {tournament.format.replace("-", " ")}
-
+            {tournament.format.replace('-', ' ')}
           </Badge>
           {tournament.game && (
             <Badge variant="outline">
@@ -230,14 +210,12 @@ function TournamentCard({
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
-            <span>{formatDateSafe(tournament.startDate, "MMM d, yyyy")}</span>
-
+            <span>{formatDateSafe(tournament.startDate, 'MMM d, yyyy')}</span>
           </div>
           {tournament.endDate && (
             <div className="flex items-center gap-1">
               <span>-</span>
-              <span>{formatDateSafe(tournament.endDate, "MMM d, yyyy")}</span>
-
+              <span>{formatDateSafe(tournament.endDate, 'MMM d, yyyy')}</span>
             </div>
           )}
           {tournament.maxTeams && (
@@ -260,8 +238,7 @@ function TournamentCard({
                 No rounds added yet
               </div>
             ) : (
-              rounds.map((round) => (
-
+              rounds.map(round => (
                 <RoundItem
                   key={round.id}
                   round={round}
@@ -292,12 +269,12 @@ function RoundItem({
   const { currentOrganization } = useOrganization();
 
   const { data: matches = [], isLoading: loadingMatches } = useQuery<Match[]>({
-    queryKey: ["/api/rounds", round.id, "matches", currentOrganization?.id],
+    queryKey: ['/api/rounds', round.id, 'matches', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
       const res = await apiRequest(
         `/api/rounds/${round.id}/matches?organizationId=${currentOrganization.id}`,
-        "GET",
+        'GET'
       );
       return await res.json();
     },
@@ -306,46 +283,39 @@ function RoundItem({
 
   const deleteRoundMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(
-        `/api/rounds/${id}?tournamentId=${tournamentId}`,
-        "DELETE",
-      );
+      return await apiRequest(`/api/rounds/${id}?tournamentId=${tournamentId}`, 'DELETE');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/tournaments", tournamentId, "rounds"],
+        queryKey: ['/api/tournaments', tournamentId, 'rounds'],
       });
       toast({
-        title: "Success",
-        description: "Round deleted successfully",
-
+        title: 'Success',
+        description: 'Round deleted successfully',
       });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete round",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to delete round',
+        variant: 'destructive',
       });
     },
   });
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure? This will delete all matches in this round.")) {
-
+    if (confirm('Are you sure? This will delete all matches in this round.')) {
       await deleteRoundMutation.mutateAsync(id);
     }
   };
@@ -368,11 +338,7 @@ function RoundItem({
                 <ChevronRight className="h-4 w-4" />
               )}
             </Button>
-            <CardTitle
-              className="text-base truncate"
-              data-testid={`text-round-name-${round.id}`}
-            >
-
+            <CardTitle className="text-base truncate" data-testid={`text-round-name-${round.id}`}>
               {round.name}
             </CardTitle>
           </div>
@@ -419,12 +385,8 @@ function RoundItem({
             </div>
           ) : (
             <div className="space-y-3">
-              {matches.map((match) => (
-                <div
-                  key={match.id}
-                  className="flex items-center justify-between gap-3"
-                >
-
+              {matches.map(match => (
+                <div key={match.id} className="flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <Badge variant="outline">{match.teamA}</Badge>
@@ -436,32 +398,26 @@ function RoundItem({
                     {match.date && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>
-                          {formatDateSafe(
-                            match.date,
-                            "MMM d, yyyy h:mm a",
-                          )}
-                        </span>
-
+                        <span>{formatDateSafe(match.date, 'MMM d, yyyy h:mm a')}</span>
                       </div>
                     )}
                     {match.scoreA !== null && match.scoreB !== null && (
                       <Badge
                         variant="outline"
                         className={tweakcn(
-                          "border",
+                          'border',
                           match.scoreA! > match.scoreB!
-                            ? "text-green-500 border-green-500/20"
+                            ? 'text-green-500 border-green-500/20'
                             : match.scoreB! > match.scoreA!
-                              ? "text-blue-500 border-blue-500/20"
-                              : "text-gray-500 border-gray-500/20",
+                              ? 'text-blue-500 border-blue-500/20'
+                              : 'text-gray-500 border-gray-500/20'
                         )}
                       >
                         {match.scoreA! > match.scoreB!
                           ? match.teamA
                           : match.scoreB! > match.scoreA!
                             ? match.teamB
-                            : "draw"}
+                            : 'draw'}
                       </Badge>
                     )}
                   </div>
@@ -484,12 +440,12 @@ export default function TournamentsPage() {
   const { currentOrganization } = useOrganization();
 
   const { data: tournaments = [], isLoading } = useQuery<Tournament[]>({
-    queryKey: ["/api/tournaments", currentOrganization?.id],
+    queryKey: ['/api/tournaments', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
       const res = await apiRequest(
         `/api/tournaments?organizationId=${currentOrganization.id}`,
-        "GET",
+        'GET'
       );
       return await res.json();
     },
@@ -525,13 +481,10 @@ export default function TournamentsPage() {
           <Skeleton className="h-24" />
         </div>
       ) : tournaments.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground">
-          No tournaments found
-        </div>
+        <div className="text-center py-6 text-muted-foreground">No tournaments found</div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {tournaments.map((tournament) => (
-
+          {tournaments.map(tournament => (
             <TournamentCard
               key={tournament.id}
               tournament={tournament}
@@ -543,14 +496,11 @@ export default function TournamentsPage() {
         </div>
       )}
 
-      <TournamentDialog
-        open={isDialogOpen}
-        onOpenChange={setDialogOpen}
-      />
-      <RoundDialog 
-        open={isRoundDialogOpen} 
-        onOpenChange={setRoundDialogOpen} 
-        tournamentId={selectedTournamentId || ""}
+      <TournamentDialog open={isDialogOpen} onOpenChange={setDialogOpen} />
+      <RoundDialog
+        open={isRoundDialogOpen}
+        onOpenChange={setRoundDialogOpen}
+        tournamentId={selectedTournamentId || ''}
       />
     </div>
   );

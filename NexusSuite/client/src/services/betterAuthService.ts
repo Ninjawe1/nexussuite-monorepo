@@ -39,7 +39,14 @@ export async function refreshUser() {
 }
 
 class BetterAuthService {
-  private apiUrl = '/api/auth';
+  private apiUrl = (() => {
+    const base = (import.meta as any).env?.VITE_API_URL as string | undefined;
+    if (base) {
+      const b = String(base).replace(/\/$/, '');
+      return `${b}/api/auth`;
+    }
+    return '/api/auth';
+  })();
 
   /**
    * Login with email and password

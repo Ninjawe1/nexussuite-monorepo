@@ -34,7 +34,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import { formatDateSafe, toDateSafe } from '@/lib/date';
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 interface CampaignDialogProps {
   open: boolean;
@@ -93,8 +93,8 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
       return await apiRequest(`/api/campaigns?organizationId=${organization?.id}`, 'POST', {
-          ...data,
-          organizationId: organization?.id
+        ...data,
+        organizationId: organization?.id,
       });
     },
     onSuccess: () => {
@@ -128,7 +128,11 @@ export function CampaignDialog({ open, onOpenChange, campaign }: CampaignDialogP
 
   const updateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      return await apiRequest(`/api/campaigns/${campaign?.id}?organizationId=${organization?.id}`, 'PATCH', data);
+      return await apiRequest(
+        `/api/campaigns/${campaign?.id}?organizationId=${organization?.id}`,
+        'PATCH',
+        data
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/campaigns', organization?.id] });

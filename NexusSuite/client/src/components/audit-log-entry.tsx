@@ -1,8 +1,7 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "date-fns";
-import { toDateSafe, formatDateSafe } from "@/lib/date";
-
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
+import { toDateSafe, formatDateSafe } from '@/lib/date';
 
 interface AuditLogEntryProps {
   id: string;
@@ -12,8 +11,7 @@ interface AuditLogEntryProps {
   timestamp: unknown;
   oldValue?: string;
   newValue?: string;
-  actionType: "create" | "update" | "delete";
-
+  actionType: 'create' | 'update' | 'delete';
 }
 
 export function AuditLogEntry({
@@ -27,15 +25,15 @@ export function AuditLogEntry({
   actionType,
 }: AuditLogEntryProps) {
   const actionColors = {
-    create: "bg-chart-2 text-primary-foreground",
-    update: "bg-chart-4 text-primary-foreground",
-    delete: "bg-chart-5 text-primary-foreground",
+    create: 'bg-chart-2 text-primary-foreground',
+    update: 'bg-chart-4 text-primary-foreground',
+    delete: 'bg-chart-5 text-primary-foreground',
   };
 
   const initials = user
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
+    .split(' ')
+    .map(n => n[0])
+    .join('')
 
     .toUpperCase();
 
@@ -60,14 +58,8 @@ export function AuditLogEntry({
           <span className="text-xs text-muted-foreground shrink-0">
             {(() => {
               const d = toDateSafe(timestamp);
-              const absolute = formatDateSafe(
-                timestamp,
-                "MMM dd, yyyy HH:mm",
-                "—",
-              );
-              const relative = d
-                ? formatDistanceToNow(d, { addSuffix: true })
-                : "Unknown time";
+              const absolute = formatDateSafe(timestamp, 'MMM dd, yyyy HH:mm', '—');
+              const relative = d ? formatDistanceToNow(d, { addSuffix: true }) : 'Unknown time';
 
               return `${absolute} • ${relative}`;
             })()}

@@ -1,16 +1,15 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MoreVertical, Mail, Phone } from "lucide-react";
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MoreVertical, Mail, Phone } from 'lucide-react';
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
+} from '@/components/ui/dropdown-menu';
 
 interface StaffCardProps {
   id: string;
@@ -20,7 +19,7 @@ interface StaffCardProps {
   phone?: string;
   avatar?: string;
   permissions: string[];
-  status: "active" | "suspended";
+  status: 'active' | 'suspended';
 
   onEdit?: () => void;
   onDelete?: () => void;
@@ -41,17 +40,16 @@ export function StaffCard({
   onToggleStatus,
 }: StaffCardProps) {
   const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
+    .split(' ')
+    .map(n => n[0])
+    .join('')
     .toUpperCase();
   const roleColors: Record<string, string> = {
-    Owner: "bg-primary text-primary-foreground",
-    Admin: "bg-chart-3 text-primary-foreground",
-    Manager: "bg-chart-2 text-primary-foreground",
-    Staff: "bg-secondary text-secondary-foreground",
-    Player: "bg-accent text-accent-foreground",
-
+    Owner: 'bg-primary text-primary-foreground',
+    Admin: 'bg-chart-3 text-primary-foreground',
+    Manager: 'bg-chart-2 text-primary-foreground',
+    Staff: 'bg-secondary text-secondary-foreground',
+    Player: 'bg-accent text-accent-foreground',
   };
 
   return (
@@ -66,16 +64,10 @@ export function StaffCard({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3
-                className="font-semibold text-base truncate"
-                data-testid={`text-name-${id}`}
-              >
+              <h3 className="font-semibold text-base truncate" data-testid={`text-name-${id}`}>
                 {name}
               </h3>
-              <Badge
-                className={`${roleColors[role] || roleColors["Staff"]} text-xs mt-1`}
-              >
-
+              <Badge className={`${roleColors[role] || roleColors['Staff']} text-xs mt-1`}>
                 {role}
               </Badge>
               <div className="flex flex-col gap-1 mt-2">
@@ -94,25 +86,16 @@ export function StaffCard({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                data-testid={`button-menu-${id}`}
-              >
-
+              <Button variant="ghost" size="icon" data-testid={`button-menu-${id}`}>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={onEdit}
-                data-testid={`button-edit-${id}`}
-              >
+              <DropdownMenuItem onClick={onEdit} data-testid={`button-edit-${id}`}>
                 Edit Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onToggleStatus}>
-                {status === "active" ? "Suspend Account" : "Activate Account"}
-
+                {status === 'active' ? 'Suspend Account' : 'Activate Account'}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 Delete
@@ -125,11 +108,8 @@ export function StaffCard({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="font-medium">{permissions.length} modules</span>
           <span>•</span>
-          <span
-            className={status === "active" ? "text-chart-2" : "text-chart-5"}
-          >
-            {status === "active" ? "Active" : "Suspended"}
-
+          <span className={status === 'active' ? 'text-chart-2' : 'text-chart-5'}>
+            {status === 'active' ? 'Active' : 'Suspended'}
           </span>
         </div>
       </CardFooter>

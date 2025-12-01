@@ -3,8 +3,8 @@
  * Provides comprehensive admin tools for managing users, organizations, and system operations
  */
 
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 import {
   adminService,
@@ -12,20 +12,13 @@ import {
   OrganizationAnalytics,
   AuditLog,
   SupportTicket,
-} from "@/services/adminService";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-
+} from '@/services/adminService';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 import {
   Table,
@@ -34,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 import {
   Pagination,
@@ -44,7 +37,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 import {
   Users,
@@ -58,10 +51,9 @@ import {
   Settings,
   MessageSquare,
   Building,
-} from "lucide-react";
-import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminDashboardProps {
   className?: string;
@@ -78,7 +70,7 @@ interface SystemMetrics {
     revenue: number;
   };
   systemHealth: {
-    status: "healthy" | "degraded" | "down";
+    status: 'healthy' | 'degraded' | 'down';
 
     uptime: number;
     responseTime: number;
@@ -86,21 +78,14 @@ interface SystemMetrics {
   };
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  className = "",
-}) => {
-
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
   const { user, isSystemAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(
-    null,
-  );
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
   const [users, setUsers] = useState<UserAnalytics[]>([]);
-  const [organizations, setOrganizations] = useState<OrganizationAnalytics[]>(
-    [],
-  );
+  const [organizations, setOrganizations] = useState<OrganizationAnalytics[]>([]);
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
@@ -109,11 +94,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Search and filter states
-  const [userSearch, setUserSearch] = useState("");
-  const [orgSearch, setOrgSearch] = useState("");
-  const [logSearch, setLogSearch] = useState("");
-  const [ticketSearch, setTicketSearch] = useState("");
-
+  const [userSearch, setUserSearch] = useState('');
+  const [orgSearch, setOrgSearch] = useState('');
+  const [logSearch, setLogSearch] = useState('');
+  const [ticketSearch, setTicketSearch] = useState('');
 
   // Pagination states
   const [userPage, setUserPage] = useState(1);
@@ -136,12 +120,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const metrics = await adminService.getSystemMetrics();
       setSystemMetrics(metrics);
     } catch (error) {
-      console.error("Failed to load system metrics:", error);
+      console.error('Failed to load system metrics:', error);
       toast({
-        title: "Failed to load system metrics",
-        description: "Unable to retrieve system statistics",
-        variant: "destructive",
-
+        title: 'Failed to load system metrics',
+        description: 'Unable to retrieve system statistics',
+        variant: 'destructive',
       });
     }
   };
@@ -159,12 +142,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setUsers(result.users);
       setUserTotal(result.total);
     } catch (error) {
-      console.error("Failed to load users:", error);
+      console.error('Failed to load users:', error);
       toast({
-        title: "Failed to load users",
-        description: "Unable to retrieve user data",
-        variant: "destructive",
-
+        title: 'Failed to load users',
+        description: 'Unable to retrieve user data',
+        variant: 'destructive',
       });
     }
   };
@@ -182,12 +164,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setOrganizations(result.organizations);
       setOrgTotal(result.total);
     } catch (error) {
-      console.error("Failed to load organizations:", error);
+      console.error('Failed to load organizations:', error);
       toast({
-        title: "Failed to load organizations",
-        description: "Unable to retrieve organization data",
-        variant: "destructive",
-
+        title: 'Failed to load organizations',
+        description: 'Unable to retrieve organization data',
+        variant: 'destructive',
       });
     }
   };
@@ -205,12 +186,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setAuditLogs(result.logs);
       setLogTotal(result.total);
     } catch (error) {
-      console.error("Failed to load audit logs:", error);
+      console.error('Failed to load audit logs:', error);
       toast({
-        title: "Failed to load audit logs",
-        description: "Unable to retrieve audit logs",
-        variant: "destructive",
-
+        title: 'Failed to load audit logs',
+        description: 'Unable to retrieve audit logs',
+        variant: 'destructive',
       });
     }
   };
@@ -228,12 +208,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setSupportTickets(result.tickets);
       setTicketTotal(result.total);
     } catch (error) {
-      console.error("Failed to load support tickets:", error);
+      console.error('Failed to load support tickets:', error);
       toast({
-        title: "Failed to load support tickets",
-        description: "Unable to retrieve support tickets",
-        variant: "destructive",
-
+        title: 'Failed to load support tickets',
+        description: 'Unable to retrieve support tickets',
+        variant: 'destructive',
       });
     }
   };
@@ -253,9 +232,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setIsRefreshing(false);
 
     toast({
-      title: "Data refreshed",
-      description: "All admin data has been updated",
-
+      title: 'Data refreshed',
+      description: 'All admin data has been updated',
     });
   };
 
@@ -264,23 +242,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
    */
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "active":
-      case "open":
-      case "healthy":
-        return "default";
-      case "suspended":
-      case "in_progress":
-      case "degraded":
-        return "secondary";
-      case "canceled":
-      case "closed":
-      case "down":
-        return "outline";
-      case "resolved":
-        return "success";
+      case 'active':
+      case 'open':
+      case 'healthy':
+        return 'default';
+      case 'suspended':
+      case 'in_progress':
+      case 'degraded':
+        return 'secondary';
+      case 'canceled':
+      case 'closed':
+      case 'down':
+        return 'outline';
+      case 'resolved':
+        return 'success';
       default:
-        return "secondary";
-
+        return 'secondary';
     }
   };
 
@@ -289,16 +266,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
    */
   const getPriorityBadgeVariant = (priority: string) => {
     switch (priority) {
-      case "urgent":
-      case "high":
-        return "destructive";
-      case "medium":
-        return "secondary";
-      case "low":
-        return "outline";
+      case 'urgent':
+      case 'high':
+        return 'destructive';
+      case 'medium':
+        return 'secondary';
+      case 'low':
+        return 'outline';
       default:
-        return "secondary";
-
+        return 'secondary';
     }
   };
 
@@ -330,8 +306,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const renderPagination = (
     currentPage: number,
     totalPages: number,
-    onPageChange: (page: number) => void,
-
+    onPageChange: (page: number) => void
   ) => {
     if (totalPages <= 1) return null;
 
@@ -341,38 +316,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <PaginationItem>
             <PaginationPrevious
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
-
+              className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
             />
           </PaginationItem>
 
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const page =
-              Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+            const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
             return (
               <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => onPageChange(page)}
-                  isActive={page === currentPage}
-                >
-
+                <PaginationLink onClick={() => onPageChange(page)} isActive={page === currentPage}>
                   {page}
                 </PaginationLink>
               </PaginationItem>
             );
           })}
 
-          {totalPages > 5 && currentPage < totalPages - 2 && (
-            <PaginationEllipsis />
-          )}
+          {totalPages > 5 && currentPage < totalPages - 2 && <PaginationEllipsis />}
 
           <PaginationItem>
             <PaginationNext
-              onClick={() =>
-                onPageChange(Math.min(totalPages, currentPage + 1))
-              }
-              className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
-
+              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+              className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}
             />
           </PaginationItem>
         </PaginationContent>
@@ -382,12 +346,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   useEffect(() => {
     if (!isSystemAdmin()) {
-      navigate("/dashboard");
+      navigate('/dashboard');
       toast({
-        title: "Access denied",
-        description: "Admin access required",
-        variant: "destructive",
-
+        title: 'Access denied',
+        description: 'Admin access required',
+        variant: 'destructive',
       });
       return;
     }
@@ -423,22 +386,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <p className="text-muted-foreground">
-                System administration and monitoring
-              </p>
+              <p className="text-muted-foreground">System administration and monitoring</p>
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               <Button variant="outline" size="sm">
@@ -456,9 +409,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Users
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
 
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -472,9 +423,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Organizations
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Organizations</CardTitle>
 
                 <Building2 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -488,9 +437,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Active Subscriptions
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Active Subscriptions</CardTitle>
 
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -500,9 +447,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {(
-                    (systemMetrics.activeSubscriptions /
-                      systemMetrics.totalOrganizations) *
-
+                    (systemMetrics.activeSubscriptions / systemMetrics.totalOrganizations) *
                     100
                   ).toFixed(1)}
                   % conversion rate
@@ -512,9 +457,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Monthly Revenue
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
 
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -544,10 +487,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>User Management</CardTitle>
-                    <CardDescription>
-                      View and manage all platform users
-                    </CardDescription>
-
+                    <CardDescription>View and manage all platform users</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="relative">
@@ -555,8 +495,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <Input
                         placeholder="Search users..."
                         value={userSearch}
-                        onChange={(e) => setUserSearch(e.target.value)}
-
+                        onChange={e => setUserSearch(e.target.value)}
                         className="pl-8 w-64"
                       />
                     </div>
@@ -576,11 +515,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
+                    {users.map(user => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          {user.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{user.name}</TableCell>
 
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
@@ -596,9 +533,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </TableCell>
                         <TableCell>
                           {user.lastLoginAt
-                            ? format(new Date(user.lastLoginAt), "MMM dd, yyyy")
-                            : "Never"}
-
+                            ? format(new Date(user.lastLoginAt), 'MMM dd, yyyy')
+                            : 'Never'}
                         </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -611,12 +547,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </Table>
 
                 <div className="mt-4">
-                  {renderPagination(
-                    userPage,
-                    Math.ceil(userTotal / itemsPerPage),
-                    setUserPage,
-                  )}
-
+                  {renderPagination(userPage, Math.ceil(userTotal / itemsPerPage), setUserPage)}
                 </div>
               </CardContent>
             </Card>
@@ -629,18 +560,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Organization Management</CardTitle>
-                    <CardDescription>
-                      View and manage all organizations
-                    </CardDescription>
-
+                    <CardDescription>View and manage all organizations</CardDescription>
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search organizations..."
                       value={orgSearch}
-                      onChange={(e) => setOrgSearch(e.target.value)}
-
+                      onChange={e => setOrgSearch(e.target.value)}
                       className="pl-8 w-64"
                     />
                   </div>
@@ -660,11 +587,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {organizations.map((org) => (
+                    {organizations.map(org => (
                       <TableRow key={org.id}>
-                        <TableCell className="font-medium">
-                          {org.name}
-                        </TableCell>
+                        <TableCell className="font-medium">{org.name}</TableCell>
 
                         <TableCell>{org.owner.email}</TableCell>
                         <TableCell>
@@ -675,22 +600,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </TableCell>
                         <TableCell>
                           {org.subscription ? (
-                            <Badge variant="outline">
-                              {org.subscription.plan}
-                            </Badge>
-
+                            <Badge variant="outline">{org.subscription.plan}</Badge>
                           ) : (
                             <Badge variant="secondary">Free</Badge>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getStatusBadgeVariant("active") as any}>
-                            Active
-                          </Badge>
+                          <Badge variant={getStatusBadgeVariant('active') as any}>Active</Badge>
                         </TableCell>
-                        <TableCell>
-                          {format(new Date(org.createdAt), "MMM dd, yyyy")}
-                        </TableCell>    
+                        <TableCell>{format(new Date(org.createdAt), 'MMM dd, yyyy')}</TableCell>
 
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -703,12 +621,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </Table>
 
                 <div className="mt-4">
-                  {renderPagination(
-                    orgPage,
-                    Math.ceil(orgTotal / itemsPerPage),
-                    setOrgPage,
-                  )}
-
+                  {renderPagination(orgPage, Math.ceil(orgTotal / itemsPerPage), setOrgPage)}
                 </div>
               </CardContent>
             </Card>
@@ -721,18 +634,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Audit Logs</CardTitle>
-                    <CardDescription>
-                      System activity and security events
-                    </CardDescription>
-
+                    <CardDescription>System activity and security events</CardDescription>
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search logs..."
                       value={logSearch}
-                      onChange={(e) => setLogSearch(e.target.value)}
-
+                      onChange={e => setLogSearch(e.target.value)}
                       className="pl-8 w-64"
                     />
                   </div>
@@ -751,37 +660,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {auditLogs.map((log) => (
+                    {auditLogs.map(log => (
                       <TableRow key={log.id}>
                         <TableCell>
-                          {format(
-                            new Date(log.createdAt),
-                            "MMM dd, yyyy HH:mm",
-                          )}
-
+                          {format(new Date(log.createdAt), 'MMM dd, yyyy HH:mm')}
                         </TableCell>
                         <TableCell>{log.userEmail}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{log.action}</Badge>
                         </TableCell>
                         <TableCell>{log.resource}</TableCell>
-                        <TableCell>{log.organizationName || "-"}</TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {log.ipAddress}
-                        </TableCell>
-
+                        <TableCell>{log.organizationName || '-'}</TableCell>
+                        <TableCell className="font-mono text-xs">{log.ipAddress}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
 
                 <div className="mt-4">
-                  {renderPagination(
-                    logPage,
-                    Math.ceil(logTotal / itemsPerPage),
-                    setLogPage,
-                  )}
-
+                  {renderPagination(logPage, Math.ceil(logTotal / itemsPerPage), setLogPage)}
                 </div>
               </CardContent>
             </Card>
@@ -794,18 +691,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Support Tickets</CardTitle>
-                    <CardDescription>
-                      User support requests and issues
-                    </CardDescription>
-
+                    <CardDescription>User support requests and issues</CardDescription>
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search tickets..."
                       value={ticketSearch}
-                      onChange={(e) => setTicketSearch(e.target.value)}
-
+                      onChange={e => setTicketSearch(e.target.value)}
                       className="pl-8 w-64"
                     />
                   </div>
@@ -826,16 +719,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {supportTickets.map((ticket) => (
+                    {supportTickets.map(ticket => (
                       <TableRow key={ticket.id}>
-                        <TableCell className="font-mono text-xs">
-                          {ticket.id}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {ticket.subject}
-                        </TableCell>
+                        <TableCell className="font-mono text-xs">{ticket.id}</TableCell>
+                        <TableCell className="font-medium">{ticket.subject}</TableCell>
                         <TableCell>{ticket.userEmail}</TableCell>
-                        <TableCell>{ticket.organizationName || "-"}</TableCell>
+                        <TableCell>{ticket.organizationName || '-'}</TableCell>
 
                         <TableCell>
                           <Badge variant={getStatusBadgeVariant(ticket.status) as any}>
@@ -843,15 +732,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant={getPriorityBadgeVariant(ticket.priority) as any}
-                          >
+                          <Badge variant={getPriorityBadgeVariant(ticket.priority) as any}>
                             {ticket.priority}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          {format(new Date(ticket.createdAt), "MMM dd, yyyy")}
-                        </TableCell>
+                        <TableCell>{format(new Date(ticket.createdAt), 'MMM dd, yyyy')}</TableCell>
 
                         <TableCell>
                           <Button variant="ghost" size="sm">
@@ -867,8 +752,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {renderPagination(
                     ticketPage,
                     Math.ceil(ticketTotal / itemsPerPage),
-                    setTicketPage,
-
+                    setTicketPage
                   )}
                 </div>
               </CardContent>

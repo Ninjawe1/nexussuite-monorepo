@@ -1,6 +1,6 @@
-import { AuditLogEntry } from "@/components/audit-log-entry";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { AuditLogEntry } from '@/components/audit-log-entry';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 import {
   Select,
@@ -8,32 +8,32 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Search } from "lucide-react";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { AuditLog } from "@shared/schema";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useOrganization } from "@/contexts/OrganizationContext";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import type { AuditLog } from '@shared/schema';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Audit() {
-  const [filter, setFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { currentOrganization: organization } = useOrganization();
 
   const { data: auditLogs = [], isLoading } = useQuery<AuditLog[]>({
-    queryKey: ["/api/audit-logs", organization?.id],
+    queryKey: ['/api/audit-logs', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
-      const res = await apiRequest(`/api/audit-logs?organizationId=${organization.id}`, "GET");
+      const res = await apiRequest(`/api/audit-logs?organizationId=${organization.id}`, 'GET');
       return res as any;
     },
     enabled: !!organization?.id,
   });
 
-  const filteredLogs = auditLogs.filter((log) => {
-    const matchesFilter = filter === "all" || log.actionType === filter;
+  const filteredLogs = auditLogs.filter(log => {
+    const matchesFilter = filter === 'all' || log.actionType === filter;
 
     const matchesSearch =
       !searchQuery ||
@@ -46,16 +46,10 @@ export default function Audit() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1
-          className="text-3xl font-heading font-bold mb-1"
-          data-testid="text-audit-title"
-        >
+        <h1 className="text-3xl font-heading font-bold mb-1" data-testid="text-audit-title">
           Audit Log
         </h1>
-        <p className="text-muted-foreground">
-          Complete history of all system actions and changes
-        </p>
-
+        <p className="text-muted-foreground">Complete history of all system actions and changes</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -65,17 +59,12 @@ export default function Audit() {
             placeholder="Search audit logs..."
             className="pl-9"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-
+            onChange={e => setSearchQuery(e.target.value)}
             data-testid="input-search-audit"
           />
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger
-            className="w-full sm:w-48"
-            data-testid="select-action-filter"
-          >
-
+          <SelectTrigger className="w-full sm:w-48" data-testid="select-action-filter">
             <SelectValue placeholder="Filter by action" />
           </SelectTrigger>
           <SelectContent>
@@ -89,28 +78,23 @@ export default function Audit() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-heading">
-            Activity History
-          </CardTitle>
-
+          <CardTitle className="text-lg font-heading">Activity History</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {isLoading ? (
             <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-
+              {[1, 2, 3, 4, 5].map(i => (
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchQuery || filter !== "all"
-                ? "No audit logs match your filters."
-                : "No audit logs yet. Actions will be tracked here."}
+              {searchQuery || filter !== 'all'
+                ? 'No audit logs match your filters.'
+                : 'No audit logs yet. Actions will be tracked here.'}
             </div>
           ) : (
-            filteredLogs.map((log) => (
-
+            filteredLogs.map(log => (
               <AuditLogEntry
                 key={log.id}
                 id={log.id}
@@ -120,8 +104,7 @@ export default function Audit() {
                 timestamp={log.timestamp ?? (log as any).createdAt}
                 oldValue={log.oldValue || undefined}
                 newValue={log.newValue || undefined}
-                actionType={log.actionType as "create" | "update" | "delete"}
-
+                actionType={log.actionType as 'create' | 'update' | 'delete'}
               />
             ))
           )}

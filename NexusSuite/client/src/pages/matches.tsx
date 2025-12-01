@@ -1,34 +1,27 @@
-import { MatchCard } from "@/components/match-card";
-import { MatchDialog } from "@/components/match-dialog";
-import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  List,
-  Calendar as CalendarIcon,
-  Edit,
-  Trash2,
-  MoreHorizontal,
-} from "lucide-react";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import type { Match as MatchType } from "@shared/schema";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MatchCard } from '@/components/match-card';
+import { MatchDialog } from '@/components/match-dialog';
+import { Button } from '@/components/ui/button';
+import { Plus, List, Calendar as CalendarIcon, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import type { Match as MatchType } from '@shared/schema';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function Matches() {
-  const [view, setView] = useState<"list" | "calendar">("list");
+  const [view, setView] = useState<'list' | 'calendar'>('list');
   const { currentOrganization } = useOrganization();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,10 +30,10 @@ export default function Matches() {
   const queryClient = useQueryClient();
 
   const { data: matches = [], isLoading } = useQuery<MatchType[]>({
-    queryKey: ["/api/matches", currentOrganization?.id],
+    queryKey: ['/api/matches', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(`/api/matches?organizationId=${currentOrganization.id}`, "GET");
+      const res = await apiRequest(`/api/matches?organizationId=${currentOrganization.id}`, 'GET');
       return await res.json();
     },
     enabled: !!currentOrganization?.id,
@@ -48,34 +41,31 @@ export default function Matches() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/matches/${id}`, "DELETE");
+      return await apiRequest(`/api/matches/${id}`, 'DELETE');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/matches'] });
       toast({
-        title: "Success",
-        description: "Match deleted successfully",
-
+        title: 'Success',
+        description: 'Match deleted successfully',
       });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete match",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to delete match',
+        variant: 'destructive',
       });
     },
   });
@@ -91,8 +81,7 @@ export default function Matches() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this match?")) {
-
+    if (confirm('Are you sure you want to delete this match?')) {
       await deleteMutation.mutateAsync(id);
     }
   };
@@ -101,11 +90,7 @@ export default function Matches() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1
-            className="text-3xl font-heading font-bold mb-1"
-            data-testid="text-matches-title"
-          >
-
+          <h1 className="text-3xl font-heading font-bold mb-1" data-testid="text-matches-title">
             Matches & Tournaments
           </h1>
           <p className="text-muted-foreground">
@@ -118,11 +103,7 @@ export default function Matches() {
         </Button>
       </div>
 
-      <Tabs
-        value={view}
-        onValueChange={(v) => setView(v as "list" | "calendar")}
-      >
-
+      <Tabs value={view} onValueChange={v => setView(v as 'list' | 'calendar')}>
         <TabsList>
           <TabsTrigger value="list" data-testid="tab-list-view">
             <List className="w-4 h-4 mr-2" />
@@ -137,8 +118,7 @@ export default function Matches() {
         <TabsContent value="list" className="mt-6">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-
+              {[1, 2, 3, 4, 5, 6].map(i => (
                 <Skeleton key={i} className="h-48" />
               ))}
             </div>
@@ -148,16 +128,14 @@ export default function Matches() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {matches.map((match) => (
-
+              {matches.map(match => (
                 <div key={match.id} className="relative group">
                   <MatchCard
                     {...match}
                     date={match.date}
                     scoreA={match.scoreA ?? undefined}
                     scoreB={match.scoreB ?? undefined}
-                    status={match.status as "upcoming" | "live" | "completed"}
-
+                    status={match.status as 'upcoming' | 'live' | 'completed'}
                   />
                   <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <DropdownMenu>
@@ -205,8 +183,7 @@ export default function Matches() {
               </p>
               <Button
                 variant="outline"
-                onClick={() => setView("list")}
-
+                onClick={() => setView('list')}
                 data-testid="button-switch-to-list"
               >
                 Switch to List View
@@ -216,12 +193,7 @@ export default function Matches() {
         </TabsContent>
       </Tabs>
 
-      <MatchDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        match={selectedMatch}
-      />
-
+      <MatchDialog open={dialogOpen} onOpenChange={setDialogOpen} match={selectedMatch} />
     </div>
   );
 }

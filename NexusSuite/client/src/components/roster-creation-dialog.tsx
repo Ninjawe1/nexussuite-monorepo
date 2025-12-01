@@ -1,7 +1,7 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import {
   Dialog,
@@ -10,8 +10,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 import {
   Form,
@@ -21,8 +21,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 import {
   Select,
@@ -30,36 +30,31 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { CreateRosterData } from "@/services/rosterService";
-import { GAME_OPTIONS } from "@/constants/games";
-
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { CreateRosterData } from '@/services/rosterService';
+import { GAME_OPTIONS } from '@/constants/games';
 
 const rosterFormSchema = z.object({
   name: z
     .string()
-    .min(3, "Roster name must be at least 3 characters")
-    .max(50, "Roster name must not exceed 50 characters")
+    .min(3, 'Roster name must be at least 3 characters')
+    .max(50, 'Roster name must not exceed 50 characters')
     .regex(
       /^[a-zA-Z0-9\s-_]+$/,
-      "Roster name can only contain letters, numbers, spaces, hyphens, and underscores",
+      'Roster name can only contain letters, numbers, spaces, hyphens, and underscores'
     ),
-  description: z
-    .string()
-    .max(200, "Description must not exceed 200 characters")
-    .optional(),
+  description: z.string().max(200, 'Description must not exceed 200 characters').optional(),
   game: z.enum(GAME_OPTIONS, {
-    errorMap: () => ({ message: "Please select a game" }),
+    errorMap: () => ({ message: 'Please select a game' }),
   }),
-  type: z.enum(["International competitive", "Local Competitive", "Academy"], {
-    errorMap: () => ({ message: "Please select a valid roster type" }),
+  type: z.enum(['International competitive', 'Local Competitive', 'Academy'], {
+    errorMap: () => ({ message: 'Please select a valid roster type' }),
   }),
   maxPlayers: z
     .number()
-    .min(1, "Maximum players must be at least 1")
-    .max(12, "Maximum players must not exceed 12"),
-
+    .min(1, 'Maximum players must be at least 1')
+    .max(12, 'Maximum players must not exceed 12'),
 });
 
 type RosterFormValues = z.infer<typeof rosterFormSchema>;
@@ -75,20 +70,19 @@ interface RosterCreationDialogProps {
 
 const rosterTypes = [
   {
-    value: "International competitive",
-    label: "International competitive",
-    description: "Teams for international tournaments",
+    value: 'International competitive',
+    label: 'International competitive',
+    description: 'Teams for international tournaments',
   },
   {
-    value: "Local Competitive",
-    label: "Local Competitive",
-    description: "Teams for local/regional competitions",
+    value: 'Local Competitive',
+    label: 'Local Competitive',
+    description: 'Teams for local/regional competitions',
   },
   {
-    value: "Academy",
-    label: "Academy",
-    description: "Development/feeder teams",
-
+    value: 'Academy',
+    label: 'Academy',
+    description: 'Development/feeder teams',
   },
 ];
 
@@ -103,10 +97,10 @@ export function RosterCreationDialog({
   const form = useForm<RosterFormValues>({
     resolver: zodResolver(rosterFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      game: "Valorant",
-      type: "International competitive",
+      name: '',
+      description: '',
+      game: 'Valorant',
+      type: 'International competitive',
 
       maxPlayers: 5,
     },
@@ -124,8 +118,7 @@ export function RosterCreationDialog({
       onOpenChange(false);
     } catch (error) {
       // Error handling is done in the parent component
-      console.error("Error creating roster:", error);
-
+      console.error('Error creating roster:', error);
     }
   };
 
@@ -142,18 +135,12 @@ export function RosterCreationDialog({
         <DialogHeader>
           <DialogTitle>Create New Roster</DialogTitle>
           <DialogDescription>
-            Set up a new roster for your team. Fill in the details below to get
-            started.
-
+            Set up a new roster for your team. Fill in the details below to get started.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
-
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -190,9 +177,7 @@ export function RosterCreationDialog({
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide additional context about this roster (max 200
-                    characters)
-
+                    Provide additional context about this roster (max 200 characters)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -205,29 +190,21 @@ export function RosterCreationDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Game</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={isLoading}
-                  >
-
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoading}>
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Choose a game" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {GAME_OPTIONS.map((g) => (
-
+                      {GAME_OPTIONS.map(g => (
                         <SelectItem key={g} value={g}>
                           {g}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Select the game this roster is for.
-                  </FormDescription>
+                  <FormDescription>Select the game this roster is for.</FormDescription>
 
                   <FormMessage />
                 </FormItem>
@@ -241,27 +218,21 @@ export function RosterCreationDialog({
                 <FormItem>
                   <FormLabel>Roster Type</FormLabel>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {rosterTypes.map((type) => (
+                    {rosterTypes.map(type => (
                       <button
                         key={type.value}
                         type="button"
-                        className={`rounded-md border p-3 text-left transition ${field.value === type.value ? "border-primary bg-primary/10" : "hover:bg-muted"}`}
-
+                        className={`rounded-md border p-3 text-left transition ${field.value === type.value ? 'border-primary bg-primary/10' : 'hover:bg-muted'}`}
                         onClick={() => field.onChange(type.value)}
                         disabled={isLoading}
                       >
                         <div className="font-medium">{type.label}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {type.description}
-                        </div>
-
+                        <div className="text-xs text-muted-foreground">{type.description}</div>
                       </button>
                     ))}
                   </div>
                   <FormDescription>
-                    Choose between International competitive, Local Competitive,
-                    or Academy
-
+                    Choose between International competitive, Local Competitive, or Academy
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -278,9 +249,7 @@ export function RosterCreationDialog({
                     <Input type="number" min={1} max={12} {...field} />
                   </FormControl>
                   <FormDescription>
-                    Default is 5. Adjust to limit how many players can be
-                    assigned.
-
+                    Default is 5. Adjust to limit how many players can be assigned.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -303,8 +272,7 @@ export function RosterCreationDialog({
                     Creating...
                   </>
                 ) : (
-                  "Create Roster"
-
+                  'Create Roster'
                 )}
               </Button>
             </DialogFooter>

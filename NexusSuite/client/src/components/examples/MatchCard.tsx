@@ -1,5 +1,4 @@
-import { MatchCard } from "../match-card";
-
+import { MatchCard } from '../match-card';
 
 export default function MatchCardExample() {
   return (
@@ -10,8 +9,7 @@ export default function MatchCardExample() {
         teamB="Team Phoenix"
         scoreA={2}
         scoreB={1}
-        date={new Date("2024-10-08T18:00:00")}
-
+        date={new Date('2024-10-08T18:00:00')}
         tournament="VCT Champions"
         game="Valorant"
         venue="Online"
@@ -21,8 +19,7 @@ export default function MatchCardExample() {
         id="2"
         teamA="Nexus League"
         teamB="Storm Esports"
-        date={new Date("2024-10-12T20:00:00")}
-
+        date={new Date('2024-10-12T20:00:00')}
         tournament="LCS Summer Split"
         game="League of Legends"
         venue="LA Studio"
@@ -34,8 +31,7 @@ export default function MatchCardExample() {
         teamB="Elite Squad"
         scoreA={3}
         scoreB={3}
-        date={new Date("2024-10-11T16:00:00")}
-
+        date={new Date('2024-10-11T16:00:00')}
         tournament="PGC Qualifiers"
         game="PUBG"
         status="live"

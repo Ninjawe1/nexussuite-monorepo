@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { insertWalletSchema, type InsertWallet } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { insertWalletSchema, type InsertWallet } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 import {
   Dialog,
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 import {
   Form,
@@ -24,9 +24,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 
 import {
   Select,
@@ -34,8 +34,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-
+} from '@/components/ui/select';
 
 export function WalletDialog() {
   const { toast } = useToast();
@@ -44,10 +43,10 @@ export function WalletDialog() {
   const form = useForm<InsertWallet>({
     resolver: zodResolver(insertWalletSchema.omit({ tenantId: true })),
     defaultValues: {
-      name: "",
-      type: "cash",
-      currency: "usd",
-      balance: "0",
+      name: '',
+      type: 'cash',
+      currency: 'usd',
+      balance: '0',
 
       isDefault: false,
     },
@@ -55,26 +54,24 @@ export function WalletDialog() {
 
   const createWalletMutation = useMutation({
     mutationFn: async (data: InsertWallet) => {
-      return apiRequest("/api/wallets", "POST", data);
+      return apiRequest('/api/wallets', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
-      toast({ title: "Wallet created successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallets'] });
+      toast({ title: 'Wallet created successfully' });
 
       setIsOpen(false);
       form.reset();
     },
     onError: () => {
-      toast({ title: "Failed to create wallet", variant: "destructive" });
-
+      toast({ title: 'Failed to create wallet', variant: 'destructive' });
     },
   });
 
   const onSubmit = (data: InsertWallet) => {
     const payload: InsertWallet = {
       ...data,
-      balance: data.balance?.toString() || "0",
-
+      balance: data.balance?.toString() || '0',
     };
     createWalletMutation.mutate(payload);
   };
@@ -102,12 +99,7 @@ export function WalletDialog() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Main Wallet"
-                      data-testid="input-wallet-name"
-                    />
-
+                    <Input {...field} placeholder="Main Wallet" data-testid="input-wallet-name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

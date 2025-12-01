@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 import {
   insertMatchSchema,
@@ -10,8 +10,8 @@ import {
   type Match,
   type Tournament,
   type TournamentRound,
-} from "@shared/schema";
-import { z } from "zod";
+} from '@shared/schema';
+import { z } from 'zod';
 
 import {
   Dialog,
@@ -19,7 +19,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 import {
   Form,
@@ -28,7 +28,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 import {
   Select,
@@ -36,14 +36,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import { toDateSafe } from "@/lib/date";
-
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import { toDateSafe } from '@/lib/date';
 
 interface MatchDialogProps {
   open: boolean;
@@ -55,27 +54,24 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTournamentId, setSelectedTournamentId] = useState<
-    string | undefined
-  >(match?.tournamentId || undefined);
+  const [selectedTournamentId, setSelectedTournamentId] = useState<string | undefined>(
+    match?.tournamentId || undefined
+  );
 
   const { data: tournaments = [] } = useQuery<Tournament[]>({
-    queryKey: ["/api/tournaments"],
+    queryKey: ['/api/tournaments'],
 
     enabled: open,
   });
 
   const { data: rounds = [] } = useQuery<TournamentRound[]>({
-    queryKey: ["/api/tournaments", selectedTournamentId, "rounds"],
+    queryKey: ['/api/tournaments', selectedTournamentId, 'rounds'],
 
     enabled: open && !!selectedTournamentId,
   });
 
   const formSchema = insertMatchSchema.omit({ tenantId: true }).extend({
-    date: insertMatchSchema.shape.date.or(
-      z.string().transform((val) => new Date(val)),
-    ),
-
+    date: insertMatchSchema.shape.date.or(z.string().transform(val => new Date(val))),
   });
 
   const form = useForm({
@@ -83,8 +79,8 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     defaultValues: {
       tournamentId: match?.tournamentId || undefined,
       roundId: match?.roundId || undefined,
-      teamA: match?.teamA || "",
-      teamB: match?.teamB || "",
+      teamA: match?.teamA || '',
+      teamB: match?.teamB || '',
 
       scoreA: match?.scoreA || undefined,
       scoreB: match?.scoreB || undefined,
@@ -92,12 +88,11 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         ? (toDateSafe(match.date)?.toISOString().slice(0, 16) ??
           new Date().toISOString().slice(0, 16))
         : new Date().toISOString().slice(0, 16),
-      tournament: match?.tournament || "",
-      game: match?.game || "",
-      venue: match?.venue || "",
-      status: match?.status || "upcoming",
-      notes: match?.notes || "",
-
+      tournament: match?.tournament || '',
+      game: match?.game || '',
+      venue: match?.venue || '',
+      status: match?.status || 'upcoming',
+      notes: match?.notes || '',
     },
   });
 
@@ -108,8 +103,8 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
         form.reset({
           tournamentId: match.tournamentId || undefined,
           roundId: match.roundId || undefined,
-          teamA: match.teamA || "",
-          teamB: match.teamB || "",
+          teamA: match.teamA || '',
+          teamB: match.teamB || '',
 
           scoreA: match.scoreA || undefined,
           scoreB: match.scoreB || undefined,
@@ -117,44 +112,41 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
             ? (toDateSafe(match.date)?.toISOString().slice(0, 16) ??
               new Date().toISOString().slice(0, 16))
             : new Date().toISOString().slice(0, 16),
-          tournament: match.tournament || "",
-          game: match.game || "",
-          venue: match.venue || "",
-          status: match.status || "upcoming",
-          notes: match.notes || "",
-
+          tournament: match.tournament || '',
+          game: match.game || '',
+          venue: match.venue || '',
+          status: match.status || 'upcoming',
+          notes: match.notes || '',
         });
       } else {
         setSelectedTournamentId(undefined);
         form.reset({
           tournamentId: undefined,
           roundId: undefined,
-          teamA: "",
-          teamB: "",
+          teamA: '',
+          teamB: '',
           scoreA: undefined,
           scoreB: undefined,
           date: new Date().toISOString().slice(0, 16),
-          tournament: "",
-          game: "",
-          venue: "",
-          status: "upcoming",
-          notes: "",
-
+          tournament: '',
+          game: '',
+          venue: '',
+          status: 'upcoming',
+          notes: '',
         });
       }
     }
   }, [match, open, form]);
 
   const createMutation = useMutation({
-    mutationFn: async (data: Omit<InsertMatch, "tenantId">) => {
-      return await apiRequest("/api/matches", "POST", data);
+    mutationFn: async (data: Omit<InsertMatch, 'tenantId'>) => {
+      return await apiRequest('/api/matches', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/matches'] });
       toast({
-        title: "Success",
-        description: "Match added successfully",
-
+        title: 'Success',
+        description: 'Match added successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -162,35 +154,32 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to add match",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to add match',
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Omit<InsertMatch, "tenantId">) => {
-      return await apiRequest(`/api/matches/${match?.id}`, "PATCH", data);
+    mutationFn: async (data: Omit<InsertMatch, 'tenantId'>) => {
+      return await apiRequest(`/api/matches/${match?.id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matches"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/matches'] });
       toast({
-        title: "Success",
-        description: "Match updated successfully",
-
+        title: 'Success',
+        description: 'Match updated successfully',
       });
       onOpenChange(false);
       form.reset();
@@ -198,21 +187,19 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update match",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to update match',
+        variant: 'destructive',
       });
     },
   });
@@ -224,10 +211,9 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
       const parsedDate = toDateSafe(data.date);
       if (!parsedDate) {
         toast({
-          title: "Invalid date",
-          description: "Please enter a valid match date (YYYY-MM-DD or ISO).",
-          variant: "destructive",
-
+          title: 'Invalid date',
+          description: 'Please enter a valid match date (YYYY-MM-DD or ISO).',
+          variant: 'destructive',
         });
         return;
       }
@@ -250,12 +236,9 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]" data-testid="dialog-match">
         <DialogHeader>
-          <DialogTitle>{match ? "Edit Match" : "Add Match"}</DialogTitle>
+          <DialogTitle>{match ? 'Edit Match' : 'Add Match'}</DialogTitle>
           <DialogDescription>
-            {match
-              ? "Update the match details below"
-              : "Schedule a new match or tournament"}
-
+            {match ? 'Update the match details below' : 'Schedule a new match or tournament'}
           </DialogDescription>
         </DialogHeader>
 
@@ -269,15 +252,12 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                   <FormItem>
                     <FormLabel>Tournament (Optional)</FormLabel>
                     <Select
-                      onValueChange={(value) => {
-                        field.onChange(value === "none" ? undefined : value);
-                        setSelectedTournamentId(
-                          value === "none" ? undefined : value,
-                        );
-                        form.setValue("roundId", undefined);
+                      onValueChange={value => {
+                        field.onChange(value === 'none' ? undefined : value);
+                        setSelectedTournamentId(value === 'none' ? undefined : value);
+                        form.setValue('roundId', undefined);
                       }}
-                      value={field.value || "none"}
-
+                      value={field.value || 'none'}
                     >
                       <FormControl>
                         <SelectTrigger data-testid="select-match-tournament">
@@ -285,11 +265,8 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">
-                          None (Standalone Match)
-                        </SelectItem>
-                        {tournaments.map((tournament) => (
-
+                        <SelectItem value="none">None (Standalone Match)</SelectItem>
+                        {tournaments.map(tournament => (
                           <SelectItem key={tournament.id} value={tournament.id}>
                             {tournament.name}
                           </SelectItem>
@@ -308,29 +285,22 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                   <FormItem>
                     <FormLabel>Round (Optional)</FormLabel>
                     <Select
-                      onValueChange={(value) =>
-                        field.onChange(value === "none" ? undefined : value)
-                      }
-                      value={field.value || "none"}
-
+                      onValueChange={value => field.onChange(value === 'none' ? undefined : value)}
+                      value={field.value || 'none'}
                       disabled={!selectedTournamentId}
                     >
                       <FormControl>
                         <SelectTrigger data-testid="select-match-round">
                           <SelectValue
                             placeholder={
-                              selectedTournamentId
-                                ? "Select round"
-                                : "Select tournament first"
-
+                              selectedTournamentId ? 'Select round' : 'Select tournament first'
                             }
                           />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
-                        {rounds.map((round) => (
-
+                        {rounds.map(round => (
                           <SelectItem key={round.id} value={round.id}>
                             {round.name}
                           </SelectItem>
@@ -393,14 +363,9 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         type="number"
                         placeholder="2"
                         {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              ? parseInt(e.target.value)
-                              : undefined,
-                          )
-
+                        value={field.value ?? ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                         }
                         data-testid="input-match-scoreA"
                       />
@@ -421,14 +386,9 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                         type="number"
                         placeholder="1"
                         {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              ? parseInt(e.target.value)
-                              : undefined,
-                          )
-
+                        value={field.value ?? ''}
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                         }
                         data-testid="input-match-scoreB"
                       />
@@ -485,12 +445,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                   <FormItem>
                     <FormLabel>Date & Time</FormLabel>
                     <FormControl>
-                      <Input
-                        type="datetime-local"
-                        {...field}
-                        data-testid="input-match-date"
-                      />
-
+                      <Input type="datetime-local" {...field} data-testid="input-match-date" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -503,11 +458,7 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-match-status">
                           <SelectValue placeholder="Select status" />
@@ -571,13 +522,8 @@ export function MatchDialog({ open, onOpenChange, match }: MatchDialogProps) {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                data-testid="button-submit-match"
-              >
-                {isSubmitting ? "Saving..." : match ? "Update" : "Add"}
-
+              <Button type="submit" disabled={isSubmitting} data-testid="button-submit-match">
+                {isSubmitting ? 'Saving...' : match ? 'Update' : 'Add'}
               </Button>
             </div>
           </form>

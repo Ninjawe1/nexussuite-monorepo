@@ -298,6 +298,16 @@ Deno.serve(async (req)=>{
     return json({ message: 'not found' }, 404);
   } catch (err){
     console.error(err);
-    return json({ message: 'internal error' }, 500);
+    const message = (err && (err as any).message) ? String((err as any).message) : String(err);
+    const name = (err && (err as any).name) ? String((err as any).name) : undefined;
+    return json({ error: { name, message } }, 500);
   }
 });
+    // Health
+    if (path === 'ping' && req.method === 'GET'){
+      return json({ success: true, message: 'pong' });
+    }
+    if (path === 'echo' && req.method === 'POST'){
+      const body = await req.json().catch(()=>null);
+      return json({ success: true, body });
+    }

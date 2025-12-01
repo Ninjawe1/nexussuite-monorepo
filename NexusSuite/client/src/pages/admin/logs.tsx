@@ -1,31 +1,23 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const demoLogs = [
   {
     id: 1,
-    type: "API",
-    message: "GET /api/clubs 200 OK",
-    ts: "2024-10-22 10:01:22",
+    type: 'API',
+    message: 'GET /api/clubs 200 OK',
+    ts: '2024-10-22 10:01:22',
   },
   {
     id: 2,
-    type: "Auth",
-    message: "Login success alice@example.com",
-    ts: "2024-10-22 10:15:03",
+    type: 'Auth',
+    message: 'Login success alice@example.com',
+    ts: '2024-10-22 10:15:03',
   },
   {
     id: 3,
-    type: "Error",
-    message: "Stripe webhook retry",
-    ts: "2024-10-22 11:02:44",
-
+    type: 'Error',
+    message: 'Stripe webhook retry',
+    ts: '2024-10-22 11:02:44',
   },
 ];
 
@@ -34,10 +26,7 @@ export default function AdminLogsPage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Access & Activity Logs</h1>
-        <p className="text-muted-foreground">
-          Recent events and actions (demo)
-        </p>
-
+        <p className="text-muted-foreground">Recent events and actions (demo)</p>
       </div>
 
       <Card>
@@ -47,8 +36,7 @@ export default function AdminLogsPage() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {demoLogs.map((l) => (
-
+            {demoLogs.map(l => (
               <li
                 key={l.id}
                 className="flex items-center justify-between p-3 border border-border rounded-lg"

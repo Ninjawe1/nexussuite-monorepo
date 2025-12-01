@@ -1,13 +1,7 @@
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
   Select,
@@ -15,37 +9,37 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 const plans = [
   {
-    id: "starter",
-    name: "Free / Starter",
+    id: 'starter',
+    name: 'Free / Starter',
     price: 0,
-    features: ["Basic analytics", "Community support"],
+    features: ['Basic analytics', 'Community support'],
     limits: { users: 3, projects: 2 },
   },
   {
-    id: "growth",
-    name: "Pro / Growth",
+    id: 'growth',
+    name: 'Pro / Growth',
     price: 49,
-    features: ["Full analytics", "Priority support"],
+    features: ['Full analytics', 'Priority support'],
     limits: { users: 25, projects: 25 },
   },
   {
-    id: "enterprise",
-    name: "Business / Enterprise",
+    id: 'enterprise',
+    name: 'Business / Enterprise',
     price: 199,
-    features: ["SLA", "Dedicated manager"],
+    features: ['SLA', 'Dedicated manager'],
     limits: { users: 200, projects: 100 },
   },
   {
-    id: "custom",
-    name: "Custom",
+    id: 'custom',
+    name: 'Custom',
     price: 0,
-    features: ["Negotiated"],
+    features: ['Negotiated'],
 
     limits: { users: 9999, projects: 9999 },
   },
@@ -53,29 +47,28 @@ const plans = [
 
 const demoInvoices = [
   {
-    id: "inv_001",
-    customer: "Phoenix Esports",
+    id: 'inv_001',
+    customer: 'Phoenix Esports',
     amount: 49.0,
-    currency: "USD",
-    status: "paid",
-    date: "2024-10-01",
+    currency: 'USD',
+    status: 'paid',
+    date: '2024-10-01',
   },
   {
-    id: "inv_002",
-    customer: "Nebula Gaming",
+    id: 'inv_002',
+    customer: 'Nebula Gaming',
     amount: 0.0,
-    currency: "USD",
-    status: "trial",
-    date: "2024-10-08",
+    currency: 'USD',
+    status: 'trial',
+    date: '2024-10-08',
   },
   {
-    id: "inv_003",
-    customer: "Phoenix Esports",
+    id: 'inv_003',
+    customer: 'Phoenix Esports',
     amount: 49.0,
-    currency: "USD",
-    status: "paid",
-    date: "2024-11-01",
-
+    currency: 'USD',
+    status: 'paid',
+    date: '2024-11-01',
   },
 ];
 
@@ -90,12 +83,12 @@ const demoRevenue = {
 
 export default function AdminBillingPage() {
   const { toast } = useToast();
-  const [couponCode, setCouponCode] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<string>("growth");
+  const [couponCode, setCouponCode] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<string>('growth');
 
   const applyCoupon = () => {
     toast({
-      title: "Coupon",
+      title: 'Coupon',
 
       description: `Applied code ${couponCode} (demo)`,
     });
@@ -103,7 +96,7 @@ export default function AdminBillingPage() {
 
   const updatePlan = () => {
     toast({
-      title: "Plan updated",
+      title: 'Plan updated',
 
       description: `Changed default plan to ${selectedPlan} (demo)`,
     });
@@ -113,34 +106,24 @@ export default function AdminBillingPage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Subscription & Billing</h1>
-        <p className="text-muted-foreground">
-          Manage plans, invoices, and revenue performance
-        </p>
-
+        <p className="text-muted-foreground">Manage plans, invoices, and revenue performance</p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Plans</CardTitle>
-          <CardDescription>
-            Set features, pricing and usage limits
-          </CardDescription>
+          <CardDescription>Set features, pricing and usage limits</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {plans.map((p) => (
-              <div
-                key={p.id}
-                className="border border-border rounded-lg p-4 space-y-2"
-              >
-
+            {plans.map(p => (
+              <div key={p.id} className="border border-border rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{p.name}</h3>
                   <span className="text-sm">${p.price}/mo</span>
                 </div>
                 <ul className="text-sm list-disc pl-5">
-                  {p.features.map((f) => (
-
+                  {p.features.map(f => (
                     <li key={f}>{f}</li>
                   ))}
                 </ul>
@@ -157,8 +140,7 @@ export default function AdminBillingPage() {
                 <SelectValue placeholder="Default signup plan" />
               </SelectTrigger>
               <SelectContent>
-                {plans.map((p) => (
-
+                {plans.map(p => (
                   <SelectItem key={p.id} value={p.id}>
                     {p.name}
                   </SelectItem>
@@ -170,8 +152,7 @@ export default function AdminBillingPage() {
               <Input
                 placeholder="Discount code"
                 value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-
+                onChange={e => setCouponCode(e.target.value)}
               />
               <Button variant="outline" onClick={applyCoupon}>
                 Apply
@@ -199,8 +180,7 @@ export default function AdminBillingPage() {
                 </tr>
               </thead>
               <tbody>
-                {demoInvoices.map((inv) => (
-
+                {demoInvoices.map(inv => (
                   <tr key={inv.id} className="border-t border-border">
                     <td className="p-2">{inv.id}</td>
                     <td className="p-2">{inv.customer}</td>
@@ -226,17 +206,10 @@ export default function AdminBillingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Metric label="MRR" value={`$${demoRevenue.mrr}`} />
             <Metric label="ARR" value={`$${demoRevenue.arr}`} />
-            <Metric
-              label="Total Income"
-              value={`$${demoRevenue.totalIncome}`}
-            />
+            <Metric label="Total Income" value={`$${demoRevenue.totalIncome}`} />
             <Metric label="Churn" value={`${demoRevenue.churnRate}%`} />
             <Metric label="Active Trials" value={`${demoRevenue.trials}`} />
-            <Metric
-              label="Trial Conversion"
-              value={`${demoRevenue.trialConversion}%`}
-            />
-
+            <Metric label="Trial Conversion" value={`${demoRevenue.trialConversion}%`} />
           </div>
         </CardContent>
       </Card>

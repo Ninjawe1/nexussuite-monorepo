@@ -1,12 +1,12 @@
 // Top-level imports (showing only the lines to adjust)
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { type Transaction } from "@shared/schema";
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { WalletDialog } from "@/components/wallet-dialog";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { type Transaction } from '@shared/schema';
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { WalletDialog } from '@/components/wallet-dialog';
 
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 import {
   Form,
@@ -23,9 +23,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 import {
   Select,
@@ -33,7 +33,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 import {
   AlertDialog,
@@ -45,18 +45,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  insertTransactionSchema,
-  type InsertTransaction,
-  type Wallet,
-} from "@shared/schema";
+} from '@/components/ui/alert-dialog';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertTransactionSchema, type InsertTransaction, type Wallet } from '@shared/schema';
 
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 // removed direct date-fns format import; using formatDateSafe instead
-import { formatDateSafe, toDateSafe } from "@/lib/date";
+import { formatDateSafe, toDateSafe } from '@/lib/date';
 
 import {
   Plus,
@@ -68,56 +64,54 @@ import {
   Calendar,
   Filter,
   Download,
-} from "lucide-react";
-import { DashboardLineChart } from "@/components/ui/chart";
-import { Skeleton } from "@/components/ui/skeleton";
+} from 'lucide-react';
+import { DashboardLineChart } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const incomeCategories = [
-  { value: "sponsorship", label: "Sponsorship" },
-  { value: "merchandise", label: "Merchandise" },
-  { value: "tournament_prize", label: "Tournament Prize" },
-  { value: "streaming_revenue", label: "Streaming Revenue" },
-  { value: "ticket_sales", label: "Ticket Sales" },
-  { value: "other_income", label: "Other Income" },
+  { value: 'sponsorship', label: 'Sponsorship' },
+  { value: 'merchandise', label: 'Merchandise' },
+  { value: 'tournament_prize', label: 'Tournament Prize' },
+  { value: 'streaming_revenue', label: 'Streaming Revenue' },
+  { value: 'ticket_sales', label: 'Ticket Sales' },
+  { value: 'other_income', label: 'Other Income' },
 ];
 
 const expenseCategories = [
-  { value: "salaries", label: "Salaries" },
-  { value: "equipment", label: "Equipment" },
-  { value: "facility", label: "Facility Rent" },
-  { value: "travel", label: "Travel" },
-  { value: "marketing", label: "Marketing" },
-  { value: "tournament_fees", label: "Tournament Fees" },
-  { value: "utilities", label: "Utilities" },
-  { value: "other_expense", label: "Other Expense" },
+  { value: 'salaries', label: 'Salaries' },
+  { value: 'equipment', label: 'Equipment' },
+  { value: 'facility', label: 'Facility Rent' },
+  { value: 'travel', label: 'Travel' },
+  { value: 'marketing', label: 'Marketing' },
+  { value: 'tournament_fees', label: 'Tournament Fees' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'other_expense', label: 'Other Expense' },
 ];
 
 const paymentMethods = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "credit_card", label: "Credit Card" },
-  { value: "paypal", label: "PayPal" },
-  { value: "crypto", label: "Cryptocurrency" },
-  { value: "other", label: "Other" },
-
+  { value: 'cash', label: 'Cash' },
+  { value: 'bank_transfer', label: 'Bank Transfer' },
+  { value: 'credit_card', label: 'Credit Card' },
+  { value: 'paypal', label: 'PayPal' },
+  { value: 'crypto', label: 'Cryptocurrency' },
+  { value: 'other', label: 'Other' },
 ];
 
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function Finance() {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] =
-    useState<Transaction | null>(null);
-  const [filterType, setFilterType] = useState<string>("all");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const { currentOrganization } = useOrganization();
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
-    queryKey: ["/api/finance", currentOrganization?.id],
+    queryKey: ['/api/finance', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(`/api/finance?organizationId=${currentOrganization.id}`, "GET");
+      const res = await apiRequest(`/api/finance?organizationId=${currentOrganization.id}`, 'GET');
       return await res.json();
     },
     enabled: !!currentOrganization?.id,
@@ -128,26 +122,20 @@ export default function Finance() {
     isLoading: walletsLoading,
     isError: walletsError,
   } = useQuery<Wallet[]>({
-    queryKey: ["/api/wallets", currentOrganization?.id],
+    queryKey: ['/api/wallets', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(`/api/wallets?organizationId=${currentOrganization.id}`, "GET");
+      const res = await apiRequest(`/api/wallets?organizationId=${currentOrganization.id}`, 'GET');
       return await res.json();
     },
     enabled: !!currentOrganization?.id,
   });
-  const walletMap = useMemo(
-    () => Object.fromEntries(wallets.map((w) => [w.id, w])),
-    [wallets],
-  );
+  const walletMap = useMemo(() => Object.fromEntries(wallets.map(w => [w.id, w])), [wallets]);
 
   // Add default wallet resolution (if one default or only one wallet)
   const defaultWallet = useMemo(
-    () =>
-      wallets.find((w) => w.isDefault) ??
-      (wallets.length === 1 ? wallets[0] : undefined),
-    [wallets],
-
+    () => wallets.find(w => w.isDefault) ?? (wallets.length === 1 ? wallets[0] : undefined),
+    [wallets]
   );
   const { data: monthlyData = [] } = useQuery<
     Array<{
@@ -157,10 +145,13 @@ export default function Finance() {
       profit: number;
     }>
   >({
-    queryKey: ["/api/finance/monthly", currentOrganization?.id],
+    queryKey: ['/api/finance/monthly', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return [];
-      const res = await apiRequest(`/api/finance/monthly?organizationId=${currentOrganization.id}`, "GET");
+      const res = await apiRequest(
+        `/api/finance/monthly?organizationId=${currentOrganization.id}`,
+        'GET'
+      );
       return await res.json();
     },
     enabled: !!currentOrganization?.id,
@@ -169,88 +160,77 @@ export default function Finance() {
   const handleExport = async () => {
     try {
       if (!currentOrganization?.id) {
-        toast({ title: "No organization selected", variant: "destructive" });
+        toast({ title: 'No organization selected', variant: 'destructive' });
         return;
       }
       const response = await fetch(`/api/finance/export?organizationId=${currentOrganization.id}`, {
-        credentials: "include",
+        credentials: 'include',
       });
 
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) throw new Error('Export failed');
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `transactions-${formatDateSafe(new Date(), "yyyy-MM-dd")}.csv`;
+      a.download = `transactions-${formatDateSafe(new Date(), 'yyyy-MM-dd')}.csv`;
 
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast({ title: "Transactions exported successfully" });
+      toast({ title: 'Transactions exported successfully' });
     } catch (error) {
       toast({
-        title: "Failed to export transactions",
-        variant: "destructive",
-
+        title: 'Failed to export transactions',
+        variant: 'destructive',
       });
     }
   };
 
   const form = useForm<any>({
-    resolver: zodResolver(
-      insertTransactionSchema.omit({ tenantId: true, createdBy: true }),
-    ),
+    resolver: zodResolver(insertTransactionSchema.omit({ tenantId: true, createdBy: true })),
     defaultValues: {
-      type: "income",
-      category: "",
+      type: 'income',
+      category: '',
       amount: undefined,
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-      paymentMethod: "",
-      reference: "",
-      walletId: "",
-
+      description: '',
+      date: new Date().toISOString().split('T')[0],
+      paymentMethod: '',
+      reference: '',
+      walletId: '',
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertTransaction) => {
-      return apiRequest("/api/finance", "POST", data);
+      return apiRequest('/api/finance', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
-      toast({ title: "Transaction created successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/finance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallets'] });
+      toast({ title: 'Transaction created successfully' });
 
       setIsOpen(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Failed to create transaction",
-        variant: "destructive",
-
+        title: 'Failed to create transaction',
+        variant: 'destructive',
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<InsertTransaction>;
-    }) => {
-      return apiRequest(`/api/finance/${id}`, "PATCH", data);
+    mutationFn: async ({ id, data }: { id: string; data: Partial<InsertTransaction> }) => {
+      return apiRequest(`/api/finance/${id}`, 'PATCH', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
-      toast({ title: "Transaction updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/finance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallets'] });
+      toast({ title: 'Transaction updated successfully' });
 
       setIsOpen(false);
       setEditingTransaction(null);
@@ -258,27 +238,25 @@ export default function Finance() {
     },
     onError: () => {
       toast({
-        title: "Failed to update transaction",
-        variant: "destructive",
-
+        title: 'Failed to update transaction',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/finance/${id}`, "DELETE");
+      return apiRequest(`/api/finance/${id}`, 'DELETE');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
-      toast({ title: "Transaction deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/finance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallets'] });
+      toast({ title: 'Transaction deleted successfully' });
     },
     onError: () => {
       toast({
-        title: "Failed to delete transaction",
-        variant: "destructive",
-
+        title: 'Failed to delete transaction',
+        variant: 'destructive',
       });
     },
   });
@@ -286,18 +264,17 @@ export default function Finance() {
   // NEW: Wallet deletion mutation
   const deleteWalletMutation = useMutation({
     mutationFn: async (id: string) => {
-      return apiRequest(`/api/wallets/${id}`, "DELETE");
+      return apiRequest(`/api/wallets/${id}`, 'DELETE');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/finance"] });
-      toast({ title: "Wallet deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallets'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/finance'] });
+      toast({ title: 'Wallet deleted successfully' });
     },
     onError: () => {
       toast({
-        title: "Failed to delete wallet",
-        variant: "destructive",
-
+        title: 'Failed to delete wallet',
+        variant: 'destructive',
       });
     },
   });
@@ -306,10 +283,9 @@ export default function Finance() {
     const parsedDate = toDateSafe(data.date);
     if (!parsedDate) {
       toast({
-        title: "Invalid date",
-        description: "Please provide a valid date for the transaction.",
-        variant: "destructive",
-
+        title: 'Invalid date',
+        description: 'Please provide a valid date for the transaction.',
+        variant: 'destructive',
       });
       return;
     }
@@ -319,8 +295,7 @@ export default function Finance() {
       date: parsedDate,
     };
     // If no wallet selected, fallback to default wallet if available
-    if (!submitData.walletId || submitData.walletId === "") {
-
+    if (!submitData.walletId || submitData.walletId === '') {
       if (defaultWallet?.id) {
         submitData.walletId = defaultWallet.id;
       } else {
@@ -340,12 +315,11 @@ export default function Finance() {
       type: transaction.type,
       category: transaction.category,
       amount: transaction.amount,
-      description: transaction.description || "",
-      date: formatDateSafe(transaction.date, "yyyy-MM-dd"),
-      paymentMethod: transaction.paymentMethod || "",
-      reference: transaction.reference || "",
-      walletId: transaction.walletId || "",
-
+      description: transaction.description || '',
+      date: formatDateSafe(transaction.date, 'yyyy-MM-dd'),
+      paymentMethod: transaction.paymentMethod || '',
+      reference: transaction.reference || '',
+      walletId: transaction.walletId || '',
     });
     setIsOpen(true);
   };
@@ -359,10 +333,10 @@ export default function Finance() {
   // Calculate financial summary
   const summary = useMemo(() => {
     const income = transactions
-      .filter((t) => t.type === "income")
+      .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const expenses = transactions
-      .filter((t) => t.type === "expense")
+      .filter(t => t.type === 'expense')
 
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const profit = income - expenses;
@@ -371,36 +345,26 @@ export default function Finance() {
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((t) => {
-      if (filterType !== "all" && t.type !== filterType) return false;
-      if (filterCategory !== "all" && t.category !== filterCategory)
-        return false;
+    return transactions.filter(t => {
+      if (filterType !== 'all' && t.type !== filterType) return false;
+      if (filterCategory !== 'all' && t.category !== filterCategory) return false;
 
       return true;
     });
   }, [transactions, filterType, filterCategory]);
 
-  const selectedType = form.watch("type");
-  const categories =
-    selectedType === "income" ? incomeCategories : expenseCategories;
-
+  const selectedType = form.watch('type');
+  const categories = selectedType === 'income' ? incomeCategories : expenseCategories;
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Finance</h1>
-          <p className="text-muted-foreground mt-1">
-            Track income, expenses, and financial health
-          </p>
+          <p className="text-muted-foreground mt-1">Track income, expenses, and financial health</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            data-testid="button-export-transactions"
-          >
-
+          <Button variant="outline" onClick={handleExport} data-testid="button-export-transactions">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -411,33 +375,21 @@ export default function Finance() {
           {/* Single, valid transaction dialog */}
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button
-                onClick={() => setIsOpen(true)}
-                data-testid="button-add-transaction"
-              >
-
+              <Button onClick={() => setIsOpen(true)} data-testid="button-add-transaction">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Transaction
               </Button>
             </DialogTrigger>
 
-            <DialogContent
-              className="max-w-2xl"
-              data-testid="dialog-transaction"
-            >
+            <DialogContent className="max-w-2xl" data-testid="dialog-transaction">
               <DialogHeader>
                 <DialogTitle>
-                  {editingTransaction ? "Edit Transaction" : "Add Transaction"}
-
+                  {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
                 </DialogTitle>
               </DialogHeader>
 
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -446,10 +398,9 @@ export default function Finance() {
                         <FormItem>
                           <FormLabel>Type</FormLabel>
                           <Select
-                            onValueChange={(value) => {
+                            onValueChange={value => {
                               field.onChange(value);
-                              form.setValue("category", "");
-
+                              form.setValue('category', '');
                             }}
                             value={field.value}
                           >
@@ -474,19 +425,14 @@ export default function Finance() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-category">
                                 <SelectValue placeholder="Select category" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {categories.map((cat) => (
-
+                              {categories.map(cat => (
                                 <SelectItem key={cat.value} value={cat.value}>
                                   {cat.label}
                                 </SelectItem>
@@ -527,12 +473,7 @@ export default function Finance() {
                         <FormItem>
                           <FormLabel>Date</FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              type="date"
-                              data-testid="input-date"
-                            />
-
+                            <Input {...field} type="date" data-testid="input-date" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -565,23 +506,15 @@ export default function Finance() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Payment Method (Optional)</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""}
-                          >
-
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
                             <FormControl>
                               <SelectTrigger data-testid="select-payment-method">
                                 <SelectValue placeholder="Select method" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {paymentMethods.map((method) => (
-                                <SelectItem
-                                  key={method.value}
-                                  value={method.value}
-                                >
-
+                              {paymentMethods.map(method => (
+                                <SelectItem key={method.value} value={method.value}>
                                   {method.label}
                                 </SelectItem>
                               ))}
@@ -617,11 +550,8 @@ export default function Finance() {
                       <FormItem>
                         <FormLabel>Wallet (Optional)</FormLabel>
                         <Select
-                          onValueChange={(v) =>
-                            field.onChange(v === "none" ? "" : v)
-                          }
-                          value={field.value === "" ? "none" : field.value}
-
+                          onValueChange={v => field.onChange(v === 'none' ? '' : v)}
+                          value={field.value === '' ? 'none' : field.value}
                         >
                           <FormControl>
                             <SelectTrigger data-testid="select-wallet">
@@ -632,8 +562,7 @@ export default function Finance() {
                             <SelectItem key="none" value="none">
                               No wallet
                             </SelectItem>
-                            {wallets.map((w) => (
-
+                            {wallets.map(w => (
                               <SelectItem key={w.id} value={w.id}>
                                 {w.name} ({w.currency.toUpperCase()})
                               </SelectItem>
@@ -656,13 +585,10 @@ export default function Finance() {
                     </Button>
                     <Button
                       type="submit"
-                      disabled={
-                        createMutation.isPending || updateMutation.isPending
-                      }
+                      disabled={createMutation.isPending || updateMutation.isPending}
                       data-testid="button-submit"
                     >
-                      {editingTransaction ? "Update" : "Create"} Transaction
-
+                      {editingTransaction ? 'Update' : 'Create'} Transaction
                     </Button>
                   </div>
                 </form>
@@ -680,63 +606,47 @@ export default function Finance() {
             <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div
-              className="text-2xl font-bold font-mono"
-              data-testid="text-total-income"
-            >
+            <div className="text-2xl font-bold font-mono" data-testid="text-total-income">
               ${summary.income.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {transactions.filter((t) => t.type === "income").length}{" "}
-              transactions
-
+              {transactions.filter(t => t.type === 'income').length} transactions
             </p>
           </CardContent>
         </Card>
 
         <Card data-testid="card-expenses">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Expenses
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div
-              className="text-2xl font-bold font-mono"
-              data-testid="text-total-expenses"
-            >
+            <div className="text-2xl font-bold font-mono" data-testid="text-total-expenses">
               ${summary.expenses.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {transactions.filter((t) => t.type === "expense").length}{" "}
-              transactions
-
+              {transactions.filter(t => t.type === 'expense').length} transactions
             </p>
           </CardContent>
         </Card>
 
         <Card data-testid="card-profit">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Net Profit/Loss
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Net Profit/Loss</CardTitle>
 
             <DollarSign className="h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div
               className={`text-2xl font-bold font-mono ${
-                summary.profit >= 0 ? "text-success" : "text-destructive"
-
+                summary.profit >= 0 ? 'text-success' : 'text-destructive'
               }`}
               data-testid="text-profit"
             >
               ${summary.profit.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {summary.profit >= 0 ? "Profitable" : "Loss"}
-
+              {summary.profit >= 0 ? 'Profitable' : 'Loss'}
             </p>
           </CardContent>
         </Card>
@@ -762,10 +672,7 @@ export default function Finance() {
             ))}
           </div>
         ) : walletsError ? (
-          <div className="text-sm text-destructive">
-            Failed to load wallets.
-          </div>
-
+          <div className="text-sm text-destructive">Failed to load wallets.</div>
         ) : wallets.length === 0 ? (
           <Card>
             <CardContent className="pt-6">
@@ -782,10 +689,8 @@ export default function Finance() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wallets.map((w) => {
-              const typeLabel = w.type
-                .replace(/_/g, " ")
-                .replace(/^\w/, (c) => c.toUpperCase());
+            {wallets.map(w => {
+              const typeLabel = w.type.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
 
               return (
                 <Card
@@ -796,9 +701,7 @@ export default function Finance() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-base leading-tight">
-                          {w.name}
-                        </CardTitle>
+                        <CardTitle className="text-base leading-tight">{w.name}</CardTitle>
 
                         <div className="text-xs text-muted-foreground mt-1">
                           {typeLabel} • {w.currency.toUpperCase()}
@@ -828,24 +731,17 @@ export default function Finance() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Delete wallet?
-                              </AlertDialogTitle>
+                              <AlertDialogTitle>Delete wallet?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will permanently delete the wallet "
-                                {w.name}". Transactions linked to this wallet
-                                will remain, but may show with an unknown wallet
-                                label. This action cannot be undone.
-
+                                This will permanently delete the wallet "{w.name}". Transactions
+                                linked to this wallet will remain, but may show with an unknown
+                                wallet label. This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() =>
-                                  deleteWalletMutation.mutate(w.id)
-                                }
-
+                                onClick={() => deleteWalletMutation.mutate(w.id)}
                                 data-testid={`confirm-delete-wallet-${w.id}`}
                               >
                                 Delete
@@ -878,13 +774,13 @@ export default function Finance() {
                 data={monthlyData}
                 xKey="month"
                 series={[
-                  { key: "income", label: "Income" },
-                  { key: "expenses", label: "Expenses" },
-                  { key: "profit", label: "Net Profit" },
+                  { key: 'income', label: 'Income' },
+                  { key: 'expenses', label: 'Expenses' },
+                  { key: 'profit', label: 'Net Profit' },
                 ]}
                 height={300}
                 xTickFormatter={(value: any) => {
-                  const v = String(value ?? "");
+                  const v = String(value ?? '');
 
                   const m = v.match(/^(\d{4})-(\d{2})$/);
                   if (m) {
@@ -892,12 +788,11 @@ export default function Finance() {
                     return isNaN(d.getTime())
                       ? v
                       : d.toLocaleDateString(undefined, {
-                          month: "short",
-                          year: "numeric",
+                          month: 'short',
+                          year: 'numeric',
                         });
                   }
-                  return v || "Unknown";
-
+                  return v || 'Unknown';
                 }}
                 yTickFormatter={(value: number) => `$${value.toLocaleString()}`}
               />
@@ -915,11 +810,7 @@ export default function Finance() {
           </CardHeader>
           <CardContent className="flex gap-4">
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger
-                className="w-[180px]"
-                data-testid="select-filter-type"
-              >
-
+              <SelectTrigger className="w-[180px]" data-testid="select-filter-type">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
@@ -930,17 +821,12 @@ export default function Finance() {
             </Select>
 
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger
-                className="w-[180px]"
-                data-testid="select-filter-category"
-              >
-
+              <SelectTrigger className="w-[180px]" data-testid="select-filter-category">
                 <SelectValue placeholder="Filter by category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {[...incomeCategories, ...expenseCategories].map((cat) => (
-
+                {[...incomeCategories, ...expenseCategories].map(cat => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>
@@ -958,17 +844,12 @@ export default function Finance() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading transactions...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Loading transactions...</div>
           ) : filteredTransactions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No transactions found
-            </div>
+            <div className="text-center py-8 text-muted-foreground">No transactions found</div>
           ) : (
             <div className="space-y-2">
-              {filteredTransactions.map((transaction) => (
-
+              {filteredTransactions.map(transaction => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-4 rounded-lg border hover-elevate active-elevate-2"
@@ -977,13 +858,12 @@ export default function Finance() {
                   <div className="flex items-center gap-4 flex-1">
                     <div
                       className={`p-2 rounded-lg ${
-                        transaction.type === "income"
-                          ? "bg-success/10 text-success"
-                          : "bg-destructive/10 text-destructive"
+                        transaction.type === 'income'
+                          ? 'bg-success/10 text-success'
+                          : 'bg-destructive/10 text-destructive'
                       }`}
                     >
-                      {transaction.type === "income" ? (
-
+                      {transaction.type === 'income' ? (
                         <TrendingUp className="h-5 w-5" />
                       ) : (
                         <TrendingDown className="h-5 w-5" />
@@ -997,53 +877,37 @@ export default function Finance() {
                         >
                           {transaction.description || transaction.category}
                         </h4>
-                        <Badge
-                          variant={
-                            transaction.type === "income"
-                              ? "default"
-                              : "destructive"
-                          }
-                        >
-                          {transaction.category.replace(/_/g, " ")}
-
+                        <Badge variant={transaction.type === 'income' ? 'default' : 'destructive'}>
+                          {transaction.category.replace(/_/g, ' ')}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
-                          {formatDateSafe(transaction.date, "MMM dd, yyyy")}
+                          {formatDateSafe(transaction.date, 'MMM dd, yyyy')}
                         </span>
                         {transaction.paymentMethod && (
-                          <span>
-                            {transaction.paymentMethod.replace(/_/g, " ")}
-                          </span>
+                          <span>{transaction.paymentMethod.replace(/_/g, ' ')}</span>
                         )}
-                        {transaction.reference && (
-                          <span>Ref: {transaction.reference}</span>
-                        )}
+                        {transaction.reference && <span>Ref: {transaction.reference}</span>}
                         {/* Wallet label */}
                         {transaction.walletId && (
                           <span>
-                            Wallet:{" "}
-                            {walletMap[transaction.walletId]?.name ?? "Unknown"}{" "}
+                            Wallet: {walletMap[transaction.walletId]?.name ?? 'Unknown'}{' '}
                             {walletMap[transaction.walletId]?.currency
                               ? `(${walletMap[transaction.walletId]?.currency.toUpperCase()})`
-                              : ""}
-
+                              : ''}
                           </span>
                         )}
                       </div>
                     </div>
                     <div
                       className={`text-lg font-mono font-semibold ${
-                        transaction.type === "income"
-                          ? "text-success"
-                          : "text-destructive"
+                        transaction.type === 'income' ? 'text-success' : 'text-destructive'
                       }`}
                       data-testid={`text-amount-${transaction.id}`}
                     >
-                      {transaction.type === "income" ? "+" : "-"}$
-
+                      {transaction.type === 'income' ? '+' : '-'}$
                       {parseFloat(transaction.amount).toFixed(2)}
                     </div>
                   </div>
@@ -1068,13 +932,10 @@ export default function Finance() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete Transaction
-                          </AlertDialogTitle>
+                          <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this transaction?
-                            This action cannot be undone.
-
+                            Are you sure you want to delete this transaction? This action cannot be
+                            undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -1082,10 +943,7 @@ export default function Finance() {
                             Cancel
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() =>
-                              deleteMutation.mutate(transaction.id)
-                            }
-
+                            onClick={() => deleteMutation.mutate(transaction.id)}
                             data-testid="button-confirm-delete"
                           >
                             Delete
@@ -1105,27 +963,24 @@ export default function Finance() {
 
   function formatCurrency(amount: string | number, currency?: string) {
     const currencyMap: Record<string, string> = {
-      usd: "USD",
-      eur: "EUR",
-      gbp: "GBP",
-      inr: "INR",
-      sgd: "SGD",
-      aed: "AED",
-      ngn: "NGN",
-      cny: "CNY",
-      jpy: "JPY",
-      cad: "CAD",
-      aud: "AUD",
-      zar: "ZAR",
+      usd: 'USD',
+      eur: 'EUR',
+      gbp: 'GBP',
+      inr: 'INR',
+      sgd: 'SGD',
+      aed: 'AED',
+      ngn: 'NGN',
+      cny: 'CNY',
+      jpy: 'JPY',
+      cad: 'CAD',
+      aud: 'AUD',
+      zar: 'ZAR',
     };
-    const code =
-      currencyMap[currency?.toLowerCase?.() || ""] ||
-      currency?.toUpperCase?.() ||
-      "USD";
-    const numeric = typeof amount === "string" ? parseFloat(amount) : amount;
+    const code = currencyMap[currency?.toLowerCase?.() || ''] || currency?.toUpperCase?.() || 'USD';
+    const numeric = typeof amount === 'string' ? parseFloat(amount) : amount;
     const safe = Number.isFinite(numeric) ? numeric : 0;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
 
       currency: code,
       maximumFractionDigits: 2,

@@ -1,15 +1,11 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  insertTournamentSchema,
-  type InsertTournament,
-  type Tournament,
-} from "@shared/schema";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { insertTournamentSchema, type InsertTournament, type Tournament } from '@shared/schema';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
 
 import {
   Dialog,
@@ -17,7 +13,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 import {
   Form,
@@ -26,10 +22,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
 import {
   Select,
@@ -37,9 +33,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { formatDateSafe, toDateSafe } from "@/lib/date";
-
+} from '@/components/ui/select';
+import { formatDateSafe, toDateSafe } from '@/lib/date';
 
 interface TournamentDialogProps {
   open: boolean;
@@ -47,21 +42,14 @@ interface TournamentDialogProps {
   tournament?: Tournament;
 }
 
-const tournamentSchema = insertTournamentSchema
-  .omit({ tenantId: true })
-  .extend({
-    startDate: z.string(),
-    endDate: z.string().optional(),
-  });
+const tournamentSchema = insertTournamentSchema.omit({ tenantId: true }).extend({
+  startDate: z.string(),
+  endDate: z.string().optional(),
+});
 
 type TournamentFormData = z.infer<typeof tournamentSchema>;
 
-export function TournamentDialog({
-  open,
-  onOpenChange,
-  tournament,
-}: TournamentDialogProps) {
-
+export function TournamentDialog({ open, onOpenChange, tournament }: TournamentDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEdit = !!tournament;
@@ -71,49 +59,39 @@ export function TournamentDialog({
     defaultValues: tournament
       ? {
           name: tournament.name,
-          description: tournament.description || "",
+          description: tournament.description || '',
           format: tournament.format,
-          game: tournament.game || "",
-          startDate: tournament.startDate
-            ? formatDateSafe(tournament.startDate, "yyyy-MM-dd")
-            : "",
-          endDate: tournament.endDate
-            ? formatDateSafe(tournament.endDate, "yyyy-MM-dd")
-            : "",
+          game: tournament.game || '',
+          startDate: tournament.startDate ? formatDateSafe(tournament.startDate, 'yyyy-MM-dd') : '',
+          endDate: tournament.endDate ? formatDateSafe(tournament.endDate, 'yyyy-MM-dd') : '',
 
           maxTeams: tournament.maxTeams || undefined,
           status: tournament.status,
         }
       : {
-          name: "",
-          description: "",
-          format: "single-elimination",
-          game: "",
-          startDate: "",
-          endDate: "",
+          name: '',
+          description: '',
+          format: 'single-elimination',
+          game: '',
+          startDate: '',
+          endDate: '',
           maxTeams: undefined,
-          status: "upcoming",
-
+          status: 'upcoming',
         },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: InsertTournament) => {
       if (isEdit) {
-        return await apiRequest(
-          `/api/tournaments/${tournament.id}`,
-          "PATCH",
-          data,
-        );
+        return await apiRequest(`/api/tournaments/${tournament.id}`, 'PATCH', data);
       }
-      return await apiRequest("/api/tournaments", "POST", data);
+      return await apiRequest('/api/tournaments', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
       toast({
-        title: "Success",
-        description: `Tournament ${isEdit ? "updated" : "created"} successfully`,
-
+        title: 'Success',
+        description: `Tournament ${isEdit ? 'updated' : 'created'} successfully`,
       });
       onOpenChange(false);
       form.reset();
@@ -121,23 +99,19 @@ export function TournamentDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description:
-          error.message ||
-          `Failed to ${isEdit ? "update" : "create"} tournament`,
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || `Failed to ${isEdit ? 'update' : 'create'} tournament`,
+        variant: 'destructive',
       });
     },
   });
@@ -146,20 +120,18 @@ export function TournamentDialog({
     const start = toDateSafe(data.startDate);
     if (!start) {
       toast({
-        title: "Invalid date",
-        description: "Please enter a valid start date (YYYY-MM-DD).",
-        variant: "destructive",
-
+        title: 'Invalid date',
+        description: 'Please enter a valid start date (YYYY-MM-DD).',
+        variant: 'destructive',
       });
       return;
     }
     const end = data.endDate ? toDateSafe(data.endDate) : undefined;
     if (data.endDate && !end) {
       toast({
-        title: "Invalid date",
-        description: "Please enter a valid end date (YYYY-MM-DD).",
-        variant: "destructive",
-
+        title: 'Invalid date',
+        description: 'Please enter a valid end date (YYYY-MM-DD).',
+        variant: 'destructive',
       });
       return;
     }
@@ -175,14 +147,9 @@ export function TournamentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Edit Tournament" : "Create Tournament"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit Tournament' : 'Create Tournament'}</DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? "Update tournament details"
-              : "Add a new tournament to your organization"}
-
+            {isEdit ? 'Update tournament details' : 'Add a new tournament to your organization'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -215,8 +182,7 @@ export function TournamentDialog({
                     <Textarea
                       placeholder="Tournament details..."
                       {...field}
-                      value={field.value || ""}
-
+                      value={field.value || ''}
                       data-testid="input-tournament-description"
                     />
                   </FormControl>
@@ -232,23 +198,15 @@ export function TournamentDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Format</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || undefined}
-                    >
-
+                    <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger data-testid="select-tournament-format">
                           <SelectValue placeholder="Select format" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="single-elimination">
-                          Single Elimination
-                        </SelectItem>
-                        <SelectItem value="double-elimination">
-                          Double Elimination
-                        </SelectItem>
+                        <SelectItem value="single-elimination">Single Elimination</SelectItem>
+                        <SelectItem value="double-elimination">Double Elimination</SelectItem>
 
                         <SelectItem value="round-robin">Round Robin</SelectItem>
                         <SelectItem value="league">League</SelectItem>
@@ -288,12 +246,7 @@ export function TournamentDialog({
                   <FormItem>
                     <FormLabel>Start Date</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        data-testid="input-tournament-start-date"
-                      />
-
+                      <Input type="date" {...field} data-testid="input-tournament-start-date" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -307,12 +260,7 @@ export function TournamentDialog({
                   <FormItem>
                     <FormLabel>End Date (Optional)</FormLabel>
                     <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        data-testid="input-tournament-end-date"
-                      />
-
+                      <Input type="date" {...field} data-testid="input-tournament-end-date" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -332,15 +280,10 @@ export function TournamentDialog({
                         type="number"
                         placeholder="16"
                         {...field}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value
-                              ? parseInt(e.target.value)
-                              : undefined,
-                          )
+                        onChange={e =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                         }
-                        value={field.value || ""}
-
+                        value={field.value || ''}
                         data-testid="input-tournament-max-teams"
                       />
                     </FormControl>
@@ -355,11 +298,7 @@ export function TournamentDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || undefined}
-                    >
-
+                    <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger data-testid="select-tournament-status">
                           <SelectValue placeholder="Select status" />
@@ -392,12 +331,7 @@ export function TournamentDialog({
                 disabled={mutation.isPending}
                 data-testid="button-save-tournament"
               >
-                {mutation.isPending
-                  ? "Saving..."
-                  : isEdit
-                    ? "Update"
-                    : "Create"}
-
+                {mutation.isPending ? 'Saving...' : isEdit ? 'Update' : 'Create'}
               </Button>
             </div>
           </form>

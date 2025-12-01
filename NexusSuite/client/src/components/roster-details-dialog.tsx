@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   Dialog,
@@ -6,23 +6,16 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  CalendarDays,
-  Users,
-  Trophy,
-  Clock,
-  Gamepad2,
-  Pencil,
-} from "lucide-react";
-import { Roster } from "@/services/rosterService";
-import { normalizeGameTitle } from "@/constants/games";
-import { useRosterContext } from "@/contexts/RosterContext";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { CalendarDays, Users, Trophy, Clock, Gamepad2, Pencil } from 'lucide-react';
+import { Roster } from '@/services/rosterService';
+import { normalizeGameTitle } from '@/constants/games';
+import { useRosterContext } from '@/contexts/RosterContext';
 
 import {
   Select,
@@ -30,8 +23,8 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
-import { TEAM_ROLES } from "@/constants/teamRoles";
+} from '@/components/ui/select';
+import { TEAM_ROLES } from '@/constants/teamRoles';
 
 import {
   AlertDialog,
@@ -43,8 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
+} from '@/components/ui/alert-dialog';
 
 interface RosterDetailsDialogProps {
   roster: Roster | null;
@@ -52,12 +44,7 @@ interface RosterDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function RosterDetailsDialog({
-  roster,
-  open,
-  onOpenChange,
-}: RosterDetailsDialogProps) {
-
+export function RosterDetailsDialog({ roster, open, onOpenChange }: RosterDetailsDialogProps) {
   const {
     rosterPlayers,
     isLoadingPlayers,
@@ -72,36 +59,33 @@ export function RosterDetailsDialog({
   if (!roster) return null;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "competitive":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      case "casual":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      case "practice":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case 'competitive':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'casual':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'practice':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
-
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case "competitive":
+      case 'competitive':
         return <Trophy className="h-4 w-4" />;
-      case "casual":
+      case 'casual':
         return <Users className="h-4 w-4" />;
-      case "practice":
-
+      case 'practice':
         return <Clock className="h-4 w-4" />;
       default:
         return <Users className="h-4 w-4" />;
@@ -114,18 +98,12 @@ export function RosterDetailsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {roster.name}
-            <Badge
-              className={`${getTypeColor(roster.type)} flex items-center gap-1`}
-            >
-
+            <Badge className={`${getTypeColor(roster.type)} flex items-center gap-1`}>
               {getTypeIcon(roster.type)}
               {roster.type.charAt(0).toUpperCase() + roster.type.slice(1)}
             </Badge>
           </DialogTitle>
-          <DialogDescription>
-            Roster details and member information
-          </DialogDescription>
-
+          <DialogDescription>Roster details and member information</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -137,9 +115,7 @@ export function RosterDetailsDialog({
             <CardContent className="space-y-4">
               {roster.description && (
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">
-                    Description
-                  </h4>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Description</h4>
 
                   <p className="text-sm">{roster.description}</p>
                 </div>
@@ -149,8 +125,7 @@ export function RosterDetailsDialog({
                 <div className="flex items-center gap-2">
                   <Gamepad2 className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {normalizeGameTitle((roster as any).game) || "Unknown Game"}
-
+                    {normalizeGameTitle((roster as any).game) || 'Unknown Game'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -162,9 +137,7 @@ export function RosterDetailsDialog({
 
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    Created {formatDate(roster.createdAt.toString())}
-                  </span>
+                  <span className="text-sm">Created {formatDate(roster.createdAt.toString())}</span>
                 </div>
               </div>
             </CardContent>
@@ -186,25 +159,15 @@ export function RosterDetailsDialog({
               {isLoadingPlayers ? (
                 <div className="space-y-3">
                   {[...Array(3)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-12 rounded-lg bg-muted animate-pulse"
-                    />
-
+                    <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
                   ))}
                 </div>
               ) : rosterPlayers && rosterPlayers.length > 0 ? (
                 <div className="space-y-3">
-                  {rosterPlayers.map((player) => (
-                    <div
-                      key={player.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border"
-                    >
+                  {rosterPlayers.map(player => (
+                    <div key={player.id} className="flex items-center gap-3 p-3 rounded-lg border">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>
-                          {player.playerId.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-
+                        <AvatarFallback>{player.playerId.slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -212,15 +175,10 @@ export function RosterDetailsDialog({
                           {editRoleFor === player.playerId ? (
                             <div className="flex items-center gap-2">
                               <Select
-                                value={
-                                  (localRoles[player.playerId] ??
-                                    player.role) ||
-                                  "Player"
-                                }
-                                onValueChange={async (val) => {
+                                value={(localRoles[player.playerId] ?? player.role) || 'Player'}
+                                onValueChange={async val => {
                                   setUpdatingRoleFor(player.playerId);
-                                  setLocalRoles((prev) => ({
-
+                                  setLocalRoles(prev => ({
                                     ...prev,
                                     [player.playerId]: val,
                                   }));
@@ -241,8 +199,7 @@ export function RosterDetailsDialog({
                                   <SelectValue placeholder="Select role" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {TEAM_ROLES.map((r) => (
-
+                                  {TEAM_ROLES.map(r => (
                                     <SelectItem key={r.value} value={r.value}>
                                       {r.label}
                                     </SelectItem>
@@ -263,10 +220,7 @@ export function RosterDetailsDialog({
                                   variant="ghost"
                                   size="sm"
                                   className="text-muted-foreground hover:text-foreground hover:bg-muted/40 h-6 px-2"
-                                  onClick={() =>
-                                    setEditRoleFor(player.playerId)
-                                  }
-
+                                  onClick={() => setEditRoleFor(player.playerId)}
                                   title="Edit role"
                                 >
                                   <Pencil className="h-3 w-3" />
@@ -276,9 +230,7 @@ export function RosterDetailsDialog({
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          Joined:{" "}
-                          {player.joinedAt?.toLocaleDateString?.() || "-"}
-
+                          Joined: {player.joinedAt?.toLocaleDateString?.() || '-'}
                         </p>
                       </div>
                       {/* Remove player action */}
@@ -300,15 +252,11 @@ export function RosterDetailsDialog({
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Remove player from roster?
-                            </AlertDialogTitle>
+                            <AlertDialogTitle>Remove player from roster?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will remove{" "}
-                              <strong>{player.playerId}</strong> from{" "}
-                              <strong>{roster.name}</strong>. You can re-assign
-                              this player at any time.
-
+                              This will remove <strong>{player.playerId}</strong> from{' '}
+                              <strong>{roster.name}</strong>. You can re-assign this player at any
+                              time.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -317,11 +265,7 @@ export function RosterDetailsDialog({
                               onClick={async () => {
                                 try {
                                   setRemovingId(player.playerId);
-                                  await removePlayerFromRoster(
-                                    roster.id,
-                                    player.playerId,
-                                  );
-
+                                  await removePlayerFromRoster(roster.id, player.playerId);
                                 } finally {
                                   setRemovingId(null);
                                 }
@@ -338,13 +282,10 @@ export function RosterDetailsDialog({
               ) : (
                 <div className="text-center py-8">
                   <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
-                    No players assigned
-                  </h3>
+                  <h3 className="text-lg font-medium mb-2">No players assigned</h3>
                   <p className="text-sm text-muted-foreground">
-                    This roster doesn't have any players assigned yet. Use the
-                    assign players option to add team members.
-
+                    This roster doesn't have any players assigned yet. Use the assign players option
+                    to add team members.
                   </p>
                 </div>
               )}

@@ -1,18 +1,17 @@
-import React, { useState } from "react";
-import { RosterList } from "@/components/roster-list";
-import { RosterCreationDialog } from "@/components/roster-creation-dialog";
-import { RosterDetailsDialog } from "@/components/roster-details-dialog";
-import { RosterEditDialog } from "@/components/roster-edit-dialog";
-import { PlayerAssignmentDialog } from "@/components/player-assignment-dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Plus, Users } from "lucide-react";
-import { useRosterContext } from "@/contexts/RosterContext";
-import { CreateRosterData, PlayerAssignment, Roster } from "@/services/rosterService";
-import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-
+import React, { useState } from 'react';
+import { RosterList } from '@/components/roster-list';
+import { RosterCreationDialog } from '@/components/roster-creation-dialog';
+import { RosterDetailsDialog } from '@/components/roster-details-dialog';
+import { RosterEditDialog } from '@/components/roster-edit-dialog';
+import { PlayerAssignmentDialog } from '@/components/player-assignment-dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Plus, Users } from 'lucide-react';
+import { useRosterContext } from '@/contexts/RosterContext';
+import { CreateRosterData, PlayerAssignment, Roster } from '@/services/rosterService';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 // Mock player data - replace with actual player data from your context
 interface Player {
@@ -22,8 +21,7 @@ interface Player {
   role: string;
   game: string;
   avatar?: string;
-  status: "active" | "inactive";
-
+  status: 'active' | 'inactive';
 }
 
 interface RosterTabProps {
@@ -32,12 +30,7 @@ interface RosterTabProps {
   allPlayers: Player[];
 }
 
-export function RosterTab({
-  organizationId,
-  currentUserId,
-  allPlayers,
-}: RosterTabProps) {
-
+export function RosterTab({ organizationId, currentUserId, allPlayers }: RosterTabProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -63,16 +56,15 @@ export function RosterTab({
     try {
       await createRoster(data);
       toast({
-        title: "Success",
-        description: "Roster created successfully",
+        title: 'Success',
+        description: 'Roster created successfully',
       });
     } catch (error) {
-      console.error("Error creating roster:", error);
+      console.error('Error creating roster:', error);
       toast({
-        title: "Error",
-        description: "Failed to create roster. Please try again.",
-        variant: "destructive",
-
+        title: 'Error',
+        description: 'Failed to create roster. Please try again.',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -88,15 +80,14 @@ export function RosterTab({
       // Ensure the roster has a 'game' set before assigning players
       const needsGame =
         !selectedRoster?.game ||
-        selectedRoster?.game === "" ||
-        selectedRoster?.game === "Unknown Game";
+        selectedRoster?.game === '' ||
+        selectedRoster?.game === 'Unknown Game';
 
       if (needsGame) {
         const gameToSet = payload.game?.trim();
         if (!gameToSet) {
           throw new Error(
-            "Roster is missing required 'game'. Please set the roster's game before assigning players.",
-
+            "Roster is missing required 'game'. Please set the roster's game before assigning players."
           );
         }
         await updateRoster(payload.rosterId, { game: gameToSet });
@@ -105,27 +96,23 @@ export function RosterTab({
           setSelectedRoster({ ...selectedRoster, game: gameToSet });
         }
       }
-      const players: PlayerAssignment[] = payload.playerIds.map((id) => ({
-
+      const players: PlayerAssignment[] = payload.playerIds.map(id => ({
         playerId: id,
         role: payload.role,
         game: needsGame ? payload.game : (selectedRoster?.game ?? payload.game),
       }));
       await assignPlayersToRoster(payload.rosterId, players);
       toast({
-        title: "Success",
-        description: "Players assigned to roster successfully",
+        title: 'Success',
+        description: 'Players assigned to roster successfully',
       });
     } catch (error) {
-      console.error("Error assigning players:", error);
+      console.error('Error assigning players:', error);
       toast({
-        title: "Error",
+        title: 'Error',
         description:
-          error instanceof Error
-            ? error.message
-            : "Failed to assign players. Please try again.",
-        variant: "destructive",
-
+          error instanceof Error ? error.message : 'Failed to assign players. Please try again.',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -135,16 +122,15 @@ export function RosterTab({
     try {
       await removePlayerFromRoster(rosterId, playerId);
       toast({
-        title: "Success",
-        description: "Player removed from roster successfully",
+        title: 'Success',
+        description: 'Player removed from roster successfully',
       });
     } catch (error) {
-      console.error("Error removing player:", error);
+      console.error('Error removing player:', error);
       toast({
-        title: "Error",
-        description: "Failed to remove player. Please try again.",
-        variant: "destructive",
-
+        title: 'Error',
+        description: 'Failed to remove player. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -209,11 +195,7 @@ export function RosterTab({
             <div>
               <p className="text-sm text-muted-foreground">Active Players</p>
               <p className="text-2xl font-bold">
-                {rosters.reduce(
-                  (total, roster) => total + (roster.playerCount || 0),
-                  0,
-                )}
-
+                {rosters.reduce((total, roster) => total + (roster.playerCount || 0), 0)}
               </p>
             </div>
             <Users className="h-8 w-8 text-muted-foreground" />
@@ -223,10 +205,7 @@ export function RosterTab({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Active Rosters</p>
-              <p className="text-2xl font-bold">
-                {rosters.filter((r) => r.isActive).length}
-              </p>
-
+              <p className="text-2xl font-bold">{rosters.filter(r => r.isActive).length}</p>
             </div>
             <Users className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -238,17 +217,14 @@ export function RosterTab({
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            No rosters found. Create your first roster to get started with team
-            management.
-
+            No rosters found. Create your first roster to get started with team management.
           </AlertDescription>
         </Alert>
       ) : (
         <RosterList
           rosters={rosters}
           onRosterSelect={handleRosterSelect}
-          onRosterEdit={(roster) => {
-
+          onRosterEdit={roster => {
             setSelectedRoster(roster);
             setIsEditDialogOpen(true);
           }}
@@ -273,8 +249,7 @@ export function RosterTab({
       <RosterDetailsDialog
         roster={selectedRoster}
         open={isDetailsDialogOpen}
-        onOpenChange={(open) => {
-
+        onOpenChange={open => {
           // Clear selection on close to avoid stale queries
           if (!open) setSelectedRoster(null);
           setIsDetailsDialogOpen(open);
@@ -287,19 +262,18 @@ export function RosterTab({
           roster={selectedRoster}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
-          onSubmit={async (data) => {
+          onSubmit={async data => {
             try {
               await updateRoster(selectedRoster.id, data);
               toast({
-                title: "Roster updated",
-                description: "Your changes have been saved.",
+                title: 'Roster updated',
+                description: 'Your changes have been saved.',
               });
             } catch (e) {
               toast({
-                title: "Failed to update roster",
-                description: "Please try again later.",
-                variant: "destructive",
-
+                title: 'Failed to update roster',
+                description: 'Please try again later.',
+                variant: 'destructive',
               });
             }
           }}
@@ -311,8 +285,7 @@ export function RosterTab({
       {selectedRoster && (
         <PlayerAssignmentDialog
           open={isAssignDialogOpen}
-          onOpenChange={(open) => {
-
+          onOpenChange={open => {
             if (!open) setSelectedRoster(null);
             setIsAssignDialogOpen(open);
           }}
@@ -321,8 +294,7 @@ export function RosterTab({
           rosterName={selectedRoster.name}
           maxPlayers={selectedRoster.maxPlayers}
           // Use context.rosterPlayers so current count/slots reflect latest server state
-          currentPlayers={rosterPlayers.map((p) => ({
-
+          currentPlayers={rosterPlayers.map(p => ({
             playerId: p.playerId,
             role: p.role,
           }))}

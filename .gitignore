@@ -21,6 +21,7 @@ NexusSuite/public/assets/
 # Local tooling
 .vercel/
 .trae/
+supabase/.temp/
 
 # Scratch and sandbox
 sandbox/
@@ -41,6 +42,7 @@ server/cleanup-log.txt
 
 # Logs
 *.log
+.DS_Store
 
 # Local data dumps and scratch files
 cookies.txt
@@ -51,3 +53,5 @@ src/scripts/replit_full_database.json
 .tmp-seed.json
 project_structure*.txt
 structure*.txt
+.vercel
+.env*.local

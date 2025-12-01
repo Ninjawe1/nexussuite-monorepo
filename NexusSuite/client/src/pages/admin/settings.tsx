@@ -1,35 +1,24 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
   const [maintenance, setMaintenance] = useState(false);
   const [maintenanceMsg, setMaintenanceMsg] = useState("We'll be back soon.");
-  const [apiKeyFirebase, setApiKeyFirebase] = useState("demo-firebase-key");
-  const [apiKeyGoogle, setApiKeyGoogle] = useState("demo-google-key");
+  const [apiKeyFirebase, setApiKeyFirebase] = useState('demo-firebase-key');
+  const [apiKeyGoogle, setApiKeyGoogle] = useState('demo-google-key');
 
-  const save = () => toast({ title: "Settings", description: "Saved (demo)" });
-
+  const save = () => toast({ title: 'Settings', description: 'Saved (demo)' });
 
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">App Control & Settings</h1>
-        <p className="text-muted-foreground">
-          Toggle features and manage integrations
-        </p>
-
+        <p className="text-muted-foreground">Toggle features and manage integrations</p>
       </div>
 
       <Card>
@@ -43,11 +32,7 @@ export default function AdminSettingsPage() {
               <span>Maintenance Mode</span>
               <Switch checked={maintenance} onCheckedChange={setMaintenance} />
             </div>
-            <Input
-              value={maintenanceMsg}
-              onChange={(e) => setMaintenanceMsg(e.target.value)}
-            />
-
+            <Input value={maintenanceMsg} onChange={e => setMaintenanceMsg(e.target.value)} />
           </div>
         </CardContent>
       </Card>
@@ -59,14 +44,8 @@ export default function AdminSettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <Input
-              value={apiKeyFirebase}
-              onChange={(e) => setApiKeyFirebase(e.target.value)}
-            />
-            <Input
-              value={apiKeyGoogle}
-              onChange={(e) => setApiKeyGoogle(e.target.value)}
-            />
+            <Input value={apiKeyFirebase} onChange={e => setApiKeyFirebase(e.target.value)} />
+            <Input value={apiKeyGoogle} onChange={e => setApiKeyGoogle(e.target.value)} />
 
             <Button onClick={save}>Save</Button>
           </div>

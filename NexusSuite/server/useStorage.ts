@@ -1,6 +1,6 @@
 // Use Firestore storage adapter (original architecture)
-import type { IStorage } from "./storage.js";
-import { storage } from "./storage-firestore.js";
+import type { IStorage } from "./storage";
+import { storage } from "./storage-firestore";
 
 export { storage };
 

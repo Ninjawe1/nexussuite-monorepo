@@ -1,5 +1,4 @@
-import { AuditLogEntry } from "../audit-log-entry";
-
+import { AuditLogEntry } from '../audit-log-entry';
 
 export default function AuditLogEntryExample() {
   return (

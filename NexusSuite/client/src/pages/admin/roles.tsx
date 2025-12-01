@@ -1,11 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 import {
   Select,
@@ -13,23 +7,20 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/select';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const demoSubAdmins = [
-  { id: "sa1", name: "Finance Admin", user: "alice@example.com" },
-  { id: "sa2", name: "Support Admin", user: "bob@example.com" },
-
+  { id: 'sa1', name: 'Finance Admin', user: 'alice@example.com' },
+  { id: 'sa2', name: 'Support Admin', user: 'bob@example.com' },
 ];
 
 export default function AdminRolesPage() {
   const { toast } = useToast();
-  const [role, setRole] = useState("finance");
+  const [role, setRole] = useState('finance');
 
-  const create = () =>
-    toast({ title: "Sub-admin", description: `Created ${role} (demo)` });
-
+  const create = () => toast({ title: 'Sub-admin', description: `Created ${role} (demo)` });
 
   return (
     <div className="p-6 space-y-6">
@@ -66,18 +57,13 @@ export default function AdminRolesPage() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {[
-              "Support Admin updated email template",
-              "Finance Admin refunded invoice inv_002",
-            ].map((l, idx) => (
-              <li
-                key={idx}
-                className="p-2 border border-border rounded-lg text-sm"
-              >
-                {l}
-              </li>
-            ))}
-
+            {['Support Admin updated email template', 'Finance Admin refunded invoice inv_002'].map(
+              (l, idx) => (
+                <li key={idx} className="p-2 border border-border rounded-lg text-sm">
+                  {l}
+                </li>
+              )
+            )}
           </ul>
         </CardContent>
       </Card>

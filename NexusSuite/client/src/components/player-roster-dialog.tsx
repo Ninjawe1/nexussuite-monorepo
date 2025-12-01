@@ -1,13 +1,8 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import type { Staff, Roster, InsertRoster } from "@shared/schema";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import type { Staff, Roster, InsertRoster } from '@shared/schema';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 import {
   Select,
@@ -15,12 +10,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Trash2 } from "lucide-react";
-
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { Trash2 } from 'lucide-react';
 
 interface PlayerRosterDialogProps {
   open: boolean;
@@ -36,49 +30,44 @@ export function PlayerRosterDialog({
   existingRosters,
 }: PlayerRosterDialogProps) {
   const { toast } = useToast();
-  const [form, setForm] = useState<
-    Pick<InsertRoster, "playerId" | "game" | "role">
-  >({
+  const [form, setForm] = useState<Pick<InsertRoster, 'playerId' | 'game' | 'role'>>({
     playerId: player.id,
-    game: "valorant",
-    role: "Player",
-
+    game: 'valorant',
+    role: 'Player',
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertRoster) => {
-      return await apiRequest("/api/rosters", "POST", data);
+      return await apiRequest('/api/rosters', 'POST', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/rosters"] });
-      toast({ title: "Success", description: "Roster assigned" });
+      queryClient.invalidateQueries({ queryKey: ['/api/rosters'] });
+      toast({ title: 'Success', description: 'Roster assigned' });
 
       onOpenChange(false);
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to assign roster",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to assign roster',
+        variant: 'destructive',
       });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/rosters/${id}`, "DELETE");
+      return await apiRequest(`/api/rosters/${id}`, 'DELETE');
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/rosters"] });
-      toast({ title: "Success", description: "Roster removed" });
+      queryClient.invalidateQueries({ queryKey: ['/api/rosters'] });
+      toast({ title: 'Success', description: 'Roster removed' });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove roster",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to remove roster',
+        variant: 'destructive',
       });
     },
   });
@@ -99,11 +88,7 @@ export function PlayerRosterDialog({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm">Game</label>
-              <Select
-                value={form.game}
-                onValueChange={(v) => setForm({ ...form, game: v })}
-              >
-
+              <Select value={form.game} onValueChange={v => setForm({ ...form, game: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select game" />
                 </SelectTrigger>
@@ -122,19 +107,13 @@ export function PlayerRosterDialog({
               <Input
                 placeholder="e.g., IGL, Entry, Support"
                 value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-
+                onChange={e => setForm({ ...form, role: e.target.value })}
               />
             </div>
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
@@ -145,16 +124,10 @@ export function PlayerRosterDialog({
 
         {existingRosters.length > 0 && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Existing assignments
-            </p>
+            <p className="text-sm text-muted-foreground">Existing assignments</p>
             <div className="space-y-2">
-              {existingRosters.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between p-2 rounded-lg border"
-                >
-
+              {existingRosters.map(r => (
+                <div key={r.id} className="flex items-center justify-between p-2 rounded-lg border">
                   <span className="text-sm">
                     {r.game} • {r.role}
                   </span>

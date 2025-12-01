@@ -1,11 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 import {
   Select,
@@ -13,17 +7,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/select';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminReportsPage() {
   const { toast } = useToast();
-  const [period, setPeriod] = useState("monthly");
+  const [period, setPeriod] = useState('monthly');
 
-  const generate = (format: "pdf" | "csv") => {
+  const generate = (format: 'pdf' | 'csv') => {
     toast({
-      title: "Report",
+      title: 'Report',
 
       description: `Generated ${period} report as ${format.toUpperCase()} (demo)`,
     });
@@ -33,10 +27,7 @@ export default function AdminReportsPage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Reports & Exporting</h1>
-        <p className="text-muted-foreground">
-          Revenue, signups, uptime, feature usage
-        </p>
-
+        <p className="text-muted-foreground">Revenue, signups, uptime, feature usage</p>
       </div>
 
       <Card>
@@ -55,9 +46,8 @@ export default function AdminReportsPage() {
                 <SelectItem value="monthly">Monthly</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => generate("pdf")}>Export PDF</Button>
-            <Button variant="outline" onClick={() => generate("csv")}>
-
+            <Button onClick={() => generate('pdf')}>Export PDF</Button>
+            <Button variant="outline" onClick={() => generate('csv')}>
               Export CSV
             </Button>
           </div>

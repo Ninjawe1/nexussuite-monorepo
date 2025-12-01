@@ -35,6 +35,13 @@ function ensureJsonResponse(res: Response) {
 }
 
 function resolveUrl(u: string): string {
+  if (u.startsWith('/api/')) {
+    const base = (import.meta as any).env?.VITE_API_URL as string | undefined;
+    if (base) {
+      const b = String(base).replace(/\/$/, '');
+      return `${b}${u}`;
+    }
+  }
   return u;
 }
 

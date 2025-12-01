@@ -1,34 +1,32 @@
-import { useState } from "react";
-import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState } from 'react';
+import { useRoute, useLocation } from 'wouter';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function InviteAccept() {
-  const [, params] = useRoute("/invite/:token");
+  const [, params] = useRoute('/invite/:token');
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const token = params?.token;
 
-  const { data: invite, isLoading, error } = useQuery({
-    queryKey: ["/api/organizations/invite", token],
+  const {
+    data: invite,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['/api/organizations/invite', token],
     queryFn: async () => {
       const res = await fetch(`/api/organizations/invite/${token}`);
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.message || "Failed to fetch invitation");
+      if (!res.ok) throw new Error(json?.message || 'Failed to fetch invitation');
 
       return json?.data;
     },
@@ -38,22 +36,25 @@ export default function InviteAccept() {
   const signup = useMutation({
     mutationFn: async () => {
       const res = await fetch(`/api/organizations/invite/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password, confirmPassword }),
-        credentials: "include",
+        credentials: 'include',
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.message || "Failed to complete signup");
+      if (!res.ok) throw new Error(json?.message || 'Failed to complete signup');
       return json;
     },
     onSuccess: () => {
-      toast({ title: "Joined organization", description: "Welcome aboard" });
-      setLocation("/dashboard");
+      toast({ title: 'Joined organization', description: 'Welcome aboard' });
+      setLocation('/dashboard');
     },
     onError: (error: any) => {
-      toast({ variant: "destructive", title: "Signup failed", description: error.message || "Error" });
-
+      toast({
+        variant: 'destructive',
+        title: 'Signup failed',
+        description: error.message || 'Error',
+      });
     },
   });
 
@@ -80,14 +81,12 @@ export default function InviteAccept() {
               <CardTitle>Invalid Invitation</CardTitle>
             </div>
             <CardDescription>
-              {error?.message || "This invitation link is invalid or has expired."}
-
+              {error?.message || 'This invitation link is invalid or has expired.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => setLocation("/dashboard")}
-
+              onClick={() => setLocation('/dashboard')}
               className="w-full"
               data-testid="button-goto-login"
             >
@@ -109,8 +108,7 @@ export default function InviteAccept() {
               {invite.organizationLogo && (
                 <img src={invite.organizationLogo} alt="Org Logo" className="w-8 h-8 rounded" />
               )}
-              <span>Join {invite.organizationName || "Organization"}</span>
-
+              <span>Join {invite.organizationName || 'Organization'}</span>
             </CardTitle>
           </div>
           <CardDescription>
@@ -132,8 +130,7 @@ export default function InviteAccept() {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={(invite.email || "").split("@")[0]} disabled />
-
+                <Input id="name" value={(invite.email || '').split('@')[0]} disabled />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -141,15 +138,29 @@ export default function InviteAccept() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Create password</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirm password</Label>
-                <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                />
               </div>
-              <Button className="w-full" onClick={() => signup.mutate()} disabled={signup.isPending || !password || password !== confirmPassword}>
-                {signup.isPending ? "Creating..." : "Create account & join"}
-
+              <Button
+                className="w-full"
+                onClick={() => signup.mutate()}
+                disabled={signup.isPending || !password || password !== confirmPassword}
+              >
+                {signup.isPending ? 'Creating...' : 'Create account & join'}
               </Button>
             </div>
           </div>

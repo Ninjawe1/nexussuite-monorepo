@@ -1,16 +1,10 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Staff, Payroll, Contract } from "@shared/schema";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Staff, Payroll, Contract } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
   Select,
@@ -18,25 +12,25 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Plus, FileText, Users, Edit2, Trash } from "lucide-react";
-import { AssignToRosterDialog } from "@/components/assign-to-roster-dialog";
-import { PlayerAddDialog } from "@/components/player-add-dialog";
-import { RosterTab } from "@/components/roster-tab";
-import { RosterProvider, useRosterContext } from "@/contexts/RosterContext";
-import { formatDateSafe, toDateSafe } from "@/lib/date";
-import { PlayerRoleEditDialog } from "@/components/player-role-edit-dialog";
-import { StaffDialog } from "@/components/staff-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Plus, FileText, Users, Edit2, Trash } from 'lucide-react';
+import { AssignToRosterDialog } from '@/components/assign-to-roster-dialog';
+import { PlayerAddDialog } from '@/components/player-add-dialog';
+import { RosterTab } from '@/components/roster-tab';
+import { RosterProvider, useRosterContext } from '@/contexts/RosterContext';
+import { formatDateSafe, toDateSafe } from '@/lib/date';
+import { PlayerRoleEditDialog } from '@/components/player-role-edit-dialog';
+import { StaffDialog } from '@/components/staff-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
-import { useAuth } from "@/hooks/useAuth"; // Correct hook path? I saw useAuth.ts in hooks/
-import { useOrganization } from "@/contexts/OrganizationContext";
+import { useAuth } from '@/hooks/useAuth'; // Correct hook path? I saw useAuth.ts in hooks/
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export default function Players() {
   const { currentOrganization } = useOrganization();
-  const organizationId = currentOrganization?.id || "";
+  const organizationId = currentOrganization?.id || '';
 
   // Wait for organization to be loaded
   if (!organizationId) {
@@ -57,19 +51,15 @@ export default function Players() {
   );
 }
 
-function PlayersContent({
-  organizationId,
-}: {
-  organizationId: string;
-}) {
+function PlayersContent({ organizationId }: { organizationId: string }) {
   const { user } = useAuth();
-  const currentUserId = user?.id || "";
-  const [searchQuery, setSearchQuery] = useState("");
-  const [gameFilter, setGameFilter] = useState("all");
+  const currentUserId = user?.id || '';
+  const [searchQuery, setSearchQuery] = useState('');
+  const [gameFilter, setGameFilter] = useState('all');
   const [dialogOpenFor, setDialogOpenFor] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<Staff | null>(null);
   const [addPlayerOpen, setAddPlayerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("players");
+  const [activeTab, setActiveTab] = useState('players');
 
   const [roleEditOpen, setRoleEditOpen] = useState(false);
   const [roleEditState, setRoleEditState] = useState<{
@@ -83,39 +73,28 @@ function PlayersContent({
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: staffMembers = [], isLoading: staffLoading } = useQuery<
-    Staff[]
-  >({
-    queryKey: ["/api/staff", organizationId],
+  const { data: staffMembers = [], isLoading: staffLoading } = useQuery<Staff[]>({
+    queryKey: ['/api/staff', organizationId],
     queryFn: async () => {
-      const res = await apiRequest(
-        `/api/staff?organizationId=${organizationId}`,
-        "GET",
-      );
+      const res = await apiRequest(`/api/staff?organizationId=${organizationId}`, 'GET');
       return await res.json();
     },
     enabled: !!organizationId,
   });
 
   const { data: payroll = [] } = useQuery<Payroll[]>({
-    queryKey: ["/api/payroll", organizationId],
+    queryKey: ['/api/payroll', organizationId],
     queryFn: async () => {
-      const res = await apiRequest(
-        `/api/payroll?organizationId=${organizationId}`,
-        "GET",
-      );
+      const res = await apiRequest(`/api/payroll?organizationId=${organizationId}`, 'GET');
       return await res.json();
     },
     enabled: !!organizationId,
   });
 
   const { data: contracts = [] } = useQuery<Contract[]>({
-    queryKey: ["/api/contracts", organizationId],
+    queryKey: ['/api/contracts', organizationId],
     queryFn: async () => {
-      const res = await apiRequest(
-        `/api/contracts?organizationId=${organizationId}`,
-        "GET",
-      );
+      const res = await apiRequest(`/api/contracts?organizationId=${organizationId}`, 'GET');
       return await res.json();
     },
     enabled: !!organizationId,
@@ -123,34 +102,32 @@ function PlayersContent({
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/staff/${id}`, "DELETE");
+      return await apiRequest(`/api/staff/${id}`, 'DELETE');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["/api/staff", organizationId],
+        queryKey: ['/api/staff', organizationId],
       });
       toast({
-        title: "Player deleted",
-        description: "The player has been removed successfully.",
+        title: 'Player deleted',
+        description: 'The player has been removed successfully.',
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Delete failed",
-        description: error.message || "Could not delete player.",
-        variant: "destructive",
-
+        title: 'Delete failed',
+        description: error.message || 'Could not delete player.',
+        variant: 'destructive',
       });
     },
   });
 
   const players = staffMembers
-    .filter((s) => s.role.toLowerCase() === "player")
+    .filter(s => s.role.toLowerCase() === 'player')
     .filter(
-      (s) =>
+      s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.email.toLowerCase().includes(searchQuery.toLowerCase()),
-
+        s.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   const filteredPlayers = players; // Game filtering removed due to roster.game deprecation
@@ -165,32 +142,26 @@ function PlayersContent({
   } = useRosterContext();
 
   const getSalaryText = (playerId: string) => {
-    const entries = payroll.filter((p) => p.staffId === playerId);
-    if (!entries.length) return "No payroll set";
-    const latestSorted = entries
-      .sort(
-        (a, b) =>
-          (toDateSafe(a.date)?.getTime() ?? 0) -
-          (toDateSafe(b.date)?.getTime() ?? 0),
-      );
+    const entries = payroll.filter(p => p.staffId === playerId);
+    if (!entries.length) return 'No payroll set';
+    const latestSorted = entries.sort(
+      (a, b) => (toDateSafe(a.date)?.getTime() ?? 0) - (toDateSafe(b.date)?.getTime() ?? 0)
+    );
     const latest = latestSorted[latestSorted.length - 1]!;
     return `${latest.amount} (${latest.type})`;
   };
 
   const getContractFor = (name: string) => {
-    return contracts.find(
-      (c) => c.type.toLowerCase() === "player" && c.linkedPerson === name,
-    );
+    return contracts.find(c => c.type.toLowerCase() === 'player' && c.linkedPerson === name);
   };
 
-  const mockPlayers = players.map((player) => ({
+  const mockPlayers = players.map(player => ({
     id: player.id,
     name: player.name,
     email: player.email,
-    role: "starter",
-    game: "valorant",
-    status: "active" as const,
-
+    role: 'starter',
+    game: 'valorant',
+    status: 'active' as const,
   }));
 
   return (
@@ -205,14 +176,10 @@ function PlayersContent({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={() => setAddPlayerOpen(true)}
-            data-testid="button-add-player"
-          >
+          <Button onClick={() => setAddPlayerOpen(true)} data-testid="button-add-player">
             + Add Player
           </Button>
-          <Button onClick={() => (window.location.href = "/contracts")}>
-
+          <Button onClick={() => (window.location.href = '/contracts')}>
             <FileText className="w-4 h-4 mr-2" />
             Manage Contracts
           </Button>
@@ -240,8 +207,7 @@ function PlayersContent({
                 placeholder="Search players by name or email..."
                 className="pl-9"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
             <Select value={gameFilter} onValueChange={setGameFilter}>
@@ -267,10 +233,8 @@ function PlayersContent({
             </div>
           ) : filteredPlayers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPlayers.map((player) => {
-                const playerAssignments = rosterPlayers.filter(
-                  (rp) => rp.playerId === player.id,
-                );
+              {filteredPlayers.map(player => {
+                const playerAssignments = rosterPlayers.filter(rp => rp.playerId === player.id);
 
                 const contract = getContractFor(player.name);
 
@@ -278,9 +242,7 @@ function PlayersContent({
                   <Card key={player.id} className="hover-elevate">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">
-                          {player.name}
-                        </CardTitle>
+                        <CardTitle className="text-base">{player.name}</CardTitle>
 
                         <div className="flex items-center gap-2">
                           <Badge>Player</Badge>
@@ -309,9 +271,7 @@ function PlayersContent({
                     <CardContent className="space-y-3">
                       <div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            Salary
-                          </span>
+                          <span className="text-xs text-muted-foreground">Salary</span>
 
                           <Badge variant="outline" className="text-xs">
                             {getSalaryText(player.id)}
@@ -321,9 +281,7 @@ function PlayersContent({
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            Rosters
-                          </span>
+                          <span className="text-xs text-muted-foreground">Rosters</span>
 
                           <Button
                             size="sm"
@@ -338,20 +296,12 @@ function PlayersContent({
                         </div>
                         {playerAssignments.length ? (
                           <div className="flex flex-wrap gap-2">
-                            {playerAssignments.map((ap) => {
+                            {playerAssignments.map(ap => {
                               const rosterName =
-                                contextRosters.find((r) => r.id === ap.rosterId)
-                                  ?.name || "Roster";
+                                contextRosters.find(r => r.id === ap.rosterId)?.name || 'Roster';
                               return (
-                                <div
-                                  key={ap.id}
-                                  className="flex items-center gap-1"
-                                >
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-
+                                <div key={ap.id} className="flex items-center gap-1">
+                                  <Badge variant="secondary" className="text-xs">
                                     {rosterName} · {ap.role}
                                   </Badge>
                                   <Button
@@ -377,26 +327,16 @@ function PlayersContent({
                             })}
                           </div>
                         ) : (
-                          <p className="text-xs text-muted-foreground">
-                            No rosters assigned
-                          </p>
-
+                          <p className="text-xs text-muted-foreground">No rosters assigned</p>
                         )}
                       </div>
 
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            Contract
-                          </span>
+                          <span className="text-xs text-muted-foreground">Contract</span>
                           {contract ? (
                             <Badge variant="outline" className="text-xs">
-                              Expires{" "}
-                              {formatDateSafe(
-                                contract.expirationDate,
-                                "MMM dd, yyyy",
-                              )}
-
+                              Expires {formatDateSafe(contract.expirationDate, 'MMM dd, yyyy')}
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs">
@@ -410,8 +350,7 @@ function PlayersContent({
                     {dialogOpenFor === player.id && (
                       <AssignToRosterDialog
                         open={true}
-                        onOpenChange={(o) => {
-
+                        onOpenChange={o => {
                           if (!o) {
                             setDialogOpenFor(null);
                             setSelectedPlayer(null);
@@ -420,14 +359,9 @@ function PlayersContent({
                         player={selectedPlayer}
                         availableRosters={contextRosters}
                         onSubmit={async (rosterId, role) => {
-                          const chosen =
-                            contextRosters.find((r) => r.id === rosterId) ||
-                            null;
+                          const chosen = contextRosters.find(r => r.id === rosterId) || null;
                           setSelectedRoster(chosen);
-                          await assignPlayersToRoster(rosterId, [
-                            { playerId: player.id, role },
-                          ]);
-
+                          await assignPlayersToRoster(rosterId, [{ playerId: player.id, role }]);
                         }}
                         isLoading={isLoadingRosters}
                       />
@@ -460,16 +394,14 @@ function PlayersContent({
       {roleEditState && (
         <PlayerRoleEditDialog
           open={roleEditOpen}
-          onOpenChange={(o) => {
-
+          onOpenChange={o => {
             setRoleEditOpen(o);
             if (!o) setRoleEditState(null);
           }}
           player={selectedPlayer}
           rosterName={roleEditState.rosterName}
           currentRole={roleEditState.role}
-          onSubmit={async (nextRole) => {
-
+          onSubmit={async nextRole => {
             await assignPlayersToRoster(roleEditState.rosterId, [
               { playerId: roleEditState.playerId, role: nextRole },
             ]);
@@ -480,15 +412,10 @@ function PlayersContent({
       {/* Edit Player Info dialog */}
       <StaffDialog
         open={!!editOpenFor}
-        onOpenChange={(o) => {
+        onOpenChange={o => {
           if (!o) setEditOpenFor(null);
         }}
-        staff={
-          editOpenFor
-            ? staffMembers.find((s) => s.id === editOpenFor)
-            : undefined
-        }
-
+        staff={editOpenFor ? staffMembers.find(s => s.id === editOpenFor) : undefined}
       />
     </div>
   );

@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Trash2, Download, Eye } from "lucide-react";
-
+import React, { useCallback, useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Trash2, Download, Eye } from 'lucide-react';
 
 interface ContractAttachmentsProps {
   contractId: string;
@@ -20,37 +19,25 @@ interface ContractFile {
   createdAt?: string | null;
 }
 
-export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
-  contractId,
-}) => {
-
+export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({ contractId }) => {
   const qc = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isReading, setIsReading] = useState(false);
 
-  const queryKey = useMemo(() => ["contract-files", contractId], [contractId]);
-
+  const queryKey = useMemo(() => ['contract-files', contractId], [contractId]);
 
   const { data, isLoading, error } = useQuery<ContractFile[]>({
     queryKey,
     queryFn: async () => {
-      const res = await apiRequest(`/api/contracts/${contractId}/files`, "GET");
+      const res = await apiRequest(`/api/contracts/${contractId}/files`, 'GET');
 
       return res.json();
     },
   });
 
   const uploadMutation = useMutation({
-    mutationFn: async (payload: {
-      fileName: string;
-      base64: string;
-      contentType?: string;
-    }) => {
-      const res = await apiRequest(
-        `/api/contracts/${contractId}/files`,
-        "POST",
-        payload,
-      );
+    mutationFn: async (payload: { fileName: string; base64: string; contentType?: string }) => {
+      const res = await apiRequest(`/api/contracts/${contractId}/files`, 'POST', payload);
 
       return res.json();
     },
@@ -62,10 +49,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
 
   const deleteMutation = useMutation({
     mutationFn: async (fileId: string) => {
-      const res = await apiRequest(
-        `/api/contracts/${contractId}/files/${fileId}`,
-        "DELETE",
-      );
+      const res = await apiRequest(`/api/contracts/${contractId}/files/${fileId}`, 'DELETE');
 
       return res.json();
     },
@@ -99,8 +83,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
       });
     } catch (err) {
       console.error(err);
-      alert((err as Error)?.message || "Failed to upload file");
-
+      alert((err as Error)?.message || 'Failed to upload file');
     } finally {
       setIsReading(false);
     }
@@ -112,18 +95,17 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
         await deleteMutation.mutateAsync(id);
       } catch (err) {
         console.error(err);
-        alert((err as Error)?.message || "Failed to delete file");
+        alert((err as Error)?.message || 'Failed to delete file');
       }
     },
-    [deleteMutation],
-
+    [deleteMutation]
   );
 
   const onDownload = useCallback((file: ContractFile) => {
     if (!file.base64) return;
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = file.base64;
-    link.download = file.fileName || "download";
+    link.download = file.fileName || 'download';
 
     document.body.appendChild(link);
     link.click();
@@ -132,19 +114,17 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
 
   const onPreview = useCallback((file: ContractFile) => {
     if (!file.base64) return;
-    const w = window.open("");
+    const w = window.open('');
     if (w) {
-      const isImage = (file.contentType || "").startsWith("image/");
-      const isPdf = (file.contentType || "").includes("pdf");
+      const isImage = (file.contentType || '').startsWith('image/');
+      const isPdf = (file.contentType || '').includes('pdf');
 
       const content = isImage
         ? `<img src="${file.base64}" style="max-width:100%;height:auto" />`
         : isPdf
           ? `<iframe src="${file.base64}" style="width:100%;height:100%" frameborder="0"></iframe>`
           : `<a href="${file.base64}" download>Download ${file.fileName}</a>`;
-      w.document.write(
-        `<!doctype html><title>${file.fileName}</title>${content}`,
-      );
+      w.document.write(`<!doctype html><title>${file.fileName}</title>${content}`);
 
       w.document.close();
     }
@@ -158,8 +138,7 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
           onClick={onUpload}
           disabled={!selectedFile || uploadMutation.isPending || isReading}
         >
-          {uploadMutation.isPending || isReading ? "Uploading..." : "Upload"}
-
+          {uploadMutation.isPending || isReading ? 'Uploading...' : 'Upload'}
         </Button>
       </div>
 
@@ -168,18 +147,12 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
           Loading attachments...
         </div>
       )}
-      {error && (
-        <div className="text-sm text-red-600">Failed to load attachments</div>
-      )}
+      {error && <div className="text-sm text-red-600">Failed to load attachments</div>}
 
       {(data?.length ?? 0) > 0 ? (
         <div className="space-y-2">
-          {data!.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center justify-between rounded border p-2"
-            >
-
+          {data!.map(file => (
+            <div key={file.id} className="flex items-center justify-between rounded border p-2">
               <div className="truncate">
                 <div className="font-medium truncate">{file.fileName}</div>
                 {file.createdAt && (
@@ -189,21 +162,10 @@ export const ContractAttachments: React.FC<ContractAttachmentsProps> = ({
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onPreview(file)}
-                  title="Preview"
-                >
+                <Button variant="ghost" size="sm" onClick={() => onPreview(file)} title="Preview">
                   <Eye className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDownload(file)}
-                  title="Download"
-                >
-
+                <Button variant="ghost" size="sm" onClick={() => onDownload(file)} title="Download">
                   <Download className="h-4 w-4" />
                 </Button>
                 <Button

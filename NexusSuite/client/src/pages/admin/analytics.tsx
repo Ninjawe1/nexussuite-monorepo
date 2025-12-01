@@ -1,53 +1,46 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const growth = [
-  { date: "2024-10-01", signups: 5 },
-  { date: "2024-10-08", signups: 12 },
-  { date: "2024-10-15", signups: 18 },
-  { date: "2024-10-22", signups: 14 },
+  { date: '2024-10-01', signups: 5 },
+  { date: '2024-10-08', signups: 12 },
+  { date: '2024-10-15', signups: 18 },
+  { date: '2024-10-22', signups: 14 },
 ];
 
 const topUsers = [
-  { name: "Alice Ng", sessions: 120 },
-  { name: "Bob Lee", sessions: 88 },
-  { name: "Carlo M", sessions: 76 },
+  { name: 'Alice Ng', sessions: 120 },
+  { name: 'Bob Lee', sessions: 88 },
+  { name: 'Carlo M', sessions: 76 },
 ];
 
 const features = [
-  { feature: "Campaigns", count: 340 },
-  { feature: "Analytics", count: 210 },
-  { feature: "Wallet", count: 188 },
+  { feature: 'Campaigns', count: 340 },
+  { feature: 'Analytics', count: 210 },
+  { feature: 'Wallet', count: 188 },
 ];
 
 const revenueByPlan = [
-  { plan: "Starter", amount: 0 },
-  { plan: "Growth", amount: 98 },
-  { plan: "Enterprise", amount: 199 },
+  { plan: 'Starter', amount: 0 },
+  { plan: 'Growth', amount: 98 },
+  { plan: 'Enterprise', amount: 199 },
 ];
 
 const engagement = [
-  { label: "Active Sessions", value: 312 },
-  { label: "Avg Time", value: "11m 20s" },
-  { label: "Retention 30d", value: "64%" },
+  { label: 'Active Sessions', value: 312 },
+  { label: 'Avg Time', value: '11m 20s' },
+  { label: 'Retention 30d', value: '64%' },
 ];
 
 const socialConnections = [
-  { platform: "Twitter/X", count: 42 },
-  { platform: "Instagram", count: 58 },
-  { platform: "Twitch", count: 21 },
+  { platform: 'Twitter/X', count: 42 },
+  { platform: 'Instagram', count: 58 },
+  { platform: 'Twitch', count: 21 },
 ];
 
 const systemPerformance = [
-  { metric: "API Uptime (7d)", value: "99.97%" },
-  { metric: "Avg Response", value: "180ms" },
-  { metric: "Errors", value: "0.12%" },
-
+  { metric: 'API Uptime (7d)', value: '99.97%' },
+  { metric: 'Avg Response', value: '180ms' },
+  { metric: 'Errors', value: '0.12%' },
 ];
 
 export default function AdminAnalyticsPage() {
@@ -55,10 +48,7 @@ export default function AdminAnalyticsPage() {
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Analytics & Insights</h1>
-        <p className="text-muted-foreground">
-          Growth, engagement, and performance at a glance
-        </p>
-
+        <p className="text-muted-foreground">Growth, engagement, and performance at a glance</p>
       </div>
 
       <Card>
@@ -68,8 +58,7 @@ export default function AdminAnalyticsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {growth.map((g) => (
-
+            {growth.map(g => (
               <div key={g.date} className="border border-border rounded-lg p-4">
                 <div className="text-xs text-muted-foreground">{g.date}</div>
                 <div className="text-xl font-semibold">{g.signups}</div>
@@ -86,13 +75,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {topUsers.map((u) => (
+              {topUsers.map(u => (
                 <li key={u.name} className="flex items-center justify-between">
                   <span>{u.name}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {u.sessions} sessions
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">{u.sessions} sessions</span>
                 </li>
               ))}
             </ul>
@@ -104,16 +90,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {features.map((f) => (
-                <li
-                  key={f.feature}
-                  className="flex items-center justify-between"
-                >
+              {features.map(f => (
+                <li key={f.feature} className="flex items-center justify-between">
                   <span>{f.feature}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {f.count}
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">{f.count}</span>
                 </li>
               ))}
             </ul>
@@ -128,13 +108,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {revenueByPlan.map((r) => (
+              {revenueByPlan.map(r => (
                 <li key={r.plan} className="flex items-center justify-between">
                   <span>{r.plan}</span>
-                  <span className="text-sm text-muted-foreground">
-                    ${r.amount}
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">${r.amount}</span>
                 </li>
               ))}
             </ul>
@@ -146,13 +123,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {engagement.map((e) => (
+              {engagement.map(e => (
                 <li key={e.label} className="flex items-center justify-between">
                   <span>{e.label}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {e.value}
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">{e.value}</span>
                 </li>
               ))}
             </ul>
@@ -167,16 +141,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {socialConnections.map((s) => (
-                <li
-                  key={s.platform}
-                  className="flex items-center justify-between"
-                >
+              {socialConnections.map(s => (
+                <li key={s.platform} className="flex items-center justify-between">
                   <span>{s.platform}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {s.count}
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">{s.count}</span>
                 </li>
               ))}
             </ul>
@@ -188,16 +156,10 @@ export default function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {systemPerformance.map((sp) => (
-                <li
-                  key={sp.metric}
-                  className="flex items-center justify-between"
-                >
+              {systemPerformance.map(sp => (
+                <li key={sp.metric} className="flex items-center justify-between">
                   <span>{sp.metric}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {sp.value}
-                  </span>
-
+                  <span className="text-sm text-muted-foreground">{sp.value}</span>
                 </li>
               ))}
             </ul>

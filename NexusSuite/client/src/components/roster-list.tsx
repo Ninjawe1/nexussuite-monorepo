@@ -1,14 +1,8 @@
-import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 import {
   Users,
@@ -19,7 +13,7 @@ import {
   Edit,
   Trash2,
   UserPlus,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -27,11 +21,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Roster } from "@/services/rosterService";
-import { normalizeGameTitle } from "@/constants/games";
-import { format } from "date-fns";
-
+} from '@/components/ui/dropdown-menu';
+import { Roster } from '@/services/rosterService';
+import { normalizeGameTitle } from '@/constants/games';
+import { format } from 'date-fns';
 
 interface RosterListProps {
   rosters: Roster[];
@@ -55,20 +48,19 @@ export function RosterList({
   const getTypeColor = (type: string) => {
     // Align badge colors with product roster types while keeping existing dark-theme palette
     switch (type) {
-      case "International competitive":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "Local Competitive":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "Academy":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case 'International competitive':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'Local Competitive':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'Academy':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const formatDate = (timestamp: any) => {
-    if (!timestamp) return "Unknown";
+    if (!timestamp) return 'Unknown';
 
     try {
       const date =
@@ -78,11 +70,10 @@ export function RosterList({
             ? timestamp.toDate()
             : new Date(timestamp);
       const time = date?.getTime?.();
-      if (!time || Number.isNaN(time)) return "Unknown";
-      return format(date, "MMM dd, yyyy");
+      if (!time || Number.isNaN(time)) return 'Unknown';
+      return format(date, 'MMM dd, yyyy');
     } catch {
-      return "Unknown";
-
+      return 'Unknown';
     }
   };
 
@@ -125,8 +116,7 @@ export function RosterList({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {rosters.map((roster) => (
-
+      {rosters.map(roster => (
         <Card
           key={roster.id}
           className="hover:shadow-lg transition-shadow cursor-pointer group"
@@ -137,14 +127,12 @@ export function RosterList({
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
-                    {(roster.name || "").trim().charAt(0).toUpperCase() || "?"}
-
+                    {(roster.name || '').trim().charAt(0).toUpperCase() || '?'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-lg font-semibold truncate">
-                    {roster.name?.trim() || "Untitled roster"}
-
+                    {roster.name?.trim() || 'Untitled roster'}
                   </CardTitle>
                   <CardDescription className="text-sm">
                     {formatDate(roster.createdAt)}
@@ -157,16 +145,14 @@ export function RosterList({
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => e.stopPropagation()}
-
+                    onClick={e => e.stopPropagation()}
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
-                    onClick={(e) => {
-
+                    onClick={e => {
                       e.stopPropagation();
                       onAssignPlayers(roster);
                     }}
@@ -175,8 +161,7 @@ export function RosterList({
                     Assign Players
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={(e) => {
-
+                    onClick={e => {
                       e.stopPropagation();
                       onRosterEdit(roster);
                     }}
@@ -187,8 +172,7 @@ export function RosterList({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-red-600"
-                    onClick={(e) => {
-
+                    onClick={e => {
                       e.stopPropagation();
                       onRosterDelete(roster);
                     }}
@@ -203,10 +187,7 @@ export function RosterList({
 
           <CardContent className="space-y-4">
             {roster.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {roster.description}
-              </p>
-
+              <p className="text-sm text-muted-foreground line-clamp-2">{roster.description}</p>
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -216,8 +197,7 @@ export function RosterList({
               </Badge>
               <Badge variant="outline" className="text-xs">
                 <Gamepad2 className="h-3 w-3 mr-1" />
-                {normalizeGameTitle(roster.game) || "Unknown Game"}
-
+                {normalizeGameTitle(roster.game) || 'Unknown Game'}
               </Badge>
             </div>
 
@@ -230,28 +210,20 @@ export function RosterList({
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  {formatDate(roster.updatedAt)}
-                </span>
-
+                <span className="text-muted-foreground">{formatDate(roster.updatedAt)}</span>
               </div>
             </div>
 
             {(roster.playerCount ?? 0) > 0 && (
               <div className="pt-3 border-t">
                 <div className="flex -space-x-2">
-                  {[...Array(Math.min(5, roster.playerCount ?? 0))].map(
-                    (_, i) => (
-                      <Avatar
-                        key={i}
-                        className="h-6 w-6 border-2 border-background"
-                      >
-                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                          P
-                        </AvatarFallback>
-                      </Avatar>
-                    ),
-                  )}
+                  {[...Array(Math.min(5, roster.playerCount ?? 0))].map((_, i) => (
+                    <Avatar key={i} className="h-6 w-6 border-2 border-background">
+                      <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                        P
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
 
                   {(roster.playerCount ?? 0) > 5 && (
                     <Avatar className="h-6 w-6 border-2 border-background">

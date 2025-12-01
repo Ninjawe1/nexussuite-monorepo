@@ -1,8 +1,7 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin } from "lucide-react";
-import { formatDateSafe } from "@/lib/date";
-
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, MapPin } from 'lucide-react';
+import { formatDateSafe } from '@/lib/date';
 
 interface MatchCardProps {
   id: string;
@@ -14,8 +13,7 @@ interface MatchCardProps {
   tournament: string | null;
   game: string;
   venue?: string | null;
-  status: "upcoming" | "live" | "completed";
-
+  status: 'upcoming' | 'live' | 'completed';
 }
 
 export function MatchCard({
@@ -31,22 +29,21 @@ export function MatchCard({
   status,
 }: MatchCardProps) {
   const statusColors = {
-    upcoming: "bg-chart-4 text-primary-foreground",
-    live: "bg-chart-5 text-primary-foreground",
-    completed: "bg-secondary text-secondary-foreground",
-
+    upcoming: 'bg-chart-4 text-primary-foreground',
+    live: 'bg-chart-5 text-primary-foreground',
+    completed: 'bg-secondary text-secondary-foreground',
   };
 
   const winner =
     scoreA !== undefined && scoreB !== undefined
       ? scoreA > scoreB
-        ? "A"
+        ? 'A'
         : scoreA < scoreB
-          ? "B"
-          : "draw"
+          ? 'B'
+          : 'draw'
       : null;
-  const dateFormatted = formatDateSafe(date, "MMM dd, HH:mm");
-  const rawDateText = typeof date === "string" ? date : "";
+  const dateFormatted = formatDateSafe(date, 'MMM dd, HH:mm');
+  const rawDateText = typeof date === 'string' ? date : '';
 
   const dateText = dateFormatted || rawDateText;
 
@@ -58,9 +55,7 @@ export function MatchCard({
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h3 className="font-semibold text-sm">
-              {tournament || "Standalone Match"}
-            </h3>
+            <h3 className="font-semibold text-sm">{tournament || 'Standalone Match'}</h3>
 
             <p className="text-xs text-muted-foreground">{game}</p>
           </div>
@@ -71,37 +66,21 @@ export function MatchCard({
 
         <div className="flex items-center justify-between py-3">
           <div className="flex-1 text-center">
-            <p
-              className={`font-semibold ${winner === "A" ? "text-chart-2" : ""}`}
-            >
-              {teamA}
-            </p>
+            <p className={`font-semibold ${winner === 'A' ? 'text-chart-2' : ''}`}>{teamA}</p>
           </div>
           <div className="px-4">
-            {status === "completed" &&
-            scoreA !== undefined &&
-            scoreB !== undefined ? (
+            {status === 'completed' && scoreA !== undefined && scoreB !== undefined ? (
               <div className="font-mono font-bold text-lg">
-                <span className={winner === "A" ? "text-chart-2" : ""}>
-                  {scoreA}
-                </span>
-                {" : "}
-                <span className={winner === "B" ? "text-chart-2" : ""}>
-                  {scoreB}
-                </span>
-
+                <span className={winner === 'A' ? 'text-chart-2' : ''}>{scoreA}</span>
+                {' : '}
+                <span className={winner === 'B' ? 'text-chart-2' : ''}>{scoreB}</span>
               </div>
             ) : (
               <span className="text-muted-foreground">vs</span>
             )}
           </div>
           <div className="flex-1 text-center">
-            <p
-              className={`font-semibold ${winner === "B" ? "text-chart-2" : ""}`}
-            >
-              {teamB}
-            </p>
-
+            <p className={`font-semibold ${winner === 'B' ? 'text-chart-2' : ''}`}>{teamB}</p>
           </div>
         </div>
 

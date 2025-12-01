@@ -3,17 +3,10 @@
  * Handles organization selection, switching, and organization-specific data
  */
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Organization {
   id: string;
@@ -60,10 +53,7 @@ interface OrganizationContextType {
   selectOrganization: (organizationId: string) => Promise<void>;
   refreshOrganizations: () => Promise<void>;
   createOrganization: (name: string, slug?: string) => Promise<Organization>;
-  updateOrganization: (
-    organizationId: string,
-    updates: Partial<Organization>,
-  ) => Promise<void>;
+  updateOrganization: (organizationId: string, updates: Partial<Organization>) => Promise<void>;
 
   deleteOrganization: (organizationId: string) => Promise<void>;
   canAccessOrganization: (organizationId: string) => boolean;
@@ -78,18 +68,12 @@ interface OrganizationContextType {
   removeMember: (memberId: string) => Promise<void>;
 }
 
-const OrganizationContext = createContext<OrganizationContextType | undefined>(
-  undefined,
-);
-
+const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export const useOrganization = () => {
   const context = useContext(OrganizationContext);
   if (!context) {
-    throw new Error(
-      "useOrganization must be used within an OrganizationProvider",
-    );
-
+    throw new Error('useOrganization must be used within an OrganizationProvider');
   }
   return context;
 };
@@ -98,18 +82,13 @@ interface OrganizationProviderProps {
   children: React.ReactNode;
 }
 
-export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
-  children,
-}) => {
-
+export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [currentOrganization, setCurrentOrganization] =
-    useState<Organization | null>(null);
-  const [currentMembership, setCurrentMembership] =
-    useState<OrganizationMembership | null>(null);
+  const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
+  const [currentMembership, setCurrentMembership] = useState<OrganizationMembership | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSwitching, setIsSwitching] = useState(false);
@@ -123,7 +102,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
 
     while (attempts < maxAttempts) {
       try {
-        const response = await apiRequest("/api/auth/user", "GET");
+        const response = await apiRequest('/api/auth/user', 'GET');
         const data = await response.json();
 
         // Prefer explicit organizations array if provided
@@ -131,8 +110,14 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         if (Array.isArray(userOrgs) && userOrgs.length > 0) {
           return userOrgs.map((org: any) => ({
             id: org.organizationId || org.id,
-            name: org.organization?.name || org.name || "Unknown Organization",
-            slug: (org.organization?.slug || org.slug || org.organizationId || org.id || "").toString(),
+            name: org.organization?.name || org.name || 'Unknown Organization',
+            slug: (
+              org.organization?.slug ||
+              org.slug ||
+              org.organizationId ||
+              org.id ||
+              ''
+            ).toString(),
             createdAt: org.createdAt || new Date().toISOString(),
             updatedAt: org.updatedAt || new Date().toISOString(),
             metadata: org.organization?.metadata || org.metadata || {},
@@ -145,7 +130,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
           const derivedName =
             data?.tenant?.name ||
             data?.clubName ||
-            (data?.firstName ? `${data.firstName}'s Club` : data?.email || "My Club");
+            (data?.firstName ? `${data.firstName}'s Club` : data?.email || 'My Club');
 
           return [
             {
@@ -165,16 +150,15 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         attempts++;
         if (attempts >= maxAttempts) {
           // Gracefully handle missing endpoints on public landing page
-          console.warn("Failed to fetch organizations (non-blocking):", error);
+          console.warn('Failed to fetch organizations (non-blocking):', error);
           return [];
         }
         // Exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, 500 * Math.pow(2, attempts - 1)));
+        await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempts - 1)));
       }
     }
     return [];
   }, []);
-  
 
   /**
    * Refresh organizations list
@@ -188,11 +172,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       setOrganizations(orgs);
 
       // Update current organization if it's still valid
-      if (
-        currentOrganization &&
-        !orgs.find((org) => org.id === currentOrganization.id)
-      ) {
-
+      if (currentOrganization && !orgs.find(org => org.id === currentOrganization.id)) {
         // Current org no longer exists or user lost access
         setCurrentOrganization(null);
         setCurrentMembership(null);
@@ -204,10 +184,9 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       }
     } catch (error) {
       toast({
-        title: "Failed to refresh organizations",
-        description: "Unable to load your organizations",
-        variant: "destructive",
-
+        title: 'Failed to refresh organizations',
+        description: 'Unable to load your organizations',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -224,18 +203,16 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
 
       // Prefer provided orgList (freshly fetched) to avoid races with state updates
       const source = orgList && orgList.length ? orgList : organizations;
-      let org = source.find((o) => o.id === organizationId) || null;
-
+      let org = source.find(o => o.id === organizationId) || null;
 
       // If not found, attempt a fresh fetch once before failing
       if (!org) {
         try {
           const fresh = await fetchOrganizations();
           setOrganizations(fresh);
-          org = fresh.find((o) => o.id === organizationId) || null;
+          org = fresh.find(o => o.id === organizationId) || null;
         } catch (err) {
-          console.warn("Failed to refresh organizations during selection:", err);
-
+          console.warn('Failed to refresh organizations during selection:', err);
         }
       }
 
@@ -244,10 +221,9 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         setCurrentOrganization(null);
         setCurrentMembership(null);
         toast({
-          title: "Organization not found",
-          description: "Please select a valid organization.",
-          variant: "destructive",
-
+          title: 'Organization not found',
+          description: 'Please select a valid organization.',
+          variant: 'destructive',
         });
         setIsSwitching(false);
         return;
@@ -256,11 +232,10 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       setCurrentOrganization(org);
 
       try {
-        const response = await apiRequest("/api/auth/user", "GET");
+        const response = await apiRequest('/api/auth/user', 'GET');
         const data = await response.json();
-        const role = data?.role || data?.user?.role || "owner";
-        const userId = String(data?.id || data?.user?.id || "user");
-
+        const role = data?.role || data?.user?.role || 'owner';
+        const userId = String(data?.id || data?.user?.id || 'user');
 
         setCurrentMembership({
           id: `${userId}-${organizationId}`,
@@ -274,30 +249,27 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
       } catch {
         setCurrentMembership(null);
       } finally {
-        localStorage.setItem("selectedOrganizationId", organizationId);
+        localStorage.setItem('selectedOrganizationId', organizationId);
 
         setIsSwitching(false);
       }
     },
     [isAuthenticated, organizations, fetchOrganizations, toast]
   );
- 
-
 
   /**
    * Create a new organization
    */
   const createOrganization = useCallback(
     async (name: string, slug?: string) => {
-      if (!isAuthenticated) throw new Error("Must be authenticated");
+      if (!isAuthenticated) throw new Error('Must be authenticated');
 
       try {
-        const response = await apiRequest("/api/organizations", "POST", {
-          "Content-Type": "application/json",
+        const response = await apiRequest('/api/organizations', 'POST', {
+          'Content-Type': 'application/json',
           name,
           slug,
-        })
-
+        });
 
         const newOrg = await response.json();
 
@@ -308,28 +280,23 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         await selectOrganization(newOrg.id);
 
         toast({
-          title: "Organization created",
+          title: 'Organization created',
 
           description: `${name} has been created successfully`,
         });
 
         return newOrg;
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to create organization";
+        const message = error instanceof Error ? error.message : 'Failed to create organization';
         toast({
-          title: "Creation failed",
+          title: 'Creation failed',
           description: message,
-          variant: "destructive",
-
+          variant: 'destructive',
         });
         throw error;
       }
     },
-    [isAuthenticated, refreshOrganizations, selectOrganization, toast],
-
+    [isAuthenticated, refreshOrganizations, selectOrganization, toast]
   );
 
   /**
@@ -339,8 +306,8 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     async (organizationId: string, updates: Partial<Organization>) => {
       try {
         // Server treats organization as current tenant; call unified endpoint
-        await apiRequest(`/api/tenant`, "PATCH", {
-          "Content-Type": "application/json",
+        await apiRequest(`/api/tenant`, 'PATCH', {
+          'Content-Type': 'application/json',
 
           ...updates,
         });
@@ -349,25 +316,20 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         await refreshOrganizations();
 
         toast({
-          title: "Organization updated",
-          description: "Changes saved successfully",
+          title: 'Organization updated',
+          description: 'Changes saved successfully',
         });
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to update organization";
+        const message = error instanceof Error ? error.message : 'Failed to update organization';
         toast({
-          title: "Update failed",
+          title: 'Update failed',
           description: message,
-          variant: "destructive",
-
+          variant: 'destructive',
         });
         throw error;
       }
     },
-    [refreshOrganizations, toast],
-
+    [refreshOrganizations, toast]
   );
 
   /**
@@ -377,32 +339,26 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     async (organizationId: string) => {
       try {
         // Server treats organization as current tenant; call unified endpoint
-        await apiRequest(`/api/tenant`, "DELETE");
-
+        await apiRequest(`/api/tenant`, 'DELETE');
 
         // Refresh organizations list
         await refreshOrganizations();
 
         toast({
-          title: "Organization deleted",
-          description: "Organization has been removed",
+          title: 'Organization deleted',
+          description: 'Organization has been removed',
         });
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to delete organization";
+        const message = error instanceof Error ? error.message : 'Failed to delete organization';
         toast({
-          title: "Deletion failed",
+          title: 'Deletion failed',
           description: message,
-          variant: "destructive",
-
+          variant: 'destructive',
         });
         throw error;
       }
     },
-    [refreshOrganizations, toast],
-
+    [refreshOrganizations, toast]
   );
 
   /**
@@ -410,13 +366,13 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
    */
   const listMembers = useCallback(async (): Promise<OrgMember[]> => {
     try {
-      const response = await apiRequest("/api/tenant/members", "GET");
+      const response = await apiRequest('/api/tenant/members', 'GET');
 
       const members = await response.json();
       return (members || []).map((m: any) => ({
         id: String(m.id || m.userId),
         userId: String(m.userId),
-        role: String(m.role || ""),
+        role: String(m.role || ''),
 
         email: m.user?.email || m.email,
         name: m.user?.name || m.name,
@@ -425,13 +381,11 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         isActive: !!m.isActive,
       }));
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to load members";
+      const message = error instanceof Error ? error.message : 'Failed to load members';
       toast({
-        title: "Unable to load members",
+        title: 'Unable to load members',
         description: message,
-        variant: "destructive",
-
+        variant: 'destructive',
       });
       return [];
     }
@@ -439,120 +393,130 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
 
   const listInvites = useCallback(async (): Promise<any[]> => {
     try {
-      const response = await apiRequest("/api/tenant/invites", "GET");
+      const response = await apiRequest('/api/tenant/invites', 'GET');
       const invites = await response.json();
       return invites || [];
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to load invitations";
-      toast({ title: "Unable to load invitations", description: message, variant: "destructive" });
+      const message = error instanceof Error ? error.message : 'Failed to load invitations';
+      toast({ title: 'Unable to load invitations', description: message, variant: 'destructive' });
 
       return [];
     }
   }, [toast]);
 
-  const resendInvite = useCallback(async (inviteId: string) => {
-    try {
-      await apiRequest(`/api/tenant/invites/${inviteId}/resend`, "POST");
-      toast({ title: "Invitation resent" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to resend invitation";
-      toast({ title: "Resend failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
+  const resendInvite = useCallback(
+    async (inviteId: string) => {
+      try {
+        await apiRequest(`/api/tenant/invites/${inviteId}/resend`, 'POST');
+        toast({ title: 'Invitation resent' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to resend invitation';
+        toast({ title: 'Resend failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
-  const cancelInvite = useCallback(async (inviteId: string) => {
-    try {
-      await apiRequest(`/api/tenant/invites/${inviteId}/cancel`, "PATCH");
-      toast({ title: "Invitation cancelled" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to cancel invitation";
-      toast({ title: "Cancel failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
-
+  const cancelInvite = useCallback(
+    async (inviteId: string) => {
+      try {
+        await apiRequest(`/api/tenant/invites/${inviteId}/cancel`, 'PATCH');
+        toast({ title: 'Invitation cancelled' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to cancel invitation';
+        toast({ title: 'Cancel failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
   /**
    * Invite/add a member by email with a role (owner/admin only; owner role requires owner)
    */
-  const inviteMember = useCallback(async (email: string, role: string, name?: string) => {
-    try {
-      await apiRequest("/api/tenant/members", "POST", {
-        "Content-Type": "application/json",
-        email,
-        role,
-        name,
-      });
-      const who = name ? `${name} <${email}>` : email;
-      toast({ title: "Member invited", description: who });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to invite member";
-      toast({ title: "Invite failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
-
+  const inviteMember = useCallback(
+    async (email: string, role: string, name?: string) => {
+      try {
+        await apiRequest('/api/tenant/members', 'POST', {
+          'Content-Type': 'application/json',
+          email,
+          role,
+          name,
+        });
+        const who = name ? `${name} <${email}>` : email;
+        toast({ title: 'Member invited', description: who });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to invite member';
+        toast({ title: 'Invite failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
   /**
    * Update an existing member's role (owner-only when assigning owner)
    */
-  const updateMemberRole = useCallback(async (memberId: string, role: string) => {
-    try {
-      await apiRequest(`/api/tenant/members/${memberId}`, "PATCH", {
-        "Content-Type": "application/json",
-        role,
-      });
-      toast({ title: "Role updated", description: `Member role is now ${role}` });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to update member role";
-      toast({ title: "Update failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
+  const updateMemberRole = useCallback(
+    async (memberId: string, role: string) => {
+      try {
+        await apiRequest(`/api/tenant/members/${memberId}`, 'PATCH', {
+          'Content-Type': 'application/json',
+          role,
+        });
+        toast({ title: 'Role updated', description: `Member role is now ${role}` });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to update member role';
+        toast({ title: 'Update failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
-  const updateMemberStatus = useCallback(async (memberId: string, isActive: boolean) => {
-    try {
-      await apiRequest(`/api/tenant/members/${memberId}/status`, "PATCH", {
-        "Content-Type": "application/json",
-        isActive,
-      });
-      toast({ title: isActive ? "Member activated" : "Member deactivated" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to update member status";
-      toast({ title: "Update failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
-
+  const updateMemberStatus = useCallback(
+    async (memberId: string, isActive: boolean) => {
+      try {
+        await apiRequest(`/api/tenant/members/${memberId}/status`, 'PATCH', {
+          'Content-Type': 'application/json',
+          isActive,
+        });
+        toast({ title: isActive ? 'Member activated' : 'Member deactivated' });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to update member status';
+        toast({ title: 'Update failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
   /**
    * Remove a member (cannot remove owner)
    */
-  const removeMember = useCallback(async (memberId: string) => {
-    try {
-      await apiRequest(`/api/tenant/members/${memberId}`, "DELETE");
-      toast({ title: "Member removed", description: memberId });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to remove member";
-      toast({ title: "Remove failed", description: message, variant: "destructive" });
-      throw error;
-    }
-  }, [toast]);
-
+  const removeMember = useCallback(
+    async (memberId: string) => {
+      try {
+        await apiRequest(`/api/tenant/members/${memberId}`, 'DELETE');
+        toast({ title: 'Member removed', description: memberId });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to remove member';
+        toast({ title: 'Remove failed', description: message, variant: 'destructive' });
+        throw error;
+      }
+    },
+    [toast]
+  );
 
   /**
    * Check if user can access an organization
    */
   const canAccessOrganization = useCallback(
     (organizationId: string): boolean => {
-      return organizations.some((org) => org.id === organizationId);
+      return organizations.some(org => org.id === organizationId);
     },
-    [organizations],
-
+    [organizations]
   );
 
   /**
@@ -574,25 +538,26 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
         setOrganizations(orgs);
 
         // Try to restore previously selected organization
-        const savedOrgId = localStorage.getItem("selectedOrganizationId");
-        const validSavedOrg =
-          savedOrgId && orgs.find((org) => org.id === savedOrgId);
-
+        const savedOrgId = localStorage.getItem('selectedOrganizationId');
+        const validSavedOrg = savedOrgId && orgs.find(org => org.id === savedOrgId);
 
         if (validSavedOrg) {
           await selectOrganization(savedOrgId, orgs);
         } else if (orgs.length > 0) {
           await selectOrganization(orgs[0].id, orgs);
         } else {
-          const hinted = localStorage.getItem("org_onboarding_hinted") === "1";
+          const hinted = localStorage.getItem('org_onboarding_hinted') === '1';
           if (!hinted) {
-            toast({ title: "No organizations found", description: "Create your first organization to get started", variant: "destructive" });
-            localStorage.setItem("org_onboarding_hinted", "1");
+            toast({
+              title: 'No organizations found',
+              description: 'Create your first organization to get started',
+              variant: 'destructive',
+            });
+            localStorage.setItem('org_onboarding_hinted', '1');
           }
         }
       } catch (error) {
-        console.error("Failed to initialize organizations:", error);
-
+        console.error('Failed to initialize organizations:', error);
       } finally {
         setIsLoading(false);
       }
@@ -625,12 +590,7 @@ export const OrganizationProvider: React.FC<OrganizationProviderProps> = ({
     removeMember,
   };
 
-  return (
-    <OrganizationContext.Provider value={value}>
-      {children}
-    </OrganizationContext.Provider>
-  );
-
+  return <OrganizationContext.Provider value={value}>{children}</OrganizationContext.Provider>;
 };
 
 export default OrganizationContext;

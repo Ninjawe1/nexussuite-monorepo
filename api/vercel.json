@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "index.ts": {
+      "memory": 1024,
+      "maxDuration": 30,
+      "includeFiles": "../server/**/*"
+    }
+  },
+  "routes": [
+    { "src": "/", "dest": "index.ts" },
+    { "src": "/api/(.*)", "dest": "index.ts" }
+  ]
+}

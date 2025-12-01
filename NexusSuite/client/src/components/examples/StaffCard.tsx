@@ -1,5 +1,4 @@
-import { StaffCard } from "../staff-card";
-
+import { StaffCard } from '../staff-card';
 
 export default function StaffCardExample() {
   return (
@@ -10,8 +9,7 @@ export default function StaffCardExample() {
         role="Manager"
         email="sarah.j@nexus.gg"
         phone="+1 555-0123"
-        permissions={["Staff", "Payroll", "Matches"]}
-
+        permissions={['Staff', 'Payroll', 'Matches']}
         status="active"
       />
       <StaffCard
@@ -19,8 +17,7 @@ export default function StaffCardExample() {
         name="Mike Chen"
         role="Analyst"
         email="mike.c@nexus.gg"
-        permissions={["Analytics", "Matches"]}
-
+        permissions={['Analytics', 'Matches']}
         status="active"
       />
       <StaffCard
@@ -29,8 +26,7 @@ export default function StaffCardExample() {
         role="Player"
         email="alex.r@nexus.gg"
         phone="+1 555-0456"
-        permissions={["Matches"]}
-
+        permissions={['Matches']}
         status="suspended"
       />
     </div>

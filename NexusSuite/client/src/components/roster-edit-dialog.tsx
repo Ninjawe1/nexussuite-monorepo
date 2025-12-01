@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Roster } from "@/services/rosterService";
+import { useEffect } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Roster } from '@/services/rosterService';
 
 import {
   Dialog,
@@ -11,8 +11,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 import {
   Form,
@@ -21,10 +21,10 @@ import {
   FormLabel,
   FormMessage,
   FormControl,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 import {
   Select,
@@ -32,9 +32,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { GAME_OPTIONS, normalizeGameTitle } from "@/constants/games";
-
+} from '@/components/ui/select';
+import { GAME_OPTIONS, normalizeGameTitle } from '@/constants/games';
 
 export interface RosterEditDialogProps {
   roster: Roster;
@@ -45,14 +44,10 @@ export interface RosterEditDialogProps {
 }
 
 const schema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  description: z
-    .string()
-    .max(200, "Description too long")
-    .optional()
-    .or(z.literal("")),
+  name: z.string().min(3, 'Name must be at least 3 characters'),
+  description: z.string().max(200, 'Description too long').optional().or(z.literal('')),
   game: z.enum(GAME_OPTIONS),
-  type: z.enum(["International competitive", "Local Competitive", "Academy"]),
+  type: z.enum(['International competitive', 'Local Competitive', 'Academy']),
 
   maxPlayers: z.coerce.number().min(1).max(12),
 });
@@ -69,16 +64,15 @@ export function RosterEditDialog({
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: roster?.name ?? "",
-      description: roster?.description ?? "",
+      name: roster?.name ?? '',
+      description: roster?.description ?? '',
       game: (() => {
-        const normalized = normalizeGameTitle(roster?.game ?? "");
-        return normalized &&
-          (GAME_OPTIONS as readonly string[]).includes(normalized)
+        const normalized = normalizeGameTitle(roster?.game ?? '');
+        return normalized && (GAME_OPTIONS as readonly string[]).includes(normalized)
           ? (normalized as (typeof GAME_OPTIONS)[number])
-          : "Valorant";
+          : 'Valorant';
       })(),
-      type: (roster?.type as FormValues["type"]) ?? "International competitive",
+      type: (roster?.type as FormValues['type']) ?? 'International competitive',
 
       maxPlayers: roster?.maxPlayers ?? 5,
     },
@@ -87,17 +81,15 @@ export function RosterEditDialog({
   useEffect(() => {
     if (open && roster) {
       form.reset({
-        name: roster.name ?? "",
-        description: roster.description ?? "",
+        name: roster.name ?? '',
+        description: roster.description ?? '',
         game: (() => {
-          const normalized = normalizeGameTitle(roster?.game ?? "");
-          return normalized &&
-            (GAME_OPTIONS as readonly string[]).includes(normalized)
+          const normalized = normalizeGameTitle(roster?.game ?? '');
+          return normalized && (GAME_OPTIONS as readonly string[]).includes(normalized)
             ? (normalized as (typeof GAME_OPTIONS)[number])
-            : "Valorant";
+            : 'Valorant';
         })(),
-        type:
-          (roster.type as FormValues["type"]) ?? "International competitive",
+        type: (roster.type as FormValues['type']) ?? 'International competitive',
 
         maxPlayers: roster.maxPlayers ?? 5,
       });
@@ -107,7 +99,7 @@ export function RosterEditDialog({
   const handleSubmit = async (values: FormValues) => {
     await onSubmit({
       name: values.name,
-      description: values.description || "",
+      description: values.description || '',
 
       game: normalizeGameTitle(values.game),
       type: values.type,
@@ -121,17 +113,11 @@ export function RosterEditDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Roster</DialogTitle>
-          <DialogDescription>
-            Update roster details and constraints.
-          </DialogDescription>
+          <DialogDescription>Update roster details and constraints.</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -172,8 +158,7 @@ export function RosterEditDialog({
                         <SelectValue placeholder="Select a game" />
                       </SelectTrigger>
                       <SelectContent>
-                        {GAME_OPTIONS.map((g) => (
-
+                        {GAME_OPTIONS.map(g => (
                           <SelectItem key={g} value={g}>
                             {g}
                           </SelectItem>
@@ -213,12 +198,7 @@ export function RosterEditDialog({
                       >
                         Local Competitive
                       </ToggleGroupItem>
-                      <ToggleGroupItem
-                        value="Academy"
-                        aria-label="Academy"
-                        className="px-4 py-2"
-                      >
-
+                      <ToggleGroupItem value="Academy" aria-label="Academy" className="px-4 py-2">
                         Academy
                       </ToggleGroupItem>
                     </ToggleGroup>
@@ -243,12 +223,7 @@ export function RosterEditDialog({
             />
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

@@ -3,16 +3,9 @@
  * Provides global authentication state and user management
  */
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import { betterAuthService, User, Session } from "@/services/betterAuthService";
-import { useToast } from "@/hooks/use-toast";
-
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { betterAuthService, User, Session } from '@/services/betterAuthService';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -20,11 +13,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (
-    email: string,
-    password: string,
-    orgName?: string,
-  ) => Promise<void>;
+  register: (email: string, password: string, orgName?: string) => Promise<void>;
 
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -42,8 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
@@ -67,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userData);
       return userData;
     } catch (error) {
-      console.error("Failed to refresh user:", error);
+      console.error('Failed to refresh user:', error);
 
       setUser(null);
       setSession(null);
@@ -88,24 +76,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSession(result.session);
 
         toast({
-          title: "Welcome back!",
+          title: 'Welcome back!',
           description: `Logged in as ${result.user.email}`,
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Login failed";
+        const message = error instanceof Error ? error.message : 'Login failed';
         toast({
-          title: "Login failed",
+          title: 'Login failed',
           description: message,
-          variant: "destructive",
-
+          variant: 'destructive',
         });
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [toast],
-
+    [toast]
   );
 
   /**
@@ -115,36 +101,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (email: string, password: string, orgName?: string) => {
       try {
         setIsLoading(true);
-        const result = await betterAuthService.register(
-          email,
-          password,
-          orgName,
-        );
-
+        const result = await betterAuthService.register(email, password, orgName);
 
         setUser(result.user);
         setSession(result.session);
 
         toast({
-          title: "Welcome!",
-          description: "Account created successfully",
+          title: 'Welcome!',
+          description: 'Account created successfully',
         });
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Registration failed";
+        const message = error instanceof Error ? error.message : 'Registration failed';
         toast({
-          title: "Registration failed",
+          title: 'Registration failed',
           description: message,
-          variant: "destructive",
-
+          variant: 'destructive',
         });
         throw error;
       } finally {
         setIsLoading(false);
       }
     },
-    [toast],
-
+    [toast]
   );
 
   /**
@@ -159,11 +137,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setSession(null);
 
       toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
+        title: 'Logged out',
+        description: 'You have been logged out successfully',
       });
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
 
       // Still clear local state even if server logout fails
       setUser(null);
@@ -181,8 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!user) return false;
       return betterAuthService.hasRole(user, organizationId, role);
     },
-    [user],
-
+    [user]
   );
 
   const hasPermission = useCallback(
@@ -190,34 +167,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!user) return false;
       return betterAuthService.hasPermission(user, organizationId, permission);
     },
-    [user],
-
+    [user]
   );
 
   const hasAnyPermission = useCallback(
     (organizationId: string, permissions: string[]): boolean => {
       if (!user) return false;
-      return betterAuthService.hasAnyPermission(
-        user,
-        organizationId,
-        permissions,
-      );
+      return betterAuthService.hasAnyPermission(user, organizationId, permissions);
     },
-    [user],
-
+    [user]
   );
 
   const hasAllPermissions = useCallback(
     (organizationId: string, permissions: string[]): boolean => {
       if (!user) return false;
-      return betterAuthService.hasAllPermissions(
-        user,
-        organizationId,
-        permissions,
-      );
+      return betterAuthService.hasAllPermissions(user, organizationId, permissions);
     },
-    [user],
-
+    [user]
   );
 
   const getUserRole = useCallback(
@@ -225,8 +191,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!user) return undefined;
       return betterAuthService.getUserRole(user, organizationId);
     },
-    [user],
-
+    [user]
   );
 
   const isOrganizationAdmin = useCallback(
@@ -234,8 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (!user) return false;
       return betterAuthService.isOrganizationAdmin(user, organizationId);
     },
-    [user],
-
+    [user]
   );
 
   const isSystemAdmin = useCallback((): boolean => {
@@ -257,21 +221,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
         }
         if (userData) {
-          console.log("User authenticated:", userData.email);
+          console.log('User authenticated:', userData.email);
         } else {
-          console.log("No active session found");
+          console.log('No active session found');
         }
       } catch (error) {
-        console.error("Auth initialization failed:", error);
-
+        console.error('Auth initialization failed:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-  initializeAuth();
-}, []); // ✅ empty dependency array
-
+    initializeAuth();
+  }, []); // ✅ empty dependency array
 
   /**
    * Session timeout handling
@@ -285,17 +247,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (now >= expiresAt) {
         toast({
-          title: "Session expired",
-          description: "Please log in again",
-          variant: "destructive",
+          title: 'Session expired',
+          description: 'Please log in again',
+          variant: 'destructive',
         });
         logout();
       }
-      };
+    };
 
-      const interval = setInterval(checkSessionTimeout, 60 * 1000); // check every minute
-      return () => clearInterval(interval); // ✅ cleanup
-
+    const interval = setInterval(checkSessionTimeout, 60 * 1000); // check every minute
+    return () => clearInterval(interval); // ✅ cleanup
   }, [user, session]); // ✅ only re-run when user or session changes
 
   const value: AuthContextType = {

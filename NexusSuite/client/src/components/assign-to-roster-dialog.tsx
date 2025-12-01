@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Staff } from "@shared/schema";
-import type { Roster } from "@/services/rosterService";
+import { useEffect } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { Staff } from '@shared/schema';
+import type { Roster } from '@/services/rosterService';
 
 import {
   Dialog,
@@ -12,8 +12,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 import {
   Form,
@@ -22,7 +22,7 @@ import {
   FormLabel,
   FormMessage,
   FormControl,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 import {
   Select,
@@ -30,9 +30,8 @@ import {
   SelectContent,
   SelectItem,
   SelectValue,
-} from "@/components/ui/select";
-import { TEAM_ROLES, type TeamRole } from "@/constants/teamRoles";
-
+} from '@/components/ui/select';
+import { TEAM_ROLES, type TeamRole } from '@/constants/teamRoles';
 
 export interface AssignToRosterDialogProps {
   open: boolean;
@@ -44,18 +43,17 @@ export interface AssignToRosterDialogProps {
 }
 
 const schema = z.object({
-  rosterId: z.string().min(1, "Please select a roster"),
+  rosterId: z.string().min(1, 'Please select a roster'),
   role: z
-    .enum([
-      "Captain",
-      "Coach",
-      "Player",
-      "Analyst",
-      "Manager",
-      "Substitute",
-    ] as [TeamRole, TeamRole, TeamRole, TeamRole, TeamRole, TeamRole])
-    .default("Player"),
-
+    .enum(['Captain', 'Coach', 'Player', 'Analyst', 'Manager', 'Substitute'] as [
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+      TeamRole,
+    ])
+    .default('Player'),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -70,13 +68,12 @@ export function AssignToRosterDialog({
 }: AssignToRosterDialogProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { rosterId: "", role: "Player" },
-
+    defaultValues: { rosterId: '', role: 'Player' },
   });
 
   useEffect(() => {
     if (open) {
-      form.reset({ rosterId: "", role: "Player" });
+      form.reset({ rosterId: '', role: 'Player' });
     }
   }, [open]);
 
@@ -92,19 +89,12 @@ export function AssignToRosterDialog({
         <DialogHeader>
           <DialogTitle>Assign to Roster</DialogTitle>
           <DialogDescription>
-            {player
-              ? `Assign ${player.name} to a roster`
-              : "Select a player to assign to a roster"}
-
+            {player ? `Assign ${player.name} to a roster` : 'Select a player to assign to a roster'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="rosterId"
@@ -112,26 +102,20 @@ export function AssignToRosterDialog({
                 <FormItem>
                   <FormLabel>Roster</FormLabel>
                   <FormControl>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isLoading}
-                    >
-
+                    <Select value={field.value} onValueChange={field.onChange} disabled={isLoading}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a roster" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableRosters && availableRosters.length > 0 ? (
                           availableRosters
-                            .filter((r) => r.isActive !== false)
-                            .map((r) => (
+                            .filter(r => r.isActive !== false)
+                            .map(r => (
                               <SelectItem key={r.id} value={r.id}>
-                                {r.name}{" "}
-                                {typeof r.playerCount === "number"
-                                  ? `(${r.playerCount}/${r.maxPlayers ?? "?"})`
-                                  : ""}
-
+                                {r.name}{' '}
+                                {typeof r.playerCount === 'number'
+                                  ? `(${r.playerCount}/${r.maxPlayers ?? '?'})`
+                                  : ''}
                               </SelectItem>
                             ))
                         ) : (
@@ -153,20 +137,14 @@ export function AssignToRosterDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team Role</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isLoading}
-                  >
-
+                  <Select value={field.value} onValueChange={field.onChange} disabled={isLoading}>
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a role" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {TEAM_ROLES.map((r) => (
-
+                      {TEAM_ROLES.map(r => (
                         <SelectItem key={r.value} value={r.value}>
                           {r.label}
                         </SelectItem>
@@ -179,12 +157,7 @@ export function AssignToRosterDialog({
             />
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading || !player}>

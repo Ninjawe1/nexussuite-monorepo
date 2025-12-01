@@ -4,9 +4,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
   Select,
@@ -14,10 +14,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+} from '@/components/ui/select';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import {
   Form,
@@ -26,16 +26,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
-import type { SocialAccount } from "@shared/schema";
+} from '@/components/ui/form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+import { isUnauthorizedError } from '@/lib/authUtils';
+import type { SocialAccount } from '@shared/schema';
 
 const socialAccountSchema = z.object({
-  platform: z.string().min(1, "Platform is required"),
-  accountName: z.string().min(1, "Account name is required"),
+  platform: z.string().min(1, 'Platform is required'),
+  accountName: z.string().min(1, 'Account name is required'),
 
   accountId: z.string().optional(),
   apiKey: z.string().optional(),
@@ -50,24 +50,18 @@ interface SocialAccountDialogProps {
   account?: SocialAccount;
 }
 
-export function SocialAccountDialog({
-  open,
-  onOpenChange,
-  account,
-}: SocialAccountDialogProps) {
-
+export function SocialAccountDialog({ open, onOpenChange, account }: SocialAccountDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<SocialAccountFormData>({
     resolver: zodResolver(socialAccountSchema),
     defaultValues: {
-      platform: account?.platform || "",
-      accountName: account?.accountName || "",
-      accountId: account?.accountId || "",
-      apiKey: "",
-      apiSecret: "",
-
+      platform: account?.platform || '',
+      accountName: account?.accountName || '',
+      accountId: account?.accountId || '',
+      apiKey: '',
+      apiSecret: '',
     },
   });
 
@@ -75,36 +69,28 @@ export function SocialAccountDialog({
     mutationFn: async (data: SocialAccountFormData) => {
       // Remove empty credential fields to preserve existing values when editing
       const payload = { ...data };
-      if (!payload.apiKey || payload.apiKey.trim() === "") {
+      if (!payload.apiKey || payload.apiKey.trim() === '') {
         delete payload.apiKey;
       }
-      if (!payload.apiSecret || payload.apiSecret.trim() === "") {
+      if (!payload.apiSecret || payload.apiSecret.trim() === '') {
         delete payload.apiSecret;
       }
-      if (!payload.accountId || payload.accountId.trim() === "") {
-
+      if (!payload.accountId || payload.accountId.trim() === '') {
         delete payload.accountId;
       }
 
       if (account) {
-        return await apiRequest(
-          `/api/social/accounts/${account.id}`,
-          "PATCH",
-          payload,
-        );
+        return await apiRequest(`/api/social/accounts/${account.id}`, 'PATCH', payload);
       } else {
-        return await apiRequest("/api/social/accounts", "POST", payload);
+        return await apiRequest('/api/social/accounts', 'POST', payload);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/accounts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/social/analytics"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/social/accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/social/analytics'] });
       toast({
-        title: "Success",
-        description: account
-          ? "Social account updated"
-          : "Social account connected",
-
+        title: 'Success',
+        description: account ? 'Social account updated' : 'Social account connected',
       });
       onOpenChange(false);
       form.reset();
@@ -112,21 +98,19 @@ export function SocialAccountDialog({
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: 'Unauthorized',
+          description: 'You are logged out. Logging in again...',
+          variant: 'destructive',
         });
         setTimeout(() => {
-          window.location.href = "/login";
-
+          window.location.href = '/login';
         }, 500);
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to connect social account",
-        variant: "destructive",
-
+        title: 'Error',
+        description: error.message || 'Failed to connect social account',
+        variant: 'destructive',
       });
     },
   });
@@ -139,14 +123,11 @@ export function SocialAccountDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent data-testid="dialog-social-account">
         <DialogHeader>
-          <DialogTitle>
-            {account ? "Update Social Account" : "Connect Social Account"}
-          </DialogTitle>
+          <DialogTitle>{account ? 'Update Social Account' : 'Connect Social Account'}</DialogTitle>
           <DialogDescription>
             {account
-              ? "Update your social media account settings"
-              : "Connect a social media account to track analytics"}
-
+              ? 'Update your social media account settings'
+              : 'Connect a social media account to track analytics'}
           </DialogDescription>
         </DialogHeader>
 
@@ -158,11 +139,7 @@ export function SocialAccountDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Platform</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger data-testid="select-platform">
                         <SelectValue placeholder="Select platform" />
@@ -189,12 +166,7 @@ export function SocialAccountDialog({
                 <FormItem>
                   <FormLabel>Account Name / Handle</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="@yourhandle"
-                      data-testid="input-account-name"
-                    />
-
+                    <Input {...field} placeholder="@yourhandle" data-testid="input-account-name" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -228,17 +200,8 @@ export function SocialAccountDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={mutation.isPending}
-                data-testid="button-save-account"
-              >
-                {mutation.isPending
-                  ? "Saving..."
-                  : account
-                    ? "Update"
-                    : "Connect"}
-
+              <Button type="submit" disabled={mutation.isPending} data-testid="button-save-account">
+                {mutation.isPending ? 'Saving...' : account ? 'Update' : 'Connect'}
               </Button>
             </div>
           </form>

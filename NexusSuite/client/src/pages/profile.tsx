@@ -1,25 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  Camera,
-  Pencil,
-  MapPin,
-  Trophy,
-  Users,
-  ShieldCheck,
-  Globe,
-} from "lucide-react";
-
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Camera, Pencil, MapPin, Trophy, Users, ShieldCheck, Globe } from 'lucide-react';
 
 // Helper to convert file to base64 data URL
 async function toDataUrl(file: File): Promise<string> {
@@ -58,7 +49,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState('overview');
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [saving, setSaving] = useState(false);
@@ -66,8 +57,8 @@ export default function ProfilePage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
 
   const initials = useMemo(() => {
-    const f = user?.firstName?.[0] ?? user?.email?.[0] ?? "U";
-    const l = user?.lastName?.[0] ?? "";
+    const f = user?.firstName?.[0] ?? user?.email?.[0] ?? 'U';
+    const l = user?.lastName?.[0] ?? '';
 
     return `${f}${l}`.toUpperCase();
   }, [user]);
@@ -76,27 +67,22 @@ export default function ProfilePage() {
     let mounted = true;
     (async () => {
       try {
-        const res = await apiRequest("/api/profile", "GET");
+        const res = await apiRequest('/api/profile', 'GET');
         const data = await res.json();
         if (!mounted) return;
         setProfile({
-          id: data?.id || user?.id || "self",
-          username: data?.username || user?.email?.split("@")[0] || "user",
-          fullName:
-            data?.fullName ||
-            `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim(),
-          role:
-            data?.role ||
-            (user?.isSuperAdmin ? "Super Admin" : user?.role || "Member"),
-          country: data?.country || "US",
-          location: data?.location || "",
-          bio: data?.bio || "",
-          joinedAt:
-            data?.joinedAt || user?.createdAt || new Date().toISOString(),
+          id: data?.id || user?.id || 'self',
+          username: data?.username || user?.email?.split('@')[0] || 'user',
+          fullName: data?.fullName || `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
+          role: data?.role || (user?.isSuperAdmin ? 'Super Admin' : user?.role || 'Member'),
+          country: data?.country || 'US',
+          location: data?.location || '',
+          bio: data?.bio || '',
+          joinedAt: data?.joinedAt || user?.createdAt || new Date().toISOString(),
           bannerBase64: data?.bannerBase64 || undefined,
           avatarBase64: data?.avatarBase64 || undefined,
           stats: data?.stats || { matches: 0, teams: 0, followers: 0, xp: 0 },
-          achievements: data?.achievements || ["MVP"],
+          achievements: data?.achievements || ['MVP'],
 
           social: data?.social || {},
           notifications: data?.notifications || { email: true, app: true },
@@ -105,19 +91,17 @@ export default function ProfilePage() {
       } catch (e) {
         // Fallback to basic user data
         setProfile({
-          id: user?.id || "self",
-          username: user?.email?.split("@")[0] || "user",
+          id: user?.id || 'self',
+          username: user?.email?.split('@')[0] || 'user',
           fullName:
-            `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() ||
-            user?.email ||
-            "User",
-          role: user?.isSuperAdmin ? "Super Admin" : user?.role || "Member",
-          country: "US",
-          location: "",
-          bio: "",
+            `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || user?.email || 'User',
+          role: user?.isSuperAdmin ? 'Super Admin' : user?.role || 'Member',
+          country: 'US',
+          location: '',
+          bio: '',
           joinedAt: user?.createdAt?.toString() || new Date().toISOString(),
           stats: { matches: 0, teams: 0, followers: 0, xp: 0 },
-          achievements: ["MVP"],
+          achievements: ['MVP'],
 
           social: {},
           notifications: { email: true, app: true },
@@ -134,20 +118,17 @@ export default function ProfilePage() {
     if (!profile) return;
     setSaving(true);
     try {
-      const res = await apiRequest("/api/profile", "POST", {
-
+      const res = await apiRequest('/api/profile', 'POST', {
         ...profile,
         ...updates,
       });
       const data = await res.json();
-      setProfile((prev) => ({
-
+      setProfile(prev => ({
         ...(prev as ProfileData),
         ...(data || updates),
       }));
     } catch (e) {
-      alert("Failed to save profile");
-
+      alert('Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -185,10 +166,7 @@ export default function ProfilePage() {
     );
   }
 
-  const joinedDate = profile.joinedAt
-    ? new Date(profile.joinedAt).toLocaleDateString()
-    : "";
-
+  const joinedDate = profile.joinedAt ? new Date(profile.joinedAt).toLocaleDateString() : '';
 
   return (
     <div className="p-6 space-y-6">
@@ -210,13 +188,7 @@ export default function ProfilePage() {
           <label className="absolute top-3 right-3 inline-flex items-center gap-2 px-2 py-1 rounded-md bg-background/80 backdrop-blur hover:bg-background cursor-pointer border border-border">
             <Camera className="w-4 h-4" />
             <span className="text-xs">Banner</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleBannerUpload}
-            />
-
+            <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
           </label>
         </div>
         <CardContent className="relative">
@@ -265,10 +237,7 @@ export default function ProfilePage() {
                 <span className="ml-auto text-xs">Joined {joinedDate}</span>
               </div>
               {profile.bio ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {profile.bio}
-                </p>
-
+                <p className="mt-2 text-sm text-muted-foreground">{profile.bio}</p>
               ) : null}
             </div>
           </div>
@@ -298,10 +267,7 @@ export default function ProfilePage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Teams</CardTitle>
               </CardHeader>
-              <CardContent className="text-2xl font-bold">
-                {profile.stats?.teams ?? 0}
-              </CardContent>
-
+              <CardContent className="text-2xl font-bold">{profile.stats?.teams ?? 0}</CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
@@ -315,10 +281,7 @@ export default function ProfilePage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">XP Level</CardTitle>
               </CardHeader>
-              <CardContent className="text-2xl font-bold">
-                {profile.stats?.xp ?? 0}
-              </CardContent>
-
+              <CardContent className="text-2xl font-bold">{profile.stats?.xp ?? 0}</CardContent>
             </Card>
           </div>
 
@@ -329,8 +292,7 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
-              {(profile.achievements ?? []).map((b) => (
-
+              {(profile.achievements ?? []).map(b => (
                 <Badge key={b} variant="outline" className="bg-background/40">
                   {b}
                 </Badge>
@@ -346,10 +308,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  Recent tournament participation, uploads, and posts will
-                  appear here.
-                </li>
+                <li>Recent tournament participation, uploads, and posts will appear here.</li>
 
                 <li className="opacity-70">
                   (Hook to your existing activity feeds when available)
@@ -367,9 +326,7 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Teams, projects, or tournaments associated with this user will
-                be listed here.
-
+                Teams, projects, or tournaments associated with this user will be listed here.
               </p>
             </CardContent>
           </Card>
@@ -387,8 +344,7 @@ export default function ProfilePage() {
                   <span className="text-sm">Full Name</span>
                   <Input
                     value={profile.fullName}
-                    onChange={(e) =>
-
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         fullName: e.target.value,
@@ -400,8 +356,7 @@ export default function ProfilePage() {
                   <span className="text-sm">Username</span>
                   <Input
                     value={profile.username}
-                    onChange={(e) =>
-
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         username: e.target.value,
@@ -413,9 +368,8 @@ export default function ProfilePage() {
               <label className="space-y-2">
                 <span className="text-sm">Bio</span>
                 <Textarea
-                  value={profile.bio || ""}
-                  onChange={(e) =>
-
+                  value={profile.bio || ''}
+                  onChange={e =>
                     setProfile({
                       ...(profile as ProfileData),
                       bio: e.target.value,
@@ -424,13 +378,8 @@ export default function ProfilePage() {
                 />
               </label>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="default"
-                  onClick={() => saveProfile(profile!)}
-                  disabled={saving}
-                >
-                  {saving ? "Saving..." : "Save Changes"}
-
+                <Button variant="default" onClick={() => saveProfile(profile!)} disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </CardContent>
@@ -446,9 +395,8 @@ export default function ProfilePage() {
                   <span className="text-sm">Twitch</span>
                   <Input
                     placeholder="https://twitch.tv/username"
-                    value={profile.social?.twitch || ""}
-                    onChange={(e) =>
-
+                    value={profile.social?.twitch || ''}
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -463,9 +411,8 @@ export default function ProfilePage() {
                   <span className="text-sm">YouTube</span>
                   <Input
                     placeholder="https://youtube.com/@username"
-                    value={profile.social?.youtube || ""}
-                    onChange={(e) =>
-
+                    value={profile.social?.youtube || ''}
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -480,9 +427,8 @@ export default function ProfilePage() {
                   <span className="text-sm">Discord</span>
                   <Input
                     placeholder="https://discord.gg/invite-or-username"
-                    value={profile.social?.discord || ""}
-                    onChange={(e) =>
-
+                    value={profile.social?.discord || ''}
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -497,9 +443,8 @@ export default function ProfilePage() {
                   <span className="text-sm">X / Twitter</span>
                   <Input
                     placeholder="https://x.com/username"
-                    value={profile.social?.twitter || ""}
-                    onChange={(e) =>
-
+                    value={profile.social?.twitter || ''}
+                    onChange={e =>
                       setProfile({
                         ...(profile as ProfileData),
                         social: {
@@ -512,16 +457,11 @@ export default function ProfilePage() {
                 </label>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={() => saveProfile({ social: profile.social })}
-                >
+                <Button variant="secondary" onClick={() => saveProfile({ social: profile.social })}>
                   Save Socials
                 </Button>
                 <Button variant="outline">
-                  <ShieldCheck className="w-4 h-4 mr-2" /> Verify Linked
-                  Accounts
-
+                  <ShieldCheck className="w-4 h-4 mr-2" /> Verify Linked Accounts
                 </Button>
               </div>
             </CardContent>
@@ -541,8 +481,7 @@ export default function ProfilePage() {
                 </div>
                 <Switch
                   checked={!!profile.twoFAEnabled}
-                  onCheckedChange={(v) =>
-
+                  onCheckedChange={v =>
                     setProfile({
                       ...(profile as ProfileData),
                       twoFAEnabled: !!v,
@@ -564,8 +503,7 @@ export default function ProfilePage() {
                 <label className="inline-flex items-center gap-2 text-sm">
                   <Switch
                     checked={!!profile.notifications?.email}
-                    onCheckedChange={(v) =>
-
+                    onCheckedChange={v =>
                       setProfile({
                         ...(profile as ProfileData),
                         notifications: {
@@ -580,8 +518,7 @@ export default function ProfilePage() {
                 <label className="inline-flex items-center gap-2 text-sm">
                   <Switch
                     checked={!!profile.notifications?.app}
-                    onCheckedChange={(v) =>
-
+                    onCheckedChange={v =>
                       setProfile({
                         ...(profile as ProfileData),
                         notifications: {

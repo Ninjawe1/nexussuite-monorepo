@@ -1,12 +1,8 @@
-"use client";
+'use client';
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon } from 'lucide-react';
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 import {
   SidebarGroup,
@@ -17,11 +13,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSidebar } from "@/components/ui/sidebar";
-import { tweakcn } from "@/lib/tweakcn";
-
+} from '@/components/ui/sidebar';
+import { useSidebar } from '@/components/ui/sidebar';
+import { tweakcn } from '@/lib/tweakcn';
 
 export function NavMain({
   items,
@@ -39,18 +33,15 @@ export function NavMain({
 }) {
   // Determine collapsed state to adapt rendering like shadcn/ui demo
   const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
-
+  const isCollapsed = state === 'collapsed';
 
   return (
     <SidebarGroup>
       {/* Hide group label entirely when collapsed to keep a clean icon stack */}
       {!isCollapsed && <SidebarGroupLabel>Platform</SidebarGroupLabel>}
       <SidebarMenu>
-        {items.map((item) => {
-          const hasChildren =
-            Array.isArray(item.items) && item.items.length > 0;
-
+        {items.map(item => {
+          const hasChildren = Array.isArray(item.items) && item.items.length > 0;
 
           if (hasChildren) {
             return (
@@ -60,18 +51,25 @@ export function NavMain({
                 defaultOpen={item.isActive}
                 className="group/collapsible"
               >
-                <SidebarMenuItem className={isCollapsed ? "p-0 m-0 flex justify-center items-center w-full" : undefined}>
-
+                <SidebarMenuItem
+                  className={
+                    isCollapsed ? 'p-0 m-0 flex justify-center items-center w-full' : undefined
+                  }
+                >
                   <CollapsibleTrigger asChild>
                     {/* When collapsed: icon-only button centered with tooltip. When expanded: icon + text. */}
                     {isCollapsed ? (
                       <SidebarMenuButton
-                        tooltip={{ children: item.title, side: "right", align: "center", sideOffset: 10 }}
+                        tooltip={{
+                          children: item.title,
+                          side: 'right',
+                          align: 'center',
+                          sideOffset: 10,
+                        }}
                         isActive={item.isActive}
                         className={tweakcn(
                           // Ensure perfect centering within the 45px column
-                          "h-[45px] w-[45px] rounded-md flex items-center justify-center transition-all duration-200 mx-auto p-0",
-
+                          'h-[45px] w-[45px] rounded-md flex items-center justify-center transition-all duration-200 mx-auto p-0'
                         )}
                       >
                         {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
@@ -80,8 +78,7 @@ export function NavMain({
                       <SidebarMenuButton
                         tooltip={undefined}
                         isActive={item.isActive}
-                        className={tweakcn("h-[45px] transition-all justify-start px-2.5 gap-2")}
-
+                        className={tweakcn('h-[45px] transition-all justify-start px-2.5 gap-2')}
                       >
                         {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                         <span className="truncate text-sm font-medium">{item.title}</span>
@@ -91,8 +88,7 @@ export function NavMain({
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-
+                      {item.items?.map(subItem => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
                             <a href={subItem.url}>
@@ -109,30 +105,33 @@ export function NavMain({
           }
 
           return (
-            <SidebarMenuItem key={item.title} className={isCollapsed ? "p-0 m-0 flex justify-center items-center w-full" : undefined}>
+            <SidebarMenuItem
+              key={item.title}
+              className={
+                isCollapsed ? 'p-0 m-0 flex justify-center items-center w-full' : undefined
+              }
+            >
               {isCollapsed ? (
                 <SidebarMenuButton
-                  tooltip={{ children: item.title, side: "right", align: "center", sideOffset: 10 }}
+                  tooltip={{ children: item.title, side: 'right', align: 'center', sideOffset: 10 }}
                   isActive={item.isActive}
                   className={tweakcn(
                     // Center the icon within the column and remove any residual offsets
-                    "h-[45px] w-[45px] rounded-md flex items-center justify-center transition-all duration-200 mx-auto p-0",
+                    'h-[45px] w-[45px] rounded-md flex items-center justify-center transition-all duration-200 mx-auto p-0'
                   )}
                   asChild
                 >
-                  <a href={item.url} aria-current={item.isActive ? "page" : undefined}>
-
+                  <a href={item.url} aria-current={item.isActive ? 'page' : undefined}>
                     {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                   </a>
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton
                   isActive={item.isActive}
-                  className={tweakcn("h-[45px] transition-all justify-start px-2.5 gap-2")}
+                  className={tweakcn('h-[45px] transition-all justify-start px-2.5 gap-2')}
                   asChild
                 >
-                  <a href={item.url} aria-current={item.isActive ? "page" : undefined}>
-
+                  <a href={item.url} aria-current={item.isActive ? 'page' : undefined}>
                     {item.icon && <item.icon className="h-5 w-5 shrink-0" />}
                     <span className="truncate text-sm font-medium">{item.title}</span>
                   </a>
